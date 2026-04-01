@@ -3,7 +3,9 @@ import { NextResponse } from "next/server"
 
 export default auth((req) => {
   if (!req.auth) {
-    return NextResponse.redirect("https://dev2b.tec.br")
+    const signInUrl = new URL("/api/auth/signin", req.url)
+    signInUrl.searchParams.set("callbackUrl", req.url)
+    return NextResponse.redirect(signInUrl)
   }
   return NextResponse.next()
 })
