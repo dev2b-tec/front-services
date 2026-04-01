@@ -1,0 +1,25 @@
+services:
+  front-services:
+    image: ${DOCKER_USERNAME}/front-services:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file:
+      - path: .env.app
+        required: false
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "3000"
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front-services.rule=Host(`app.dev2b.tec.br`)"
+      - "traefik.http.routers.front-services.entrypoints=websecure"
+      - "traefik.http.routers.front-services.tls=true"
+      - "traefik.http.routers.front-services.tls.certresolver=letsencrypt"
+      - "traefik.http.services.front-services.loadbalancer.server.port=3000"
+
+networks:
+  proxy:
+    external: true
+    name: proxy
