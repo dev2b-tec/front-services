@@ -209,6 +209,293 @@ function MultiSelectDropdown({
   )
 }
 
+const CONSELHOS = ['CRM', 'CRO', 'CRP', 'CREFITO', 'CRN', 'COREN']
+const DURACOES = ['20 minutos', '30 minutos', '40 minutos', '45 minutos', '50 minutos', '60 minutos', '90 minutos']
+const TIPOS_PROF = ['Dentista', 'Médico', 'Psicólogo', 'Fisioterapeuta', 'Nutricionista', 'Enfermeiro', 'Assistente']
+
+// ─── Modal Editar Usuário ─────────────────────────────────────────────────────
+function EditarUsuarioModal({
+  usuario,
+  onClose,
+}: {
+  usuario: Usuario
+  onClose: () => void
+}) {
+  const [showSenha, setShowSenha] = useState(false)
+  const [email, setEmail] = useState(usuario.email)
+  const [senha, setSenha] = useState('')
+  const [nome, setNome] = useState(usuario.nome)
+  const [genero, setGenero] = useState('Masculino')
+  const [codigoPais, setCodigoPais] = useState('Brasil')
+  const [telefone, setTelefone] = useState(usuario.telefone.replace(/^\+55\s?/, ''))
+  const [nivelPermissao, setNivelPermissao] = useState<string>('Profissional / ADM')
+  const [cep, setCep] = useState('')
+  const [logradouro, setLogradouro] = useState('')
+  const [numero, setNumero] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
+  const [duracao, setDuracao] = useState('40 minutos')
+  const [tipo, setTipo] = useState(usuario.especialidade)
+  const [especialidade, setEspecialidadeProf] = useState('')
+  const [conselho, setConselho] = useState('')
+  const [numeroConselho, setNumeroConselho] = useState('')
+  const [horarioPersonalizado, setHorarioPersonalizado] = useState(false)
+
+  const DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+  const [horarios, setHorarios] = useState(() =>
+    DIAS.map((dia) => ({ dia, abertura: '09:00', fechamento: '18:00', aberto: false }))
+  )
+  const [almoco, setAlmoco] = useState(false)
+  const [almocoInicio, setAlmocoInicio] = useState('12:00')
+  const [almocoFim, setAlmocoFim] = useState('13:00')
+
+  function setHorarioDia(idx: number, field: 'abertura' | 'fechamento' | 'aberto', val: string | boolean) {
+    setHorarios((h) => h.map((row, i) => i === idx ? { ...row, [field]: val } : row))
+  }
+
+  return (
+    <Dialog open onOpenChange={(v: boolean) => { if (!v) onClose() }}>
+      <DialogContent
+        showCloseButton={false}
+        className="bg-white border text-gray-900 !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
+      >
+        {/* Header */}
+        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b space-y-0">
+          <DialogTitle className="text-base font-semibold text-gray-900">Editar um usuário</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+            <X size={15} />
+          </button>
+        </DialogHeader>
+
+        <div className="overflow-y-auto max-h-[78vh] px-7 py-6 space-y-7">
+
+          {/* Informações da conta */}
+          <div>
+            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações da conta</p>
+            <p className="text-xs text-gray-400 mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Email <span className="text-purple-600">*</span></label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Senha <span className="text-purple-600">*</span></label>
+                <div className="relative">
+                  <input type={showSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-10 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                  <button type="button" onClick={() => setShowSenha((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors">
+                    {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Informações pessoais */}
+          <div>
+            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações pessoais</p>
+            <p className="text-xs text-gray-400 mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Nome <span className="text-purple-600">*</span></label>
+                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Gênero <span className="text-purple-600">*</span></label>
+                <div className="relative">
+                  <select value={genero} onChange={(e) => setGenero(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
+                    {GENEROS.map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Código do País</label>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-1.5 border border-gray-300 rounded-lg px-3 py-3 text-sm bg-white cursor-pointer shrink-0">
+                    🇧🇷 <span className="text-gray-500 text-xs">Brasil</span> <ChevronDown size={11} className="text-gray-400" />
+                  </div>
+                  <div className="relative flex-1">
+                    <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número de Telefone <span className="text-purple-600">*</span></label>
+                    <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                  </div>
+                </div>
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Nível de Permissão <span className="text-purple-600">*</span></label>
+                <div className="relative">
+                  <select value={nivelPermissao} onChange={(e) => setNivelPermissao(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
+                    {NIVEIS_PERMISSAO.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Informações profissionais */}
+          <div>
+            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações profissionais</p>
+            <p className="text-xs text-gray-400 mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">CEP</label>
+                <input type="text" value={cep} onChange={(e) => setCep(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Logradouro</label>
+                <input type="text" value={logradouro} onChange={(e) => setLogradouro(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número</label>
+                <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Complemento</label>
+                <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Bairro</label>
+                <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Cidade</label>
+                <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Duração da sessão <span className="text-purple-600">*</span></label>
+                <div className="relative">
+                  <select value={duracao} onChange={(e) => setDuracao(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
+                    {DURACOES.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Tipo <span className="text-purple-600">*</span></label>
+                <div className="relative">
+                  <select value={tipo} onChange={(e) => setTipo(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
+                    {TIPOS_PROF.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Especialidade</label>
+                <input type="text" value={especialidade} onChange={(e) => setEspecialidadeProf(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Conselho</label>
+                <div className="relative">
+                  <select value={conselho} onChange={(e) => setConselho(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm appearance-none focus:outline-none focus:border-purple-500 transition-colors"
+                    style={{ color: conselho ? '#111827' : '#9CA3AF' }}>
+                    <option value="">Selecione um conselho</option>
+                    {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="relative">
+                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número do conselho</label>
+                <input type="text" value={numeroConselho} onChange={(e) => setNumeroConselho(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+              </div>
+            </div>
+
+            {/* Horário personalizado */}
+            <label className="flex items-center gap-3 mt-5 cursor-pointer">
+              <button type="button" onClick={() => setHorarioPersonalizado((v) => !v)}
+                className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${horarioPersonalizado ? 'bg-purple-600' : 'bg-gray-300'}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${horarioPersonalizado ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </button>
+              <span className="text-sm text-gray-600">Configurar horários personalizados de atendimento para este profissional ?</span>
+            </label>
+
+            {/* ── Horários expandidos ──────────────────────────────────── */}
+            {horarioPersonalizado && (
+              <div className="mt-4 space-y-5">
+                <p className="text-xs text-gray-400">Configure os horários de atendimento deste profissional abaixo:</p>
+
+                {/* Horários de Funcionamento */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Horários de Funcionamento</p>
+                  <div className="space-y-3">
+                    {horarios.map((row, idx) => (
+                      <div key={row.dia} className="flex items-center gap-3">
+                        <span className="w-8 text-sm text-gray-500 flex-shrink-0">{row.dia}:</span>
+                        <div className="relative flex-1">
+                          <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Abertura</label>
+                          <input type="time" value={row.abertura} onChange={(e) => setHorarioDia(idx, 'abertura', e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                        </div>
+                        <div className="relative flex-1">
+                          <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Fechamento</label>
+                          <input type="time" value={row.fechamento} onChange={(e) => setHorarioDia(idx, 'fechamento', e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                        </div>
+                        <label className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+                          <input type="checkbox" checked={row.aberto} onChange={(e) => setHorarioDia(idx, 'aberto', e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300 accent-purple-600 cursor-pointer" />
+                          <span className="text-sm text-gray-600">Aberto</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Horário de Almoço */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Horário de Almoço</p>
+                  <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                    <input type="checkbox" checked={almoco} onChange={(e) => setAlmoco(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 accent-purple-600 cursor-pointer" />
+                    <span className="text-sm text-gray-600">Ativar Horário de Almoço</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Inicio</label>
+                      <input type="time" value={almocoInicio} onChange={(e) => setAlmocoInicio(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                    </div>
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Fim</label>
+                      <input type="time" value={almocoFim} onChange={(e) => setAlmocoFim(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t">
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors">Cancelar</button>
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 transition-colors">Salvar</button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Modal Cadastrar Usuário ──────────────────────────────────────────────────
 function CadastrarUsuarioModal({
   open,
@@ -336,6 +623,7 @@ export function UsuariosView() {
   const [especialidade, setEspecialidade] = useState('')
   const [niveisSelected, setNiveisSelected] = useState<string[]>([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [editarUsuario, setEditarUsuario] = useState<Usuario | null>(null)
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
@@ -466,7 +754,8 @@ export function UsuariosView() {
             paginated.map((u, i) => (
               <div
                 key={u.id}
-                className={`grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] items-center gap-0 border-b border-[rgba(124,77,255,0.10)] transition-colors hover:bg-[rgba(124,77,255,0.05)] ${i % 2 === 1 ? 'bg-[rgba(124,77,255,0.02)]' : ''}`}
+                className={`grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] items-center gap-0 border-b border-[rgba(124,77,255,0.10)] transition-colors hover:bg-[rgba(124,77,255,0.05)] cursor-pointer ${i % 2 === 1 ? 'bg-[rgba(124,77,255,0.02)]' : ''}`}
+                onClick={() => setEditarUsuario(u)}
               >
                 {/* Nome */}
                 <div className="px-4 py-3.5 flex items-center gap-3">
@@ -501,7 +790,9 @@ export function UsuariosView() {
                       * Proprietário da Clínica
                     </span>
                   ) : (
-                    <button className="w-8 h-8 rounded-md flex items-center justify-center text-[#EF4444] hover:bg-[rgba(239,68,68,0.12)] transition-colors">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); /* delete */ }}
+                      className="w-8 h-8 rounded-md flex items-center justify-center text-[#EF4444] hover:bg-[rgba(239,68,68,0.12)] transition-colors">
                       <Trash2 size={15} />
                     </button>
                   )}
@@ -557,8 +848,10 @@ export function UsuariosView() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal Cadastrar */}
       <CadastrarUsuarioModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      {/* Modal Editar */}
+      {editarUsuario && <EditarUsuarioModal usuario={editarUsuario} onClose={() => setEditarUsuario(null)} />}
     </div>
   )
 }
