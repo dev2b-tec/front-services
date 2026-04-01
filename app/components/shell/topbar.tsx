@@ -1,21 +1,12 @@
 'use client'
 
-/**
- * topbar.tsx — Barra superior fixa
- *
- * Contém:
- *  - Botão de abrir menu mobile (hamburger)
- *  - Título/breadcrumb dinâmico baseado na rota atual
- *  - Campo de busca
- *  - Avatar/usuário placeholder (sem backend)
- */
-
-import { Menu, Search, Bell } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Menu, Search, Bell, LogOut, User } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
 
-// Resolve o label da rota atual percorrendo o nav-config
 function usePageTitle() {
   const pathname = usePathname()
   for (const group of navGroups) {
@@ -30,6 +21,29 @@ function usePageTitle() {
 export function Topbar() {
   const { setMobileOpen } = useSidebar()
   const title = usePageTitle()
+  const { data: session } = useSession()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const initials = session?.user?.name
+    ? session.user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+    : 'U'
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function handleLogout() {
+    signOut({
+      callbackUrl: 'https://dev2b.tec.br',
+    })
+  }
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-3 h-14 px-4 bg-[#120328]/80 backdrop-blur-md border-b border-[rgba(124,77,255,0.18)]">
@@ -67,11 +81,43 @@ export function Topbar() {
         <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#7C4DFF]" />
       </button>
 
-      {/* Avatar usuário */}
-      <div className="flex-shrink-0 flex items-center gap-2 pl-1">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7C4DFF] to-[#C084FC] flex items-center justify-center text-xs font-bold text-white select-none">
-          U
-        </div>
+      {/* Avatar usuário + dropdown */}
+      <div ref={menuRef} className="relative flex-shrink-0 pl-1">
+        <button
+          onClick={() => setMenuOpen(v => !v)}
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7C4DFF] to-[#C084FC] flex items-center justify-center text-xs font-bold text-white select-none hover:opacity-90 transition-opacity"
+          aria-label="Menu do usuário"
+        >
+          {initials}
+        </button>
+
+        {menuOpen && (
+          <div className="absolute right-0 top-10 w-56 bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-lg shadow-[rgba(0,0,0,0.4)] overflow-hidden">
+            {/* Info do usuário */}
+            <div className="px-4 py-3 border-b border-[rgba(124,77,255,0.15)]">
+              <div className="flex items-center gap-2">
+                <User size={14} className="text-[#A78BCC]" />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[#F5F0FF] truncate">
+                    {session?.user?.name ?? 'Usuário'}
+                  </p>
+                  <p className="text-[11px] text-[#A78BCC] truncate">
+                    {session?.user?.email ?? ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-4 py-3 text-xs text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.1)] transition-colors"
+            >
+              <LogOut size={14} />
+              Sair
+            </button>
+          </div>
+        )}
       </div>
     </header>
   )

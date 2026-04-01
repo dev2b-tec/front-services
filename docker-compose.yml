@@ -7,6 +7,7 @@ services:
         required: false
     environment:
       - NODE_ENV=production
+      - AUTH_URL=https://app.dev2b.tec.br
     expose:
       - "3000"
     networks:
