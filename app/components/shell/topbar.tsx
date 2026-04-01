@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Menu, Search, Bell, LogOut, User } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
 
@@ -40,9 +40,7 @@ export function Topbar() {
   }, [])
 
   function handleLogout() {
-    signOut({
-      callbackUrl: 'https://dev2b.tec.br',
-    })
+    window.location.href = '/api/auth/logout'
   }
 
   return (
