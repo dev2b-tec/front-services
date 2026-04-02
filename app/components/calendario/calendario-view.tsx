@@ -252,7 +252,7 @@ function NovoAgendamentoModal({ open, onClose, defaultInicio, defaultFim }: {
       <Dialog open={open && !buscaAvancada} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
         <DialogContent
           showCloseButton={false}
-          className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden"
+          className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-xl p-0 gap-0 overflow-hidden rounded-2xl"
         >
           <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
             <DialogTitle className="text-base font-bold text-[#F5F0FF]">Novo Agendamento</DialogTitle>
@@ -320,18 +320,14 @@ function NovoAgendamentoModal({ open, onClose, defaultInicio, defaultFim }: {
                   <FloatingField label="Início Evento" required>
                     <input type="datetime-local" defaultValue={inicio} className={INP} />
                   </FloatingField>
-                  <div className="flex gap-2 items-end">
-                    <div className="flex-1">
-                      <FloatingField label="Fim Evento" required>
-                        <input type="datetime-local" defaultValue={fim} className={INP} />
-                      </FloatingField>
-                    </div>
-                    <button className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors shrink-0 whitespace-nowrap">
-                      <CalendarIcon size={14} />
-                      Escolher no Calendário
-                    </button>
-                  </div>
+                  <FloatingField label="Fim Evento" required>
+                    <input type="datetime-local" defaultValue={fim} className={INP} />
+                  </FloatingField>
                 </div>
+                <button className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors w-fit">
+                  <CalendarIcon size={14} />
+                  Escolher no Calendário
+                </button>
 
                 <FloatingSelect label="Sala" options={SALAS} placeholder="Selecione uma sala" value={sala} onChange={setSala} />
               </div>

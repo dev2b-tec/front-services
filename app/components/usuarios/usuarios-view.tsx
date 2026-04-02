@@ -226,7 +226,6 @@ function EditarUsuarioModal({
   const [senha, setSenha] = useState('')
   const [nome, setNome] = useState(usuario.nome)
   const [genero, setGenero] = useState('Masculino')
-  const [codigoPais, setCodigoPais] = useState('Brasil')
   const [telefone, setTelefone] = useState(usuario.telefone.replace(/^\+55\s?/, ''))
   const [nivelPermissao, setNivelPermissao] = useState<string>('Profissional / ADM')
   const [cep, setCep] = useState('')
@@ -254,16 +253,19 @@ function EditarUsuarioModal({
     setHorarios((h) => h.map((row, i) => i === idx ? { ...row, [field]: val } : row))
   }
 
+  const LBL = 'absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none'
+  const SEL = INPUT + ' appearance-none pr-8 cursor-pointer'
+
   return (
     <Dialog open onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-white border text-gray-900 !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
+        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
       >
         {/* Header */}
-        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b space-y-0">
-          <DialogTitle className="text-base font-semibold text-gray-900">Editar um usuário</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Editar usuário</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
             <X size={15} />
           </button>
         </DialogHeader>
@@ -272,21 +274,19 @@ function EditarUsuarioModal({
 
           {/* Informações da conta */}
           <div>
-            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações da conta</p>
-            <p className="text-xs text-gray-400 mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações da conta</p>
+            <p className="text-xs text-[#6B4E8A] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
             <div className="grid grid-cols-2 gap-4">
+              <FloatingField label="Email" required>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
+              </FloatingField>
               <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Email <span className="text-purple-600">*</span></label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Senha <span className="text-purple-600">*</span></label>
+                <label className={LBL}>Senha<span className="text-[#7C4DFF] ml-0.5">*</span></label>
                 <div className="relative">
                   <input type={showSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-10 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                    className={INPUT + ' pr-10'} />
                   <button type="button" onClick={() => setShowSenha((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
                     {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
@@ -296,164 +296,109 @@ function EditarUsuarioModal({
 
           {/* Informações pessoais */}
           <div>
-            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações pessoais</p>
-            <p className="text-xs text-gray-400 mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
+            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações pessoais</p>
+            <p className="text-xs text-[#6B4E8A] mb-4">Defina os dados pessoais e o nível de permissão para este usuário.</p>
             <div className="grid grid-cols-2 gap-4">
+              <FloatingField label="Nome" required>
+                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingSelect label="Gênero" required options={GENEROS} value={genero} onChange={setGenero} />
               <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Nome <span className="text-purple-600">*</span></label>
-                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Gênero <span className="text-purple-600">*</span></label>
-                <div className="relative">
-                  <select value={genero} onChange={(e) => setGenero(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
-                    {GENEROS.map((g) => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Código do País</label>
+                <label className={LBL}>Código do País</label>
                 <div className="flex gap-2">
-                  <div className="flex items-center gap-1.5 border border-gray-300 rounded-lg px-3 py-3 text-sm bg-white cursor-pointer shrink-0">
-                    🇧🇷 <span className="text-gray-500 text-xs">Brasil</span> <ChevronDown size={11} className="text-gray-400" />
+                  <div className="flex items-center gap-1.5 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] cursor-pointer shrink-0">
+                    🇧🇷 <span className="text-[#A78BCC] text-xs">Brasil</span> <ChevronDown size={11} className="text-[#6B4E8A]" />
                   </div>
                   <div className="relative flex-1">
-                    <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número de Telefone <span className="text-purple-600">*</span></label>
+                    <label className={LBL}>Telefone<span className="text-[#7C4DFF] ml-0.5">*</span></label>
                     <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                      placeholder="(00) 00000-0000" className={INPUT} />
                   </div>
                 </div>
               </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Nível de Permissão <span className="text-purple-600">*</span></label>
-                <div className="relative">
-                  <select value={nivelPermissao} onChange={(e) => setNivelPermissao(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
-                    {NIVEIS_PERMISSAO.map((n) => <option key={n} value={n}>{n}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
+              <FloatingSelect label="Nível de Permissão" required
+                options={NIVEIS_PERMISSAO} value={nivelPermissao} onChange={setNivelPermissao} />
             </div>
           </div>
 
           {/* Informações profissionais */}
           <div>
-            <p className="text-sm font-semibold text-gray-900 mb-0.5">Informações profissionais</p>
-            <p className="text-xs text-gray-400 mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
+            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações profissionais</p>
+            <p className="text-xs text-[#6B4E8A] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
             <div className="grid grid-cols-2 gap-4">
+              <FloatingField label="CEP">
+                <input type="text" value={cep} onChange={(e) => setCep(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingField label="Logradouro">
+                <input type="text" value={logradouro} onChange={(e) => setLogradouro(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingField label="Número">
+                <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingField label="Complemento">
+                <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingField label="Bairro">
+                <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingField label="Cidade">
+                <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)} className={INPUT} />
+              </FloatingField>
+              <FloatingSelect label="Duração da sessão" required options={DURACOES} value={duracao} onChange={setDuracao} />
+              <FloatingSelect label="Tipo" required options={TIPOS_PROF} value={tipo} onChange={setTipo} />
+              <FloatingField label="Especialidade">
+                <input type="text" value={especialidade} onChange={(e) => setEspecialidadeProf(e.target.value)} className={INPUT} />
+              </FloatingField>
               <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">CEP</label>
-                <input type="text" value={cep} onChange={(e) => setCep(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Logradouro</label>
-                <input type="text" value={logradouro} onChange={(e) => setLogradouro(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número</label>
-                <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Complemento</label>
-                <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Bairro</label>
-                <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Cidade</label>
-                <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Duração da sessão <span className="text-purple-600">*</span></label>
+                <label className={LBL}>Conselho</label>
                 <div className="relative">
-                  <select value={duracao} onChange={(e) => setDuracao(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
-                    {DURACOES.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Tipo <span className="text-purple-600">*</span></label>
-                <div className="relative">
-                  <select value={tipo} onChange={(e) => setTipo(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm text-gray-900 appearance-none focus:outline-none focus:border-purple-500 transition-colors">
-                    {TIPOS_PROF.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Especialidade</label>
-                <input type="text" value={especialidade} onChange={(e) => setEspecialidadeProf(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Conselho</label>
-                <div className="relative">
-                  <select value={conselho} onChange={(e) => setConselho(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-8 text-sm appearance-none focus:outline-none focus:border-purple-500 transition-colors"
-                    style={{ color: conselho ? '#111827' : '#9CA3AF' }}>
+                  <select value={conselho} onChange={(e) => setConselho(e.target.value)} className={SEL}>
                     <option value="">Selecione um conselho</option>
                     {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
                 </div>
               </div>
-              <div className="relative">
-                <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Número do conselho</label>
-                <input type="text" value={numeroConselho} onChange={(e) => setNumeroConselho(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
-              </div>
+              <FloatingField label="Número do conselho">
+                <input type="text" value={numeroConselho} onChange={(e) => setNumeroConselho(e.target.value)} className={INPUT} />
+              </FloatingField>
             </div>
 
-            {/* Horário personalizado */}
-            <label className="flex items-center gap-3 mt-5 cursor-pointer">
+            {/* Horário personalizado toggle */}
+            <label className="flex items-center gap-3 mt-5 cursor-pointer select-none">
               <button type="button" onClick={() => setHorarioPersonalizado((v) => !v)}
-                className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${horarioPersonalizado ? 'bg-purple-600' : 'bg-gray-300'}`}>
+                className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${horarioPersonalizado ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.20)]'}`}>
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${horarioPersonalizado ? 'translate-x-4' : 'translate-x-0.5'}`} />
               </button>
-              <span className="text-sm text-gray-600">Configurar horários personalizados de atendimento para este profissional ?</span>
+              <span className="text-sm text-[#A78BCC]">Configurar horários personalizados de atendimento para este profissional?</span>
             </label>
 
             {/* ── Horários expandidos ──────────────────────────────────── */}
             {horarioPersonalizado && (
               <div className="mt-4 space-y-5">
-                <p className="text-xs text-gray-400">Configure os horários de atendimento deste profissional abaixo:</p>
+                <p className="text-xs text-[#6B4E8A]">Configure os horários de atendimento deste profissional abaixo:</p>
 
                 {/* Horários de Funcionamento */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Horários de Funcionamento</p>
+                  <p className="text-sm font-semibold text-[#F5F0FF] mb-3">Horários de Funcionamento</p>
                   <div className="space-y-3">
                     {horarios.map((row, idx) => (
                       <div key={row.dia} className="flex items-center gap-3">
-                        <span className="w-8 text-sm text-gray-500 flex-shrink-0">{row.dia}:</span>
+                        <span className="w-8 text-sm text-[#A78BCC] flex-shrink-0">{row.dia}:</span>
                         <div className="relative flex-1">
-                          <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Abertura</label>
+                          <label className={LBL}>Abertura</label>
                           <input type="time" value={row.abertura} onChange={(e) => setHorarioDia(idx, 'abertura', e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                            className={INPUT} />
                         </div>
                         <div className="relative flex-1">
-                          <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Fechamento</label>
+                          <label className={LBL}>Fechamento</label>
                           <input type="time" value={row.fechamento} onChange={(e) => setHorarioDia(idx, 'fechamento', e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                            className={INPUT} />
                         </div>
                         <label className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
                           <input type="checkbox" checked={row.aberto} onChange={(e) => setHorarioDia(idx, 'aberto', e.target.checked)}
-                            className="w-4 h-4 rounded border-gray-300 accent-purple-600 cursor-pointer" />
-                          <span className="text-sm text-gray-600">Aberto</span>
+                            className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
+                          <span className="text-sm text-[#A78BCC]">Aberto</span>
                         </label>
                       </div>
                     ))}
@@ -462,22 +407,20 @@ function EditarUsuarioModal({
 
                 {/* Horário de Almoço */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Horário de Almoço</p>
+                  <p className="text-sm font-semibold text-[#F5F0FF] mb-3">Horário de Almoço</p>
                   <label className="flex items-center gap-2 mb-3 cursor-pointer">
                     <input type="checkbox" checked={almoco} onChange={(e) => setAlmoco(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 accent-purple-600 cursor-pointer" />
-                    <span className="text-sm text-gray-600">Ativar Horário de Almoço</span>
+                      className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
+                    <span className="text-sm text-[#A78BCC]">Ativar Horário de Almoço</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
-                      <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Inicio</label>
-                      <input type="time" value={almocoInicio} onChange={(e) => setAlmocoInicio(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                      <label className={LBL}>Início</label>
+                      <input type="time" value={almocoInicio} onChange={(e) => setAlmocoInicio(e.target.value)} className={INPUT} />
                     </div>
                     <div className="relative">
-                      <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-400">Fim</label>
-                      <input type="time" value={almocoFim} onChange={(e) => setAlmocoFim(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-purple-500 transition-colors" />
+                      <label className={LBL}>Fim</label>
+                      <input type="time" value={almocoFim} onChange={(e) => setAlmocoFim(e.target.value)} className={INPUT} />
                     </div>
                   </div>
                 </div>
@@ -487,9 +430,9 @@ function EditarUsuarioModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700 transition-colors">Cancelar</button>
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 transition-colors">Salvar</button>
+        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Salvar</button>
         </div>
       </DialogContent>
     </Dialog>
@@ -497,6 +440,38 @@ function EditarUsuarioModal({
 }
 
 // ─── Modal Cadastrar Usuário ──────────────────────────────────────────────────
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer select-none">
+      <button type="button" onClick={() => onChange(!checked)}
+        className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.20)]'}`}>
+        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`} />
+      </button>
+      <span className="text-sm text-[#A78BCC]">{label}</span>
+    </label>
+  )
+}
+
+type PermToggles = {
+  financeiro: boolean
+  calendario: boolean
+  horarios: boolean
+  todosPacientes: boolean
+  evolucoes: boolean
+  filaEspera: boolean
+}
+
+function getDefaultToggles(nivel: string): PermToggles {
+  return {
+    financeiro: false,
+    calendario: false,
+    horarios: nivel === 'Profissional / ADM' || nivel === 'Profissional Simples',
+    todosPacientes: nivel === 'Profissional Simples',
+    evolucoes: nivel === 'Profissional Simples',
+    filaEspera: true,
+  }
+}
+
 function CadastrarUsuarioModal({
   open,
   onClose,
@@ -504,113 +479,185 @@ function CadastrarUsuarioModal({
   open: boolean
   onClose: () => void
 }) {
-  const [showSenha, setShowSenha] = useState(false)
-  const [nivelPermissao, setNivelPermissao] = useState('')
-  const [genero, setGenero] = useState('')
+  const [showSenha,      setShowSenha]      = useState(false)
+  const [nivelPermissao, setNivelPermissao] = useState('Assistente')
+  const [genero,         setGenero]         = useState('Masculino')
+  const [toggles,        setToggles]        = useState<PermToggles>(getDefaultToggles('Assistente'))
+
+  function handleNivel(v: string) {
+    setNivelPermissao(v)
+    setToggles(getDefaultToggles(v))
+  }
+  function setToggle(key: keyof PermToggles, v: boolean) {
+    setToggles((prev) => ({ ...prev, [key]: v }))
+  }
+
+  const isProf    = nivelPermissao === 'Profissional / ADM' || nivelPermissao === 'Profissional Simples'
+  const isSimples = nivelPermissao === 'Profissional Simples'
+
+  const FIELD = 'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] transition-colors'
+  const LBL   = 'absolute -top-2 left-3 bg-[#1A0A38] px-1 text-[10px] text-[#A78BCC] leading-none'
+  const SEL   = FIELD + ' appearance-none pr-8 cursor-pointer'
+
+  function FloatInput({ label, type = 'text', placeholder, required }: { label: string; type?: string; placeholder?: string; required?: boolean }) {
+    return (
+      <div className="relative">
+        <label className={LBL}>{label}{required && <span className="text-[#7C4DFF] ml-0.5">*</span>}</label>
+        <input type={type} placeholder={placeholder} className={FIELD} />
+      </div>
+    )
+  }
+  function FloatSel({ label, options, value, onChange, placeholder, required }: {
+    label: string; options: string[]; value: string; onChange: (v: string) => void; placeholder?: string; required?: boolean
+  }) {
+    return (
+      <div className="relative">
+        <label className={LBL}>{label}{required && <span className="text-[#7C4DFF] ml-0.5">*</span>}</label>
+        <div className="relative">
+          <select value={value} onChange={(e) => onChange(e.target.value)} className={SEL}>
+            {placeholder && <option value="" disabled>{placeholder}</option>}
+            {options.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden"
+        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
       >
-        {/* Header */}
-        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">
-            Cadastrar novo usuário
-          </DialogTitle>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-lg leading-none"
-          >
-            ✕
+        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Cadastrar novo usuário</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+            <X size={15} />
           </button>
         </DialogHeader>
 
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[70vh] px-6 py-5 space-y-6">
+        <div className="overflow-y-auto max-h-[80vh] px-7 py-6 space-y-6">
 
-          {/* Informações da conta */}
+          {/* ── Informações da conta ── */}
           <div>
             <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações da conta</p>
             <p className="text-xs text-[#6B4E8A] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Email" required>
-                <input type="email" className={INPUT} placeholder="email@exemplo.com" />
-              </FloatingField>
-              <FloatingField label="Senha" required>
+              <FloatInput label="Email" type="email" required />
+              <div className="relative">
+                <label className={LBL}>Senha<span className="text-[#7C4DFF] ml-0.5">*</span></label>
                 <div className="relative">
-                  <input
-                    type={showSenha ? 'text' : 'password'}
-                    className={INPUT + ' pr-10'}
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSenha((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
-                  >
+                  <input type={showSenha ? 'text' : 'password'} className={FIELD + ' pr-10'} />
+                  <button type="button" onClick={() => setShowSenha((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
                     {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
-              </FloatingField>
+              </div>
             </div>
-            <p className="text-[10px] text-[#6B4E8A] mt-2">Permissões deste usuário</p>
           </div>
 
-          {/* Informações pessoais */}
+          {/* ── Permissões ── */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-[#6B4E8A] uppercase tracking-widest">Permissões deste usuário</p>
+            <Toggle checked={toggles.financeiro} onChange={(v) => setToggle('financeiro', v)}
+              label="Visualiza e pode editar os dados financeiros de cada atendimento." />
+            <Toggle checked={toggles.calendario} onChange={(v) => setToggle('calendario', v)}
+              label="Pode fazer alterações de agendamentos no calendário." />
+            {isProf && (
+              <Toggle checked={toggles.horarios} onChange={(v) => setToggle('horarios', v)}
+                label="Permitir que este usuário possa configurar seus próprios horários" />
+            )}
+            {isSimples && (
+              <>
+                <Toggle checked={toggles.todosPacientes} onChange={(v) => setToggle('todosPacientes', v)}
+                  label="Tem acesso aos dados de todos os pacientes da conta." />
+                <Toggle checked={toggles.evolucoes} onChange={(v) => setToggle('evolucoes', v)}
+                  label="Pode visualizar as evoluções de outros profissionais." />
+              </>
+            )}
+            <Toggle checked={toggles.filaEspera} onChange={(v) => setToggle('filaEspera', v)}
+              label="Pode adicionar ou remover paciente da fila de espera" />
+          </div>
+
+          {/* ── Informações pessoais ── */}
           <div>
             <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações pessoais</p>
             <p className="text-xs text-[#6B4E8A] mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
-
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Nome" required>
-                <input type="text" className={INPUT} placeholder="Nome completo" />
-              </FloatingField>
-
-              <FloatingSelect
-                label="Gênero"
-                required
-                options={GENEROS}
-                placeholder="Selecione um gênero"
-                value={genero}
-                onChange={setGenero}
-              />
-
-              {/* Telefone com prefixo país */}
-              <FloatingField label="Telefone">
+              <FloatInput label="Nome" required />
+              <FloatSel label="Gênero" required options={GENEROS} value={genero} onChange={setGenero} />
+              <div className="relative">
+                <label className={LBL}>Código do País</label>
                 <div className="flex gap-2">
-                  <div className="flex items-center gap-1 shrink-0 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-2.5 text-sm text-[#F5F0FF] cursor-pointer">
-                    🇧🇷 <span className="text-[#A78BCC] text-xs ml-1">+55</span>
-                    <ChevronDown size={11} className="text-[#6B4E8A] ml-0.5" />
+                  <div className="flex items-center gap-1.5 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] cursor-pointer shrink-0">
+                    🇧🇷 <span className="text-[#A78BCC] text-xs">Brasil</span> <ChevronDown size={11} className="text-[#6B4E8A]" />
                   </div>
-                  <input className={INPUT} placeholder="(00) 00000-0000" />
+                  <div className="relative flex-1">
+                    <label className={LBL}>Telefone</label>
+                    <input type="text" placeholder="(00) 00000-0000" className={FIELD} />
+                  </div>
                 </div>
-              </FloatingField>
-
-              <FloatingSelect
-                label="Nível de Permissão"
-                required
-                options={NIVEIS_PERMISSAO}
-                placeholder="Selecione uma permissão"
-                value={nivelPermissao}
-                onChange={setNivelPermissao}
-              />
+              </div>
+              <FloatSel label="Nível de Permissão" required
+                options={NIVEIS_PERMISSAO} value={nivelPermissao} onChange={handleNivel} />
             </div>
           </div>
+
+          {/* ── Informações profissionais ── */}
+          {isProf && (
+            <div>
+              <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações profissionais</p>
+              <p className="text-xs text-[#6B4E8A] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
+              <div className="grid grid-cols-2 gap-4">
+                <FloatInput label="CEP" />
+                <FloatInput label="Logradouro" />
+                <FloatInput label="Número" />
+                <FloatInput label="Complemento" />
+                <FloatInput label="Bairro" />
+                <FloatInput label="Cidade" />
+                <div className="relative">
+                  <label className={LBL}>Duração da sessão<span className="text-[#7C4DFF] ml-0.5">*</span></label>
+                  <div className="relative">
+                    <select defaultValue="" className={SEL}>
+                      <option value="" disabled>Selecione uma duração</option>
+                      {DURACOES.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                  </div>
+                </div>
+                <div className="relative">
+                  <label className={LBL}>Tipo<span className="text-[#7C4DFF] ml-0.5">*</span></label>
+                  <div className="relative">
+                    <select defaultValue="" className={SEL}>
+                      <option value="" disabled>Selecione um tipo</option>
+                      {TIPOS_PROF.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                  </div>
+                </div>
+                <FloatInput label="Especialidade" />
+                <div className="relative">
+                  <label className={LBL}>Conselho</label>
+                  <div className="relative">
+                    <select defaultValue="" className={SEL}>
+                      <option value="" disabled>Selecione um conselho</option>
+                      {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                  </div>
+                </div>
+                <FloatInput label="Número do conselho" />
+              </div>
+            </div>
+          )}
+
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
-          >
-            Cancelar
-          </button>
-          <button className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">
-            Cadastrar
-          </button>
+        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
+          <button className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Cadastrar</button>
         </div>
       </DialogContent>
     </Dialog>
