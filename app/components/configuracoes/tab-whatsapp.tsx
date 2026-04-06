@@ -5,7 +5,7 @@ import { Plus, RefreshCw, Trash2, QrCode, Wifi, WifiOff, Loader2, X, Hash } from
 import { useToast } from '@/hooks/use-toast'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
-const WHATS_URL = process.env.NEXT_PUBLIC_WHATS_API_URL ?? 'http://localhost:8012'
+const WHATS_URL = ''
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Instancia {

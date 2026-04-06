@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-const WHATS_URL = process.env.NEXT_PUBLIC_WHATS_API_URL ?? 'http://localhost:8012'
+const WHATS_URL = ''
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 export interface MensagemContext {
