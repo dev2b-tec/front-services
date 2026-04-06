@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 
 const BACKEND = process.env.API_URL ?? 'http://app-agenda:8011'
 
@@ -12,15 +13,22 @@ async function proxy(
   const targetUrl = `${BACKEND}/api/v1/${path.join('/')}${req.nextUrl.search}`
 
   // Build clean headers — strip cookies (JWT session) and hop-by-hop headers.
-  // The backend is an internal REST API and has no use for browser cookies.
+  // Inject Authorization with the Keycloak access token from the NextAuth session.
+  const session = await auth()
+
   const headers = new Headers()
   req.headers.forEach((value, key) => {
     const lower = key.toLowerCase()
     if (lower === 'cookie') return
     if (lower === 'host') return
+    if (lower === 'authorization') return   // will be set from session below
     if (HOP_BY_HOP.has(lower)) return
     headers.set(key, value)
   })
+
+  if (session?.accessToken) {
+    headers.set('authorization', `Bearer ${session.accessToken}`)
+  }
 
   const hasBody = !['GET', 'HEAD'].includes(req.method)
 
