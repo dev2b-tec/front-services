@@ -12,9 +12,6 @@ jobs:
       app_name: front-services
       context: app
       dockerfile_path: Dockerfile
-      build_args: |
-        NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-        NEXT_PUBLIC_WHATS_API_URL=${{ vars.NEXT_PUBLIC_WHATS_API_URL }}
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
