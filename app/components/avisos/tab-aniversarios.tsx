@@ -163,7 +163,7 @@ export function AniversariosTab({
 
         <div className="relative min-w-[280px]">
           <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-main)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
-            Dia do Anivers�rio
+            Dia do Aniversário
           </label>
           <input
             value={dateRange}

@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Fix Encoding",
+			"type": "shell",
+			"command": "node fix-encoding.js",
+			"isBackground": false
+		}
+	]
+}

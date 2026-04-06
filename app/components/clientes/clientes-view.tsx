@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -51,13 +51,13 @@ type Agendamento = {
 
 // --- Mock data --------------------------------------------------------------
 const MOCK_CLIENTES: Cliente[] = [
-  { id: '1', nome: 'Monique Franca',   telefone: '+55 81 99634 9077', sessoes: 0, grupo: '�', statusPagamento: 'Em Aberto' },
-  { id: '2', nome: 'Paciente Exemplo', telefone: '+55 000000000',     sessoes: 1, grupo: '�', statusPagamento: 'Quitado', convenio: 'PARTICULAR' },
+  { id: '1', nome: 'Monique Franca',   telefone: '+55 81 99634 9077', sessoes: 0, grupo: '—', statusPagamento: 'Em Aberto' },
+  { id: '2', nome: 'Paciente Exemplo', telefone: '+55 000000000',     sessoes: 1, grupo: '—', statusPagamento: 'Quitado', convenio: 'PARTICULAR' },
 ]
 
 const MOCK_AGENDAMENTOS: Agendamento[] = [
   { id: 'a1', data: '2026-04-01', dataLabel: 'Abril 1, 2026',    profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Faltou',   pagamento: 'Valores a definir' },
-  { id: 'a2', data: '2026-03-30', dataLabel: 'Mar�o 30, 2026', profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Atendido', pagamento: 'Valores a definir' },
+  { id: 'a2', data: '2026-03-30', dataLabel: 'Março 30, 2026', profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Atendido', pagamento: 'Valores a definir' },
 ]
 
 // --- API Types ---------------------------------------------------------------
@@ -105,7 +105,7 @@ function pacienteParaCliente(p: PacienteApi): Cliente {
     nome: p.nome,
     telefone: p.telefone ?? '',
     sessoes: p.sessoes ?? 0,
-    grupo: p.grupo ?? '�',
+    grupo: p.grupo ?? '—',
     statusPagamento: statusLabel(p.statusPagamento),
     genero: p.genero ?? undefined,
     convenio: p.plano ?? undefined,
@@ -165,7 +165,7 @@ function PhoneField({ label, required, value, onChange }: { label: string; requi
     <FloatingField label={label} required={required}>
       <div className="flex gap-2">
         <div className="flex items-center gap-1 shrink-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-2.5 text-sm text-[var(--d2b-text-primary)] cursor-pointer h-10">
-          ???? <span className="text-[var(--d2b-text-secondary)] text-xs ml-1">+55</span>
+          🇧🇷 <span className="text-[var(--d2b-text-secondary)] text-xs ml-1">+55</span>
           <ChevronDown size={11} className="text-[var(--d2b-text-muted)] ml-0.5" />
         </div>
         {onChange !== undefined
@@ -270,7 +270,7 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
 
             {/* Informacoes do Paciente */}
             <div>
-              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMA��ES DO PACIENTE</p>
+              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMAÇÕES DO PACIENTE</p>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-base font-bold text-[var(--d2b-text-primary)]">Paciente Exemplo</span>
                 <button onClick={() => setMensagensOpen(true)}
@@ -283,8 +283,8 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <FloatingField label="Telefone"><input readOnly className={INPUT} defaultValue="+550000000000" /></FloatingField>
-                <FloatingField label="Conv�nio"><input readOnly className={INPUT} defaultValue="PARTICULAR" /></FloatingField>
-                <FloatingField label="N�mero da Carteirinha"><input readOnly className={INPUT} defaultValue="-" /></FloatingField>
+                <FloatingField label="Convênio"><input readOnly className={INPUT} defaultValue="PARTICULAR" /></FloatingField>
+                <FloatingField label="Número da Carteirinha"><input readOnly className={INPUT} defaultValue="-" /></FloatingField>
               </div>
             </div>
 
@@ -300,7 +300,7 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
                       <ChevronDown size={12} className="text-[var(--d2b-text-secondary)] cursor-pointer" />
                     </div>
                   </FloatingField>
-                  <FloatingField label="In�cio Evento" required>
+                  <FloatingField label="Início Evento" required>
                     <input className={INPUT} defaultValue={`${dataFmt} ${ag.inicio}`} />
                   </FloatingField>
                   <FloatingField label="Fim Evento" required>
@@ -329,10 +329,10 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
 
             {/* Servicos */}
             <div>
-              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">SERVI�OS PRESTADOS</p>
-              <p className="text-xs text-[var(--d2b-text-muted)] mb-2">Nenhum servi�o adicionado neste agendamento</p>
+              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">SERVIÇOS PRESTADOS</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mb-2">Nenhum serviço adicionado neste agendamento</p>
               <button className="text-xs text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1.5 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
-                + Adicionar Servi�o
+                + Adicionar Serviço
               </button>
             </div>
 
@@ -355,15 +355,15 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
                   <FloatingField label="Data Pagamento">
                     <input className={INPUT} placeholder="dd/mm/aaaa" />
                   </FloatingField>
-                  <FloatingField label="M�todo Pagamento">
+                  <FloatingField label="Método Pagamento">
                     <div className="relative">
                       <select className={SELECT}><option value="">Selecione...</option></select>
                       <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                     </div>
                   </FloatingField>
                 </div>
-                <FloatingField label="Observa��es">
-                  <textarea rows={3} placeholder="Observa��es" className={INPUT + ' resize-none'} />
+                <FloatingField label="Observações">
+                  <textarea rows={3} placeholder="Observações" className={INPUT + ' resize-none'} />
                 </FloatingField>
               </div>
             </div>
@@ -460,7 +460,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
       setChanged(false)
       toast({ title: 'Paciente atualizado com sucesso!' })
     } catch {
-      toast({ title: 'Erro ao salvar altera��es', variant: 'destructive' })
+      toast({ title: 'Erro ao salvar alterações', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -473,7 +473,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Paciente</h3>
-            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Edite as informa��es associadas a este paciente.</p>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Edite as informações associadas a este paciente.</p>
           </div>
           <button className="text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Voltar
@@ -483,7 +483,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         {/* Aviso de alteracoes */}
         {changed && (
           <p className="text-xs text-[#EF4444]">
-            Voc� realizou altera��es que ainda n�o foram salvas. Clique em &apos;Salvar altera��es&apos; para armazen�-las.
+            Você realizou alterações que ainda não foram salvas. Clique em &apos;Salvar alterações&apos; para armazená-las.
           </p>
         )}
 
@@ -499,17 +499,17 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="N�mero de Telefone" required value={telefone} onChange={mark(setTelefone)} />
+            <PhoneField label="Número de Telefone" required value={telefone} onChange={mark(setTelefone)} />
             <DateField label="Data de nascimento" value={dataNascimento} onChange={mark(setDataNascimento)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="G�nero" placeholder="Selecione um g�nero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro n�o informar']} value={genero} onChange={mark(setGenero)} />
-            <FieldSelect label="Conv�nio" placeholder="Selecione um plano" value={plano} options={['PARTICULAR', 'Unimed', 'Bradesco Sa�de', 'Amil']} onChange={mark(setPlano)} />
+            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={mark(setGenero)} />
+            <FieldSelect label="Convênio" placeholder="Selecione um plano" value={plano} options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} onChange={mark(setPlano)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="N�mero da Carteirinha"><input className={INPUT} value={numeroCarteirinha} onChange={(e) => { setNumeroCarteirinha(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="Número da Carteirinha"><input className={INPUT} value={numeroCarteirinha} onChange={(e) => { setNumeroCarteirinha(e.target.value); setChanged(true) }} /></FloatingField>
             <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={mark(setGrupo)} />
           </div>
 
@@ -525,7 +525,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
           <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
             <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => { setLogradouro(e.target.value); setChanged(true) }} /></FloatingField>
-            <FloatingField label="N�mero"><input className={INPUT} value={numero} onChange={(e) => { setNumero(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => { setNumero(e.target.value); setChanged(true) }} /></FloatingField>
             <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => { setComplemento(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
@@ -534,9 +534,9 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
             <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => { setCidade(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
-          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indica��o', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={mark(setComoConheceu)} />
+          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={mark(setComoConheceu)} />
 
-          <FloatingField label="Outras Informa��es">
+          <FloatingField label="Outras Informações">
             <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => { setOutrasInformacoes(e.target.value); setChanged(true) }} />
           </FloatingField>
         </div>
@@ -555,12 +555,12 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
           {menorIdade && (
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="Nome do respons�vel"><input className={INPUT} value={nomeResponsavel} onChange={(e) => { setNomeResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <FloatingField label="Nome do responsável"><input className={INPUT} value={nomeResponsavel} onChange={(e) => { setNomeResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
                 <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={mark(setDataNascimentoResp)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="CPF do respons�vel"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
-                <PhoneField label="Telefone do respons�vel" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
+                <FloatingField label="CPF do responsável"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
               </div>
             </div>
           )}
@@ -570,7 +570,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--d2b-border)]">
           <button type="button" onClick={() => setChanged(false)} className={BTN_GHOST} disabled={saving}>Cancelar</button>
           <button type="button" onClick={handleSave} className={BTN_PRIMARY} disabled={saving}>
-            {saving ? 'Salvando...' : 'Salvar Altera��es'}
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>
@@ -595,12 +595,12 @@ function TabEmConstrucao({ label }: { label: string }) {
 // --- Notas Compartilhadas (painel lateral direito) --------------------------
 type Nota = { id: number; texto: string; autor: string; data: string }
 
-const FORMATO_OPCOES = ['Par�grafo', 'T�tulo 1', 'T�tulo 2', 'T�tulo 3']
+const FORMATO_OPCOES = ['Parágrafo', 'Título 1', 'Título 2', 'Título 3']
 
 function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
   const [notas] = useState<Nota[]>([])
   const [texto, setTexto] = useState('')
-  const [formato, setFormato] = useState('Par�grafo')
+  const [formato, setFormato] = useState('Parágrafo')
 
   return (
     <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] h-full">
@@ -623,14 +623,14 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {notas.length === 0 ? (
           <p className="text-xs text-[var(--d2b-text-muted)] text-center mt-8">
-            N�o existem notas compartilhadas para este paciente...
+            Não existem notas compartilhadas para este paciente...
           </p>
         ) : (
           <div className="space-y-3">
             {notas.map((n) => (
               <div key={n.id} className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 py-2.5">
                 <p className="text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap">{n.texto}</p>
-                <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1.5">{n.autor} � {n.data}</p>
+                <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1.5">{n.autor}° {n.data}</p>
               </div>
             ))}
           </div>
@@ -703,7 +703,7 @@ const TABS: { id: Tab; label: string; icon: ReactNode; badge?: ReactNode }[] = [
   { id: 'dados',       label: 'Dados',         icon: <User size={18} /> },
   { id: 'timeline',    label: 'Linha do Tempo', icon: <LayoutGrid size={18} />, badge: <span className="text-[9px] font-bold bg-[#10B981] text-white px-1.5 py-0.5 rounded">Novo</span> },
   { id: 'anamnese',    label: 'Anamnese',       icon: <ClipboardList size={18} /> },
-  { id: 'evolucoes',   label: 'Evolu��es',   icon: <Activity size={18} /> },
+  { id: 'evolucoes',   label: 'Evoluções',   icon: <Activity size={18} /> },
   { id: 'financeiro',  label: 'Financeiro',     icon: <DollarSign size={18} /> },
   { id: 'documentos',  label: 'Documentos',     icon: <FileText size={18} /> },
 ]
@@ -729,7 +729,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             <span className="text-[#C084FC]">{cliente.nome}</span>
           </div>
           <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
-            ? Resumir Paciente
+            ✦ Resumir Paciente
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -1015,9 +1015,9 @@ function CriarClienteModal({
   }
 
   async function handleSubmit() {
-    if (!nome.trim()) { toast({ title: 'Nome � obrigat�rio', variant: 'destructive' }); return }
-    if (!telefone.trim()) { toast({ title: 'Telefone � obrigat�rio', variant: 'destructive' }); return }
-    if (!empresaId) { toast({ title: 'Empresa n�o identificada. Contate o suporte.', variant: 'destructive' }); return }
+    if (!nome.trim()) { toast({ title: 'Nome é obrigatório', variant: 'destructive' }); return }
+    if (!telefone.trim()) { toast({ title: 'Telefone é obrigatório', variant: 'destructive' }); return }
+    if (!empresaId) { toast({ title: 'Empresa não identificada. Contate o suporte.', variant: 'destructive' }); return }
     setSaving(true)
     try {
       const body: Record<string, unknown> = {
@@ -1081,23 +1081,23 @@ function CriarClienteModal({
             <FloatingField label="Nome Social"><input className={INPUT} /></FloatingField>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="N�mero de Telefone" required value={telefone} onChange={setTelefone} />
+            <PhoneField label="Número de Telefone" required value={telefone} onChange={setTelefone} />
             <DateField label="Data de nascimento" value={dataNascimento} onChange={setDataNascimento} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="G�nero" placeholder="Selecione um g�nero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro n�o informar']} value={genero} onChange={setGenero} />
-            <FieldSelect label="Conv�nio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Sa�de', 'Amil']} value={plano} onChange={setPlano} />
+            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={setGenero} />
+            <FieldSelect label="Convênio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} value={plano} onChange={setPlano} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="N�mero da Carteirinha">
+            <FloatingField label="Número da Carteirinha">
               <input className={INPUT} value={numeroCarteirinha} onChange={(e) => setNumeroCarteirinha(e.target.value)} />
             </FloatingField>
             <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={setGrupo} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indica��o', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={setComoConheceu} />
+            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={setComoConheceu} />
           </div>
-          <Section title="Informa��es Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
+          <Section title="Informações Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => setRg(e.target.value)} /></FloatingField>
               <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => setCpf(e.target.value)} /></FloatingField>
@@ -1108,29 +1108,29 @@ function CriarClienteModal({
             </div>
             <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
               <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => setLogradouro(e.target.value)} /></FloatingField>
-              <FloatingField label="N�mero"><input className={INPUT} value={numero} onChange={(e) => setNumero(e.target.value)} /></FloatingField>
+              <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => setNumero(e.target.value)} /></FloatingField>
               <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => setComplemento(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Bairro"><input className={INPUT} value={bairro} onChange={(e) => setBairro(e.target.value)} /></FloatingField>
               <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => setCidade(e.target.value)} /></FloatingField>
             </div>
-            <FloatingField label="Outras Informa��es">
+            <FloatingField label="Outras Informações">
               <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => setOutrasInformacoes(e.target.value)} />
             </FloatingField>
           </Section>
           <Section title="Menor de idade" open={menorIdade} onToggle={() => setMenorIdade((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Nome do respons�vel">
+              <FloatingField label="Nome do responsável">
                 <input className={INPUT} value={nomeResponsavel} onChange={(e) => setNomeResponsavel(e.target.value)} />
               </FloatingField>
               <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={setDataNascimentoResp} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="CPF do respons�vel">
+              <FloatingField label="CPF do responsável">
                 <input className={INPUT} value={cpfResponsavel} onChange={(e) => setCpfResponsavel(e.target.value)} />
               </FloatingField>
-              <PhoneField label="Telefone do respons�vel" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
+              <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
             </div>
           </Section>
         </div>
@@ -1172,8 +1172,8 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
     <div className="p-6 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Pacientes da Cl�nica</h2>
-          <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie pacientes atendidos pela cl�nica.</p>
+          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Pacientes da Clínica</h2>
+          <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie pacientes atendidos pela clínica.</p>
         </div>
         <button onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors">
@@ -1218,7 +1218,7 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
       {/* Table */}
       <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
         <div className="grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3 border-b border-[var(--d2b-border)]">
-          {[{ label: 'A��ES' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESS�ES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }].map((col) => (
+          {[{ label: 'AÇÕES' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESSÕES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }].map((col) => (
             <div key={col.label} className="flex items-center gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)]">{col.label}</span>
               {col.sortable && <ChevronsUpDown size={11} className="text-[var(--d2b-text-muted)]" />}
@@ -1248,7 +1248,7 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
               </button>
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.telefone ?? ''}</span>
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.sessoes}</span>
-              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.grupo ?? '�'}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.grupo ?? '—'}</span>
               <StatusBadge status={c.statusPagamento} />
             </div>
           ))
