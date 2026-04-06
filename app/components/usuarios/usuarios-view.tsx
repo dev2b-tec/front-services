@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Search, Plus, Trash2, ChevronDown, X, Eye, EyeOff,
   ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight,
@@ -23,20 +23,19 @@ interface Usuario {
   telefone: string
   tipoAcesso: string
   proprietario?: boolean
+  tipo?: string
+  conselho?: string
+  numeroConselho?: string
+  cep?: string
+  logradouro?: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  cidade?: string
+  agendaId?: string
+  genero?: string
+  duracaoSessao?: number
 }
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_USUARIOS: Usuario[] = [
-  {
-    id: '1',
-    nome: 'JESSE DOS SANTOS BEZERRA',
-    especialidade: 'Dentista',
-    email: 'jesse.9001@gmail.com',
-    telefone: '+55 81 99708 8404',
-    tipoAcesso: 'Profissional administrador',
-    proprietario: true,
-  },
-]
 
 const ESPECIALIDADES = ['Dentista', 'Médico', 'Psicólogo', 'Fisioterapeuta', 'Nutricionista', 'Enfermeiro']
 const NIVEIS_PERMISSAO: NivelPermissao[] = [
@@ -217,28 +216,31 @@ const TIPOS_PROF = ['Dentista', 'Médico', 'Psicólogo', 'Fisioterapeuta', 'Nutr
 function EditarUsuarioModal({
   usuario,
   onClose,
+  onSaved,
 }: {
   usuario: Usuario
   onClose: () => void
+  onSaved?: (updated: Usuario) => void
 }) {
+  const [saving, setSaving] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
   const [email, setEmail] = useState(usuario.email)
   const [senha, setSenha] = useState('')
   const [nome, setNome] = useState(usuario.nome)
-  const [genero, setGenero] = useState('Masculino')
+  const [genero, setGenero] = useState(usuario.genero ?? 'Masculino')
   const [telefone, setTelefone] = useState(usuario.telefone.replace(/^\+55\s?/, ''))
-  const [nivelPermissao, setNivelPermissao] = useState<string>('Profissional / ADM')
-  const [cep, setCep] = useState('')
-  const [logradouro, setLogradouro] = useState('')
-  const [numero, setNumero] = useState('')
-  const [complemento, setComplemento] = useState('')
-  const [bairro, setBairro] = useState('')
-  const [cidade, setCidade] = useState('')
-  const [duracao, setDuracao] = useState('40 minutos')
-  const [tipo, setTipo] = useState(usuario.especialidade)
-  const [especialidade, setEspecialidadeProf] = useState('')
-  const [conselho, setConselho] = useState('')
-  const [numeroConselho, setNumeroConselho] = useState('')
+  const [nivelPermissao, setNivelPermissao] = useState<string>(usuario.tipoAcesso || 'Profissional / ADM')
+  const [cep, setCep] = useState(usuario.cep ?? '')
+  const [logradouro, setLogradouro] = useState(usuario.logradouro ?? '')
+  const [numero, setNumero] = useState(usuario.numero ?? '')
+  const [complemento, setComplemento] = useState(usuario.complemento ?? '')
+  const [bairro, setBairro] = useState(usuario.bairro ?? '')
+  const [cidade, setCidade] = useState(usuario.cidade ?? '')
+  const [duracao, setDuracao] = useState(usuario.duracaoSessao ? `${usuario.duracaoSessao} minutos` : '40 minutos')
+  const [tipo, setTipo] = useState(usuario.tipo ?? '')
+  const [especialidade, setEspecialidadeProf] = useState(usuario.especialidade ?? '')
+  const [conselho, setConselho] = useState(usuario.conselho ?? '')
+  const [numeroConselho, setNumeroConselho] = useState(usuario.numeroConselho ?? '')
   const [horarioPersonalizado, setHorarioPersonalizado] = useState(false)
 
   const DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
@@ -432,7 +434,28 @@ function EditarUsuarioModal({
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
           <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
-          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Salvar</button>
+          <button
+            disabled={saving}
+            onClick={async () => {
+              setSaving(true)
+              try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${usuario.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ nome, telefone, cep, logradouro, numero, complemento, bairro, cidade, tipo, especialidade, conselho, numeroConselho }),
+                })
+                if (res.ok) {
+                  const updated = await res.json()
+                  onSaved?.({ ...usuario, ...updated })
+                  onClose()
+                }
+              } finally {
+                setSaving(false)
+              }
+            }}
+            className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors">
+            {saving ? 'Salvando…' : 'Salvar'}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
@@ -475,14 +498,26 @@ function getDefaultToggles(nivel: string): PermToggles {
 function CadastrarUsuarioModal({
   open,
   onClose,
+  onCadastrado,
 }: {
   open: boolean
   onClose: () => void
+  onCadastrado?: (u: Usuario) => void
 }) {
   const [showSenha,      setShowSenha]      = useState(false)
   const [nivelPermissao, setNivelPermissao] = useState('Assistente')
   const [genero,         setGenero]         = useState('Masculino')
   const [toggles,        setToggles]        = useState<PermToggles>(getDefaultToggles('Assistente'))
+  const [nome,           setNomeCad]        = useState('')
+  const [email,          setEmailCad]       = useState('')
+  const [senha,          setSenhaCad]       = useState('')
+  const [telefone,       setTelefoneCad]    = useState('')
+  const [tipo,           setTipoCad]        = useState('')
+  const [especialidade,  setEspCad]         = useState('')
+  const [conselho,       setConselhoCad]    = useState('')
+  const [numeroConselho, setNumConselhoCad] = useState('')
+  const [erros,          setErros]          = useState<Record<string, string>>({})
+  const [saving,         setSaving]         = useState(false)
 
   function handleNivel(v: string) {
     setNivelPermissao(v)
@@ -496,14 +531,16 @@ function CadastrarUsuarioModal({
   const isSimples = nivelPermissao === 'Profissional Simples'
 
   const FIELD = 'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] transition-colors'
-  const LBL   = 'absolute -top-2 left-3 bg-[#1A0A38] px-1 text-[10px] text-[#A78BCC] leading-none'
+  const LBL   = 'absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] text-[#A78BCC] leading-none'
   const SEL   = FIELD + ' appearance-none pr-8 cursor-pointer'
 
-  function FloatInput({ label, type = 'text', placeholder, required }: { label: string; type?: string; placeholder?: string; required?: boolean }) {
+  function FloatInput({ label, type = 'text', placeholder, required, value, onChange }: { label: string; type?: string; placeholder?: string; required?: boolean; value?: string; onChange?: (v: string) => void }) {
     return (
       <div className="relative">
         <label className={LBL}>{label}{required && <span className="text-[#7C4DFF] ml-0.5">*</span>}</label>
-        <input type={type} placeholder={placeholder} className={FIELD} />
+        <input type={type} placeholder={placeholder} value={value ?? ''} onChange={(e) => onChange?.(e.target.value)}
+          className={FIELD + (required && erros[label] ? ' border-red-500' : '')} />
+        {required && erros[label] && <p className="text-xs text-red-400 mt-1">{erros[label]}</p>}
       </div>
     )
   }
@@ -544,16 +581,18 @@ function CadastrarUsuarioModal({
             <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações da conta</p>
             <p className="text-xs text-[#6B4E8A] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
             <div className="grid grid-cols-2 gap-4">
-              <FloatInput label="Email" type="email" required />
+              <FloatInput label="Email" type="email" required value={email} onChange={setEmailCad} />
               <div className="relative">
                 <label className={LBL}>Senha<span className="text-[#7C4DFF] ml-0.5">*</span></label>
                 <div className="relative">
-                  <input type={showSenha ? 'text' : 'password'} className={FIELD + ' pr-10'} />
+                  <input type={showSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenhaCad(e.target.value)}
+                    className={FIELD + ' pr-10' + (erros['Senha'] ? ' border-red-500' : '')} />
                   <button type="button" onClick={() => setShowSenha((p) => !p)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
                     {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
+                {erros['Senha'] && <p className="text-xs text-red-400 mt-1">{erros['Senha']}</p>}
               </div>
             </div>
           </div>
@@ -586,7 +625,7 @@ function CadastrarUsuarioModal({
             <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações pessoais</p>
             <p className="text-xs text-[#6B4E8A] mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
             <div className="grid grid-cols-2 gap-4">
-              <FloatInput label="Nome" required />
+              <FloatInput label="Nome" required value={nome} onChange={setNomeCad} />
               <FloatSel label="Gênero" required options={GENEROS} value={genero} onChange={setGenero} />
               <div className="relative">
                 <label className={LBL}>Código do País</label>
@@ -596,7 +635,7 @@ function CadastrarUsuarioModal({
                   </div>
                   <div className="relative flex-1">
                     <label className={LBL}>Telefone</label>
-                    <input type="text" placeholder="(00) 00000-0000" className={FIELD} />
+                    <input type="text" placeholder="(00) 00000-0000" value={telefone} onChange={(e) => setTelefoneCad(e.target.value)} className={FIELD} />
                   </div>
                 </div>
               </div>
@@ -611,53 +650,81 @@ function CadastrarUsuarioModal({
               <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações profissionais</p>
               <p className="text-xs text-[#6B4E8A] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
               <div className="grid grid-cols-2 gap-4">
-                <FloatInput label="CEP" />
-                <FloatInput label="Logradouro" />
-                <FloatInput label="Número" />
-                <FloatInput label="Complemento" />
-                <FloatInput label="Bairro" />
-                <FloatInput label="Cidade" />
-                <div className="relative">
-                  <label className={LBL}>Duração da sessão<span className="text-[#7C4DFF] ml-0.5">*</span></label>
-                  <div className="relative">
-                    <select defaultValue="" className={SEL}>
-                      <option value="" disabled>Selecione uma duração</option>
-                      {DURACOES.map((d) => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
-                  </div>
-                </div>
                 <div className="relative">
                   <label className={LBL}>Tipo<span className="text-[#7C4DFF] ml-0.5">*</span></label>
                   <div className="relative">
-                    <select defaultValue="" className={SEL}>
-                      <option value="" disabled>Selecione um tipo</option>
+                    <select value={tipo} onChange={(e) => setTipoCad(e.target.value)} className={SEL}>
+                      <option value="">Selecione um tipo</option>
                       {TIPOS_PROF.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                     <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
                   </div>
                 </div>
-                <FloatInput label="Especialidade" />
+                <FloatInput label="Especialidade" value={especialidade} onChange={setEspCad} />
                 <div className="relative">
                   <label className={LBL}>Conselho</label>
                   <div className="relative">
-                    <select defaultValue="" className={SEL}>
-                      <option value="" disabled>Selecione um conselho</option>
+                    <select value={conselho} onChange={(e) => setConselhoCad(e.target.value)} className={SEL}>
+                      <option value="">Selecione um conselho</option>
                       {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                     <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
                   </div>
                 </div>
-                <FloatInput label="Número do conselho" />
+                <FloatInput label="Número do conselho" value={numeroConselho} onChange={setNumConselhoCad} />
               </div>
             </div>
           )}
 
-        </div>
+        </div>{/* end scroll area */}
 
         <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
           <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
-          <button className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Cadastrar</button>
+          <button
+            disabled={saving}
+            onClick={async () => {
+              const errosNovos: Record<string, string> = {}
+              if (!email.trim()) errosNovos['Email'] = 'Obrigatório'
+              if (!senha.trim()) errosNovos['Senha'] = 'Obrigatório'
+              if (!nome.trim()) errosNovos['Nome'] = 'Obrigatório'
+              if (Object.keys(errosNovos).length > 0) { setErros(errosNovos); return }
+              setSaving(true)
+              try {
+                const res = await fetch('/api/usuarios/criar', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                  nome, email, senha, telefone, tipo, especialidade,
+                  conselho, numeroConselho, nivelPermissao,
+                  permissoes: toggles,
+                }),
+                })
+                const data = await res.json()
+                if (!res.ok) {
+                  setErros({ Email: data.error ?? 'Erro ao cadastrar' })
+                  return
+                }
+                onCadastrado?.({
+                  id: data.id,
+                  nome: data.nome,
+                  especialidade: data.especialidade ?? tipo,
+                  email: data.email,
+                  telefone: data.telefone ?? '',
+                  tipoAcesso: nivelPermissao,
+                  tipo: data.tipo,
+                  conselho: data.conselho,
+                  numeroConselho: data.numeroConselho,
+                })
+                onClose()
+              } catch {
+                setErros({ Email: 'Erro de conexão' })
+              } finally {
+                setSaving(false)
+              }
+            }}
+            className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors">
+            {saving ? 'Cadastrando…' : 'Cadastrar'}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
@@ -673,9 +740,44 @@ export function UsuariosView() {
   const [editarUsuario, setEditarUsuario] = useState<Usuario | null>(null)
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Array<{
+        id: string; nome: string; email: string; telefone?: string
+        tipo?: string; especialidade?: string; conselho?: string
+        numeroConselho?: string; cep?: string; logradouro?: string
+        numero?: string; complemento?: string; bairro?: string
+        cidade?: string; agendaId?: string; genero?: string; duracaoSessao?: number
+      }>) =>
+        setUsuarios(data.map((u) => ({
+          id: u.id,
+          nome: u.nome,
+          especialidade: u.especialidade ?? u.tipo ?? '',
+          email: u.email,
+          telefone: u.telefone ?? '',
+          tipoAcesso: u.tipo ?? '',
+          tipo: u.tipo,
+          conselho: u.conselho,
+          numeroConselho: u.numeroConselho,
+          cep: u.cep,
+          logradouro: u.logradouro,
+          numero: u.numero,
+          complemento: u.complemento,
+          bairro: u.bairro,
+          cidade: u.cidade,
+          agendaId: u.agendaId,
+          genero: u.genero,
+          duracaoSessao: u.duracaoSessao,
+        })))
+      )
+      .catch(() => {})
+  }, [])
 
   // Filtering
-  const filtered = MOCK_USUARIOS.filter((u) => {
+  const filtered = usuarios.filter((u) => {
     const q = search.toLowerCase()
     const matchSearch =
       !q || u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
@@ -896,9 +998,21 @@ export function UsuariosView() {
       </div>
 
       {/* Modal Cadastrar */}
-      <CadastrarUsuarioModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <CadastrarUsuarioModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCadastrado={(u) => setUsuarios((prev) => [...prev, u])}
+      />
       {/* Modal Editar */}
-      {editarUsuario && <EditarUsuarioModal usuario={editarUsuario} onClose={() => setEditarUsuario(null)} />}
+      {editarUsuario && (
+        <EditarUsuarioModal
+          usuario={editarUsuario}
+          onClose={() => setEditarUsuario(null)}
+          onSaved={(updated) => {
+            setUsuarios((prev) => prev.map((u) => u.id === updated.id ? updated : u))
+          }}
+        />
+      )}
     </div>
   )
 }

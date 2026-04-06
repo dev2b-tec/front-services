@@ -4,6 +4,9 @@ import type { JWT } from "next-auth/jwt"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  pages: {
+    signIn: '/auth/signin',
+  },
   providers: [
     Keycloak({
       clientId: process.env.KEYCLOAK_CLIENT_ID!,
@@ -35,6 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       session.accessToken = token.accessToken as string
       session.idToken = token.idToken as string
+      session.keycloakId = token.sub as string
       session.error = token.error as string | undefined
       return session
     },

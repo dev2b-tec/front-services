@@ -1,38 +1,39 @@
-/**
- * app/dashboard/clientes/page.tsx — Módulo de Clientes
- *
- * ╔══════════════════════════════════════════════════════════════════╗
- * ║  MICROFRONTEND: CLIENTES                                         ║
- * ║                                                                  ║
- * ║  Este arquivo é o ponto de entrada do módulo Clientes.           ║
- * ║  Ele herda automaticamente do layout pai (Topbar + Sidebar).     ║
- * ║                                                                  ║
- * ║  Para desenvolver este módulo:                                   ║
- * ║    1. Substitua o conteúdo abaixo pelo seu componente real       ║
- * ║    2. Crie sub-componentes em components/clientes/               ║
- * ║    3. Crie rotas filhas em app/dashboard/clientes/[id]/page.tsx  ║
- * ║                                                                  ║
- * ║  O que o layout pai já fornece (grátis):                        ║
- * ║    - Topbar com título dinâmico                                  ║
- * ║    - Sidebar com item "Clientes" marcado como ativo              ║
- * ║    - Scroll independente nesta área                              ║
- * ║    - Background e tokens de cor do design system                ║
- * ╚══════════════════════════════════════════════════════════════════╝
- *
- * BACKEND MÍNIMO PARA ESTE MÓDULO:
- *   - GET  /api/clientes          → lista paginada
- *   - GET  /api/clientes/[id]     → detalhe
- *   - POST /api/clientes          → criar
- *   - PUT  /api/clientes/[id]     → editar
- *   - DELETE /api/clientes/[id]   → remover
- *
- * Com Supabase, substitua as chamadas fetch por:
- *   const supabase = createClient()
- *   const { data } = await supabase.from('clientes').select('*')
- */
+import { Suspense } from 'react'
+import { auth } from '@/lib/auth'
+import { ClientesView, type PacienteApi } from '@/components/clientes/clientes-view'
 
-import { ClientesView } from '@/components/clientes/clientes-view'
+export default async function ClientesPage() {
+  const session = await auth()
+  const keycloakId = session?.keycloakId
 
-export default function ClientesPage() {
-  return <ClientesView />
+  let empresaId: string | null = null
+  let pacientes: PacienteApi[] = []
+
+  if (keycloakId) {
+    try {
+      const res = await fetch(
+        `${process.env.API_URL}/api/v1/usuarios/keycloak/${keycloakId}`,
+        { cache: 'no-store' }
+      )
+      if (res.ok) {
+        const usuario = await res.json()
+        empresaId = usuario.empresaId ?? null
+        if (empresaId) {
+          const pRes = await fetch(
+            `${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}`,
+            { cache: 'no-store' }
+          )
+          if (pRes.ok) pacientes = await pRes.json()
+        }
+      }
+    } catch {
+      // backend offline — tela carrega vazia
+    }
+  }
+
+  return (
+    <Suspense>
+      <ClientesView initialPacientes={pacientes} empresaId={empresaId} />
+    </Suspense>
+  )
 }

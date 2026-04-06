@@ -66,7 +66,6 @@ export const navGroups: NavGroup[] = [
         label: 'Clientes',
         href: '/dashboard/clientes',
         icon: Users,
-        badge: '3',
       },
       {
         label: 'Usuários',

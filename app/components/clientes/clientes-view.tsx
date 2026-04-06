@@ -1,6 +1,14 @@
 ﻿'use client'
 
-import { useState, useRef, type ReactNode } from 'react'
+import { useState, useRef, useEffect, type ReactNode } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useToast } from '@/hooks/use-toast'
+import { TabEvolucoes } from '@/components/clientes/tab-evolucoes'
+import { TabLinhaTempo as TabLinhaDoTempo } from '@/components/clientes/tab-linha-do-tempo'
+import { TabAnamnese } from '@/components/clientes/tab-anamnese'
+import { TabFinanceiro } from '@/components/clientes/tab-financeiro'
+import { TabDocumentos } from '@/components/clientes/tab-documentos'
+import { SistemaMensagensModal } from '@/components/mensagens/sistema-mensagens-modal'
 import {
   Search, Plus, Pencil, Trash2,
   ChevronsUpDown, ChevronDown, ChevronUp,
@@ -52,6 +60,59 @@ const MOCK_AGENDAMENTOS: Agendamento[] = [
   { id: 'a2', data: '2026-03-30', dataLabel: 'Março 30, 2026', profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Atendido', pagamento: 'Valores a definir' },
 ]
 
+// ─── API Types ───────────────────────────────────────────────────────────────
+export type PacienteApi = {
+  id: string
+  empresaId?: string
+  nome: string
+  dataNascimento?: string | null
+  telefone?: string | null
+  genero?: string | null
+  plano?: string | null
+  numeroCarteirinha?: string | null
+  grupo?: string | null
+  comoConheceu?: string | null
+  rg?: string | null
+  cpf?: string | null
+  cep?: string | null
+  email?: string | null
+  logradouro?: string | null
+  numero?: string | null
+  complemento?: string | null
+  bairro?: string | null
+  cidade?: string | null
+  outrasInformacoes?: string | null
+  nomeResponsavel?: string | null
+  dataNascimentoResp?: string | null
+  cpfResponsavel?: string | null
+  telefoneResponsavel?: string | null
+  statusPagamento: string
+  sessoes: number
+}
+
+function statusLabel(s: string): string {
+  const map: Record<string, string> = {
+    EM_ABERTO: 'Em Aberto',
+    QUITADO: 'Quitado',
+    PENDENTE: 'Pendente',
+  }
+  return map[s] ?? s
+}
+
+function pacienteParaCliente(p: PacienteApi): Cliente {
+  return {
+    id: p.id,
+    nome: p.nome,
+    telefone: p.telefone ?? '',
+    sessoes: p.sessoes ?? 0,
+    grupo: p.grupo ?? '—',
+    statusPagamento: statusLabel(p.statusPagamento),
+    genero: p.genero ?? undefined,
+    convenio: p.plano ?? undefined,
+    email: p.email ?? undefined,
+  }
+}
+
 // ─── Shared styles ──────────────────────────────────────────────────────────
 const INPUT = [
   'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md',
@@ -76,23 +137,30 @@ function FloatingField({ label, required, children }: { label: string; required?
   )
 }
 
-function FieldSelect({ label, required, options, placeholder, value }: {
-  label: string; required?: boolean; options: string[]; placeholder?: string; value?: string
+function FieldSelect({ label, required, options, placeholder, value, onChange }: {
+  label: string; required?: boolean; options: string[]; placeholder?: string; value?: string; onChange?: (v: string) => void
 }) {
   return (
     <FloatingField label={label} required={required}>
       <div className="relative">
-        <select defaultValue={value ?? ''} className={SELECT}>
-          <option value="" disabled>{placeholder ?? 'Selecione'}</option>
-          {options.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        {onChange !== undefined ? (
+          <select value={value ?? ''} onChange={(e) => onChange(e.target.value)} className={SELECT}>
+            <option value="" disabled>{placeholder ?? 'Selecione'}</option>
+            {options.map((o) => <option key={o}>{o}</option>)}
+          </select>
+        ) : (
+          <select defaultValue={value ?? ''} className={SELECT}>
+            <option value="" disabled>{placeholder ?? 'Selecione'}</option>
+            {options.map((o) => <option key={o}>{o}</option>)}
+          </select>
+        )}
         <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
       </div>
     </FloatingField>
   )
 }
 
-function PhoneField({ label, required, value }: { label: string; required?: boolean; value?: string }) {
+function PhoneField({ label, required, value, onChange }: { label: string; required?: boolean; value?: string; onChange?: (v: string) => void }) {
   return (
     <FloatingField label={label} required={required}>
       <div className="flex gap-2">
@@ -100,17 +168,23 @@ function PhoneField({ label, required, value }: { label: string; required?: bool
           🇧🇷 <span className="text-[#A78BCC] text-xs ml-1">+55</span>
           <ChevronDown size={11} className="text-[#6B4E8A] ml-0.5" />
         </div>
-        <input className={INPUT} defaultValue={value ?? ''} />
+        {onChange !== undefined
+          ? <input className={INPUT} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
+          : <input className={INPUT} defaultValue={value ?? ''} />
+        }
       </div>
     </FloatingField>
   )
 }
 
-function DateField({ label }: { label: string }) {
+function DateField({ label, value, onChange }: { label: string; value?: string; onChange?: (v: string) => void }) {
   return (
     <FloatingField label={label}>
       <div className="relative">
-        <input type="date" className={INPUT + ' pr-9'} />
+        {onChange !== undefined
+          ? <input type="date" value={value ?? ''} onChange={(e) => onChange(e.target.value)} className={INPUT + ' pr-9'} />
+          : <input type="date" className={INPUT + ' pr-9'} />
+        }
         <CalendarIcon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
       </div>
     </FloatingField>
@@ -131,12 +205,13 @@ function Section({ title, open, onToggle, children }: { title: string; open: boo
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const color: Record<string, string> = { 'Em Aberto': '#EF4444', 'Quitado': '#22C55E' }
-  const c = color[status] ?? '#A78BCC'
+  const label = statusLabel(status)
+  const color: Record<string, string> = { 'Em Aberto': '#EF4444', 'Quitado': '#22C55E', 'Pendente': '#F59E0B' }
+  const c = color[label] ?? '#A78BCC'
   return (
     <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: c }}>
       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c }} />
-      {status}
+      {label}
     </span>
   )
 }
@@ -166,61 +241,8 @@ function StatusEventBadge({ status }: { status: string }) {
   )
 }
 
-// ─── Modal: Sistema de Mensagens ─────────────────────────────────────────────
-function SistemaMensagensModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const mensagens = [
-    { titulo: 'Confirmar Agendamento',    desc: 'Confirme que o paciente virá ao atendimento.', selector: false },
-    { titulo: 'Remarcação',    desc: 'Entre em contato para reagendar quem faltou.',        selector: false },
-    { titulo: 'Agradecimento',            desc: 'Agradeça a presença do paciente.',          selector: false },
-    { titulo: 'Cobrança',            desc: 'Lembre seu paciente sobre o pagamento.',              selector: false },
-    { titulo: 'Questionário de Anamnese', desc: 'Envie um questionário de Anamnese',         selector: true },
-    { titulo: 'Personalize a Mensagem',   desc: 'Envie a mensagem que desejar ao paciente.',          selector: false },
-  ]
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-lg p-0 gap-0">
-        <DialogHeader className="flex-row items-center justify-between px-5 py-3.5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-sm font-bold text-[#F5F0FF]">Sistema de Mensagens</DialogTitle>
-          <div className="flex items-center gap-2">
-            <button className="text-xs font-medium text-[#7C4DFF] border border-[rgba(124,77,255,0.25)] px-3 py-1 rounded-md hover:bg-[rgba(124,77,255,0.1)] transition-colors">
-              Editar Mensagens
-            </button>
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
-              <X size={15} />
-            </button>
-          </div>
-        </DialogHeader>
-        <div className="p-4 space-y-2">
-          {mensagens.map((m) => (
-            <div key={m.titulo} className="flex items-center justify-between gap-3 bg-[#150830] border border-[rgba(124,77,255,0.12)] rounded-xl px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold text-[#F5F0FF]">{m.titulo}</p>
-                <p className="text-xs text-[#A78BCC] mt-0.5">{m.desc}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {m.selector && (
-                  <div className="relative">
-                    <select className="appearance-none h-8 pl-3 pr-7 text-xs rounded-lg bg-[#0D0520] border border-[rgba(124,77,255,0.25)] text-[#A78BCC] focus:outline-none cursor-pointer">
-                      <option>Selecione</option>
-                    </select>
-                    <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
-                  </div>
-                )}
-                <button className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] px-3 py-1.5 rounded-md transition-colors">
-                  <Send size={11} /> Enviar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // ─── Modal: Detalhes do Agendamento ──────────────────────────────────────────
-function AgendamentoModal({ open, onClose, ag }: { open: boolean; onClose: () => void; ag: Agendamento | null }) {
+function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onClose: () => void; ag: Agendamento | null; empresaId?: string | null }) {
   const [mensagensOpen, setMensagensOpen] = useState(false)
   if (!ag) return null
 
@@ -360,15 +382,89 @@ function AgendamentoModal({ open, onClose, ag }: { open: boolean; onClose: () =>
           </div>
         </DialogContent>
       </Dialog>
-      <SistemaMensagensModal open={mensagensOpen} onClose={() => setMensagensOpen(false)} />
+      <SistemaMensagensModal
+        open={mensagensOpen}
+        onClose={() => setMensagensOpen(false)}
+        empresaId={empresaId}
+      />
     </>
   )
 }
 
 // ─── Detalhe: aba Dados ───────────────────────────────────────────────────────
-function TabDados({ cliente }: { cliente: Cliente }) {
+function TabDados({ paciente }: { paciente: PacienteApi }) {
+  const { toast } = useToast()
+  const [saving, setSaving] = useState(false)
   const [changed, setChanged] = useState(false)
   const [menorIdade, setMenorIdade] = useState(false)
+
+  const [nome, setNome] = useState(paciente.nome ?? '')
+  const [telefone, setTelefone] = useState((paciente.telefone ?? '').replace('+55 ', ''))
+  const [dataNascimento, setDataNascimento] = useState(paciente.dataNascimento ?? '')
+  const [genero, setGenero] = useState(paciente.genero ?? '')
+  const [plano, setPlano] = useState(paciente.plano ?? '')
+  const [numeroCarteirinha, setNumeroCarteirinha] = useState(paciente.numeroCarteirinha ?? '')
+  const [grupo, setGrupo] = useState(paciente.grupo ?? '')
+  const [rg, setRg] = useState(paciente.rg ?? '')
+  const [cpf, setCpf] = useState(paciente.cpf ?? '')
+  const [email, setEmail] = useState(paciente.email ?? '')
+  const [cep, setCep] = useState(paciente.cep ?? '')
+  const [logradouro, setLogradouro] = useState(paciente.logradouro ?? '')
+  const [numero, setNumero] = useState(paciente.numero ?? '')
+  const [complemento, setComplemento] = useState(paciente.complemento ?? '')
+  const [bairro, setBairro] = useState(paciente.bairro ?? '')
+  const [cidade, setCidade] = useState(paciente.cidade ?? '')
+  const [comoConheceu, setComoConheceu] = useState(paciente.comoConheceu ?? '')
+  const [outrasInformacoes, setOutrasInformacoes] = useState(paciente.outrasInformacoes ?? '')
+  const [nomeResponsavel, setNomeResponsavel] = useState(paciente.nomeResponsavel ?? '')
+  const [dataNascimentoResp, setDataNascimentoResp] = useState(paciente.dataNascimentoResp ?? '')
+  const [cpfResponsavel, setCpfResponsavel] = useState(paciente.cpfResponsavel ?? '')
+  const [telefoneResponsavel, setTelefoneResponsavel] = useState((paciente.telefoneResponsavel ?? '').replace('+55 ', ''))
+
+  function mark<T>(setter: (v: T) => void): (v: T) => void {
+    return (v) => { setter(v); setChanged(true) }
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${paciente.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome,
+          telefone: telefone ? `+55 ${telefone}` : null,
+          dataNascimento: dataNascimento || null,
+          genero: genero || null,
+          plano: plano || null,
+          numeroCarteirinha: numeroCarteirinha || null,
+          grupo: grupo || null,
+          rg: rg || null,
+          cpf: cpf || null,
+          email: email || null,
+          cep: cep || null,
+          logradouro: logradouro || null,
+          numero: numero || null,
+          complemento: complemento || null,
+          bairro: bairro || null,
+          cidade: cidade || null,
+          comoConheceu: comoConheceu || null,
+          outrasInformacoes: outrasInformacoes || null,
+          nomeResponsavel: nomeResponsavel || null,
+          dataNascimentoResp: dataNascimentoResp || null,
+          cpfResponsavel: cpfResponsavel || null,
+          telefoneResponsavel: telefoneResponsavel ? `+55 ${telefoneResponsavel}` : null,
+        }),
+      })
+      if (!res.ok) throw new Error('Erro ao salvar')
+      setChanged(false)
+      toast({ title: 'Paciente atualizado com sucesso!' })
+    } catch {
+      toast({ title: 'Erro ao salvar alterações', variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -392,10 +488,10 @@ function TabDados({ cliente }: { cliente: Cliente }) {
         )}
 
         {/* Campos */}
-        <div className="space-y-4" onChange={() => setChanged(true)}>
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <FloatingField label="Nome" required>
-              <input className={INPUT} defaultValue={cliente.nome} />
+              <input className={INPUT} value={nome} onChange={(e) => { setNome(e.target.value); setChanged(true) }} />
             </FloatingField>
             <FloatingField label="Nome Social">
               <input className={INPUT} />
@@ -403,45 +499,45 @@ function TabDados({ cliente }: { cliente: Cliente }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="Número de Telefone" required value={cliente.telefone.replace('+55 ', '')} />
-            <DateField label="Data de nascimento" />
+            <PhoneField label="Número de Telefone" required value={telefone} onChange={mark(setTelefone)} />
+            <DateField label="Data de nascimento" value={dataNascimento} onChange={mark(setDataNascimento)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} />
-            <FieldSelect label="Convênio" placeholder="Selecione um plano" value={cliente.convenio} options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} />
+            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={mark(setGenero)} />
+            <FieldSelect label="Convênio" placeholder="Selecione um plano" value={plano} options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} onChange={mark(setPlano)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Número da Carteirinha"><input className={INPUT} /></FloatingField>
-            <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} />
+            <FloatingField label="Número da Carteirinha"><input className={INPUT} value={numeroCarteirinha} onChange={(e) => { setNumeroCarteirinha(e.target.value); setChanged(true) }} /></FloatingField>
+            <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={mark(setGrupo)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="RG"><input className={INPUT} /></FloatingField>
-            <FloatingField label="CPF"><input className={INPUT} /></FloatingField>
+            <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => { setRg(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => { setCpf(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Email"><input type="email" className={INPUT} /></FloatingField>
-            <FloatingField label="CEP"><input className={INPUT} /></FloatingField>
+            <FloatingField label="Email"><input type="email" className={INPUT} value={email} onChange={(e) => { setEmail(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="CEP"><input className={INPUT} value={cep} onChange={(e) => { setCep(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
           <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
-            <FloatingField label="Logradouro"><input className={INPUT} /></FloatingField>
-            <FloatingField label="Número"><input className={INPUT} /></FloatingField>
-            <FloatingField label="Complemento"><input className={INPUT} /></FloatingField>
+            <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => { setLogradouro(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => { setNumero(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => { setComplemento(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Bairro"><input className={INPUT} /></FloatingField>
-            <FloatingField label="Cidade"><input className={INPUT} /></FloatingField>
+            <FloatingField label="Bairro"><input className={INPUT} value={bairro} onChange={(e) => { setBairro(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => { setCidade(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
-          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} />
+          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={mark(setComoConheceu)} />
 
           <FloatingField label="Outras Informações">
-            <textarea rows={3} className={INPUT + ' resize-y'} />
+            <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => { setOutrasInformacoes(e.target.value); setChanged(true) }} />
           </FloatingField>
         </div>
 
@@ -459,12 +555,12 @@ function TabDados({ cliente }: { cliente: Cliente }) {
           {menorIdade && (
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="Nome do responsável"><input className={INPUT} /></FloatingField>
-                <DateField label="Data de nascimento" />
+                <FloatingField label="Nome do responsável"><input className={INPUT} value={nomeResponsavel} onChange={(e) => { setNomeResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={mark(setDataNascimentoResp)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="CPF do responsável"><input className={INPUT} /></FloatingField>
-                <PhoneField label="Telefone do responsável" />
+                <FloatingField label="CPF do responsável"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
               </div>
             </div>
           )}
@@ -472,161 +568,9 @@ function TabDados({ cliente }: { cliente: Cliente }) {
 
         {/* Footer actions */}
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-[rgba(124,77,255,0.12)]">
-          <button type="button" onClick={() => setChanged(false)} className={BTN_GHOST}>Cancelar</button>
-          <button type="button" onClick={() => setChanged(false)} className={BTN_PRIMARY}>Salvar Alterações</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Detalhe: aba Linha do Tempo ─────────────────────────────────────────────
-function TabLinhaTempo() {
-  const [agSelecionado, setAgSelecionado] = useState<Agendamento | null>(null)
-
-  return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <div className="max-w-xl mx-auto space-y-6">
-        {MOCK_AGENDAMENTOS.map((ag) => (
-          <div key={ag.id}>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-3 text-center">{ag.dataLabel}</p>
-            <div className="relative bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl p-4 pl-5 overflow-hidden">
-              {/* Left accent bar */}
-              <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl"
-                style={{ background: ag.status === 'Faltou' ? '#EF4444' : ag.status === 'Atendido' ? '#10B981' : '#7C4DFF' }} />
-
-              {/* Calendar icon (top right area) */}
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-sm font-bold text-[#F5F0FF]">{ag.profissional}</p>
-                  <div className="flex items-center gap-1 text-xs text-[#A78BCC] mt-1">
-                    <Clock size={11} />
-                    {ag.inicio} &ndash; {ag.fim}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#7C4DFF] flex items-center justify-center">
-                    <CalendarIcon size={13} className="text-white" />
-                  </div>
-                  <button
-                    onClick={() => setAgSelecionado(ag)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] px-3 py-1.5 rounded-md transition-colors">
-                    <Eye size={11} /> Visualizar
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mt-2 pt-2 border-t border-[rgba(124,77,255,0.10)]">
-                <div>
-                  <p className="text-[10px] font-bold tracking-widest text-[#A78BCC] mb-1">STATUS</p>
-                  <StatusEventBadge status={ag.status} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold tracking-widest text-[#A78BCC] mb-1">PAGAMENTO</p>
-                  <p className="text-xs font-semibold text-[#F59E0B]">{ag.pagamento}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <AgendamentoModal open={!!agSelecionado} onClose={() => setAgSelecionado(null)} ag={agSelecionado} />
-    </div>
-  )
-}
-
-// ─── Detalhe: aba Anamnese ──────────────────────────────────────────────────
-const MODELOS_ANAMNESE = ['Anamnese Padrão', 'Anamnese Fisioterapia', 'Anamnese Nutrição']
-
-const PERGUNTAS_ANAMNESE = [
-  'Possui contato de emergência?',
-  'Possui uma queixa inicial? Qual?',
-  'Sabe dizer o tempo com o sintoma da queixa? Quanto?',
-  'Pratica atividade física?',
-  'Tabagismo?',
-  'Alimentação saudável?',
-  'Ingere bebida alcoólica? Qual frequência?',
-  'Histórico familiar de doenças? Quais?',
-  'Faz uso contínuo de alguma medicação? Qual?',
-  'Tem ou teve alguma doença crônica?',
-  'Realiza acompanhamento com outros profissionais de saúde?',
-  'Observações adicionais:',
-]
-
-type RespostaAnamnese = { radio: 'sim' | 'nao' | null; texto: string }
-
-const MENSAGEM_ANAMNESE_PADRAO = '#nome_paciente#. Solicito que o questionário abaixo seja respondido antes do atendimento\n#link_anamnese#'
-
-// Renders the message text highlighting #tokens# in purple
-function MensagemComVariaveis({ texto }: { texto: string }) {
-  const parts = texto.split(/(#[^#]+#)/g)
-  return (
-    <>
-      {parts.map((p, i) =>
-        /^#.+#$/.test(p)
-          ? <span key={i} className="text-[#C084FC] font-semibold">{p}</span>
-          : <span key={i}>{p}</span>
-      )}
-    </>
-  )
-}
-
-function EditarMensagemAnamneseModal({ onClose }: { onClose: () => void }) {
-  const [mensagem, setMensagem] = useState(MENSAGEM_ANAMNESE_PADRAO)
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-[560px] bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(124,77,255,0.18)]">
-          <span className="text-base font-semibold text-[#F5F0FF]">Editar Mensagem</span>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors"
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-5 py-5 space-y-3">
-          {/* Preview overlay textarea */}
-          <div className="relative">
-            {/* Transparent textarea for editing */}
-            <textarea
-              rows={6}
-              value={mensagem}
-              onChange={(e) => setMensagem(e.target.value)}
-              className="relative z-10 w-full bg-transparent border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-transparent caret-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
-              spellCheck={false}
-            />
-            {/* Syntax-highlighted overlay (non-interactive) */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 px-4 py-3 text-sm text-[#F5F0FF] whitespace-pre-wrap break-words rounded-xl z-0 leading-[1.5rem]"
-            >
-              <MensagemComVariaveis texto={mensagem} />
-            </div>
-          </div>
-
-          <p className="text-xs text-[#6B4E8A] leading-relaxed">
-            Adicione variáveis inserindo hastag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento.
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[rgba(124,77,255,0.14)]">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-lg transition-colors"
-          >
-            Salvar
+          <button type="button" onClick={() => setChanged(false)} className={BTN_GHOST} disabled={saving}>Cancelar</button>
+          <button type="button" onClick={handleSave} className={BTN_PRIMARY} disabled={saving}>
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>
@@ -634,2029 +578,7 @@ function EditarMensagemAnamneseModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-function TabAnamnese() {
-  const [modelo, setModelo] = useState('Anamnese Padrão')
-  const [modeloOpen, setModeloOpen] = useState(false)
-  const [acoesOpen, setAcoesOpen] = useState(false)
-  const [editarMensagemOpen, setEditarMensagemOpen] = useState(false)
-  const [respostas, setRespostas] = useState<RespostaAnamnese[]>(
-    PERGUNTAS_ANAMNESE.map(() => ({ radio: null, texto: '' }))
-  )
 
-  function setRadio(i: number, val: 'sim' | 'nao') {
-    setRespostas((prev) => prev.map((r, idx) => idx === i ? { ...r, radio: val } : r))
-  }
-  function setTexto(i: number, val: string) {
-    setRespostas((prev) => prev.map((r, idx) => idx === i ? { ...r, texto: val } : r))
-  }
-
-  return (
-    <div className="flex-1 overflow-y-auto">
-      {/* Sub-header */}
-      <div className="px-6 pt-5 pb-4 border-b border-[rgba(124,77,255,0.14)] flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-base font-semibold text-[#F5F0FF]">Anamnese</h2>
-          <p className="text-xs text-[#A78BCC] mt-0.5">Selecione e edite uma anamnese para este paciente.</p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Ações dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setAcoesOpen((v) => !v)}
-              className="flex items-center gap-1.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <Settings size={12} /> Ações <ChevronDown size={12} />
-            </button>
-            {acoesOpen && (
-              <div className="absolute z-30 right-0 mt-1 w-48 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                <button
-                  onClick={() => setAcoesOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.10)] transition-colors text-left"
-                >
-                  <Pencil size={13} className="text-[#A78BCC]" />
-                  Editar Questionário
-                </button>
-                <button
-                  onClick={() => { setAcoesOpen(false); setEditarMensagemOpen(true) }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.10)] transition-colors text-left"
-                >
-                  <FileText size={13} className="text-[#A78BCC]" />
-                  Editar Mensagem
-                </button>
-              </div>
-            )}
-          </div>
-          <button className="flex items-center gap-1.5 text-xs font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] px-3 py-1.5 rounded-lg transition-colors">
-            Voltar
-          </button>
-        </div>
-      </div>
-
-      {editarMensagemOpen && (
-        <EditarMensagemAnamneseModal onClose={() => setEditarMensagemOpen(false)} />
-      )}
-
-      {/* Content */}
-      <div className="px-6 py-5 space-y-6">
-        {/* Modelo selector row */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <button
-              onClick={() => setModeloOpen((v) => !v)}
-              className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-            >
-              <span>{modelo}</span>
-              <ChevronDown size={14} className="text-[#6B4E8A]" />
-            </button>
-            {modeloOpen && (
-              <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                {MODELOS_ANAMNESE.map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => { setModelo(m); setModeloOpen(false) }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                      m === modelo ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#150830] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
-            <Printer size={15} />
-          </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#0D9488] hover:bg-[#0F766E] transition-colors" title="Enviar">
-            <Send size={13} className="text-white" />
-          </button>
-        </div>
-
-        {/* Questions */}
-        {PERGUNTAS_ANAMNESE.map((pergunta, i) => (
-          <div key={i} className="space-y-2">
-            <p className="text-sm font-semibold text-[#F5F0FF]">
-              {i + 1}. {pergunta}
-            </p>
-            <div className="flex items-center gap-5">
-              {/* Sim */}
-              <button
-                onClick={() => setRadio(i, 'sim')}
-                className="flex items-center gap-1.5 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
-              >
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  respostas[i].radio === 'sim' ? 'border-[#7C4DFF] bg-[#7C4DFF]' : 'border-[#6B4E8A]'
-                }`}>
-                  {respostas[i].radio === 'sim' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </div>
-                Sim
-              </button>
-              {/* Não */}
-              <button
-                onClick={() => setRadio(i, 'nao')}
-                className="flex items-center gap-1.5 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
-              >
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  respostas[i].radio === 'nao' ? 'border-[#7C4DFF] bg-[#7C4DFF]' : 'border-[#6B4E8A]'
-                }`}>
-                  {respostas[i].radio === 'nao' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </div>
-                Não
-              </button>
-            </div>
-            <textarea
-              rows={3}
-              value={respostas[i].texto}
-              onChange={(e) => setTexto(i, e.target.value)}
-              placeholder="Digite aqui"
-              className="w-full bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-y min-h-[72px] transition-colors"
-            />
-          </div>
-        ))}
-
-        {/* Save button */}
-        <div className="flex justify-end pt-2 pb-4">
-          <button className="flex items-center gap-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
-            Salvar Anamnese
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Odontograma ─────────────────────────────────────────────────────────────
-// angleDeg: 0=top, 90=right, 180=bottom, 270=left (clockwise)
-// Upper teeth span top half: 270°→0°→90°  (left→top→right)
-// Lower teeth span bottom half: 90°→180°→270° (right→bottom→left)
-const TEETH_UPPER: [number, number][] = [
-  // Upper right quadrant (DIREITA): tooth 18 at left → 11 near top
-  [18,270],[17,283],[16,296],[15,309],[14,321],[13,334],[12,347],[11,357],
-  // Upper left quadrant (ESQUERDA): tooth 21 near top → 28 at right
-  [21,3],[22,16],[23,28],[24,41],[25,54],[26,66],[27,79],[28,90],
-]
-const TEETH_LOWER: [number, number][] = [
-  // Lower left quadrant (ESQUERDA): tooth 38 at right → 31 near bottom
-  [38,90],[37,103],[36,116],[35,128],[34,141],[33,154],[32,166],[31,177],
-  // Lower right quadrant (DIREITA): tooth 41 near bottom → 48 at left
-  [41,183],[42,195],[43,207],[44,219],[45,231],[46,244],[47,256],[48,270],
-]
-
-function ToothCircle({ num, cx, cy, selected, onClick }: { num: number; cx: number; cy: number; selected: boolean; onClick: () => void }) {
-  return (
-    <g onClick={onClick} className="cursor-pointer">
-      <circle cx={cx} cy={cy} r={11} fill={selected ? 'rgba(124,77,255,0.25)' : 'rgba(21,8,48,0.8)'}
-        stroke={selected ? '#7C4DFF' : 'rgba(124,77,255,0.35)'} strokeWidth={1.2} />
-      <text x={cx} y={cy + 4} textAnchor="middle" fontSize={8} fill={selected ? '#C084FC' : '#A78BCC'} fontWeight={selected ? '700' : '400'}>
-        {num}
-      </text>
-    </g>
-  )
-}
-
-function OdontogramaView() {
-  const [selected, setSelected] = useState<Set<number>>(new Set())
-  const [painelOpen, setPainelOpen] = useState(false)
-  const [denteAtivo, setDenteAtivo] = useState<number | ''>('')
-  const [denteDropOpen, setDenteDropOpen] = useState(false)
-  const [descricao, setDescricao] = useState('')
-  const W = 460; const H = 420
-  const CX = W / 2; const CY = H / 2
-  const RU = 138; const RL = 154
-
-  const ALL_TEETH = [
-    ...TEETH_UPPER.map(([n]) => n),
-    ...TEETH_LOWER.map(([n]) => n),
-  ].sort((a, b) => a - b)
-
-  function toXY(angleDeg: number, r: number): [number, number] {
-    const rad = (angleDeg - 90) * Math.PI / 180
-    return [CX + r * Math.cos(rad), CY + r * Math.sin(rad)]
-  }
-
-  function toggleTooth(n: number) {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      next.has(n) ? next.delete(n) : next.add(n)
-      return next
-    })
-  }
-
-  function handleAdicionar() {
-    setPainelOpen(false)
-    setDenteAtivo('')
-    setDescricao('')
-  }
-
-  return (
-    <div className="flex-1 flex flex-col">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-semibold text-[#F5F0FF]">Odontograma</h3>
-          <p className="text-xs text-[#6B4E8A] mt-0.5">Preencha o odontograma adicionando informações a cada dente que desejar e salve esta evolução para armazená-lo.</p>
-        </div>
-        <button
-          onClick={() => setPainelOpen((v) => !v)}
-          className="flex items-center gap-1.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors flex-shrink-0"
-        >
-          <Plus size={12} /> Adicionar Dente
-        </button>
-      </div>
-
-      <div className="flex-1 flex gap-4 overflow-hidden">
-        {/* Chart */}
-        <div className={`flex items-center justify-center transition-all ${painelOpen ? 'flex-shrink-0' : 'flex-1'}`}>
-          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-            <circle cx={CX} cy={CY} r={178} fill="rgba(21,8,48,0.5)" stroke="rgba(124,77,255,0.15)" strokeWidth={1} />
-            <circle cx={CX} cy={CY} r={118} fill="rgba(13,5,32,0.6)" stroke="rgba(124,77,255,0.10)" strokeWidth={1} />
-            <line x1={CX} y1={CY - 178} x2={CX} y2={CY - 118} stroke="rgba(124,77,255,0.18)" strokeWidth={1} />
-            <line x1={CX} y1={CY + 118} x2={CX} y2={CY + 178} stroke="rgba(124,77,255,0.18)" strokeWidth={1} />
-            <line x1={CX - 178} y1={CY} x2={CX - 118} y2={CY} stroke="rgba(124,77,255,0.18)" strokeWidth={1} />
-            <line x1={CX + 118} y1={CY} x2={CX + 178} y2={CY} stroke="rgba(124,77,255,0.18)" strokeWidth={1} />
-            <text x={CX} y={CY - 40} textAnchor="middle" fontSize={9} fill="#6B4E8A" letterSpacing={1}>Maxilar superior</text>
-            <text x={CX} y={CY + 52} textAnchor="middle" fontSize={9} fill="#6B4E8A" letterSpacing={1}>Maxilar inferior</text>
-            <text x={22} y={CY + 4} textAnchor="middle" fontSize={8} fill="#6B4E8A" transform={`rotate(-90 22 ${CY})`}>DIREITA</text>
-            <text x={W - 14} y={CY + 4} textAnchor="middle" fontSize={8} fill="#6B4E8A" transform={`rotate(90 ${W - 14} ${CY})`}>ESQUERDA</text>
-            {TEETH_UPPER.map(([num, angle]) => {
-              const [x, y] = toXY(angle, RU)
-              return <ToothCircle key={num} num={num} cx={x} cy={y} selected={selected.has(num)} onClick={() => toggleTooth(num)} />
-            })}
-            {TEETH_LOWER.map(([num, angle]) => {
-              const [x, y] = toXY(angle, RL)
-              return <ToothCircle key={num} num={num} cx={x} cy={y} selected={selected.has(num)} onClick={() => toggleTooth(num)} />
-            })}
-          </svg>
-        </div>
-
-        {/* Side panel */}
-        {painelOpen && (
-          <div className="flex-1 flex flex-col justify-center space-y-4 pl-4 border-l border-[rgba(124,77,255,0.18)]">
-            <p className="text-sm font-semibold text-[#7C4DFF]">Preencha os dados para adicionar ao Odontograma</p>
-
-            {/* Tooth selector */}
-            <div className="relative">
-              <button
-                onClick={() => setDenteDropOpen((v) => !v)}
-                className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-              >
-                <span className={denteAtivo === '' ? 'text-[#3D2A5A]' : 'text-[#F5F0FF]'}>
-                  {denteAtivo === '' ? 'Selecionar dente' : `Dente ${denteAtivo}`}
-                </span>
-                <ChevronDown size={13} className="text-[#6B4E8A]" />
-              </button>
-              {denteDropOpen && (
-                <div className="absolute z-30 top-full mt-1 left-0 right-0 max-h-48 overflow-y-auto bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl">
-                  {ALL_TEETH.map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => { setDenteAtivo(n); setDenteDropOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${denteAtivo === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}
-                    >
-                      Dente {n}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Description textarea */}
-            <div>
-              <textarea
-                rows={5}
-                placeholder="Descrição"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value.slice(0, 20000))}
-                className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
-              />
-              <p className="text-xs text-[#7C4DFF] mt-1">Máximo de 20000 caracteres.</p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => { setPainelOpen(false); setDenteAtivo(''); setDescricao('') }}
-                className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAdicionar}
-                className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                Adicionar
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {selected.size > 0 && (
-        <p className="text-xs text-[#A78BCC] mt-2 text-center">
-          Dentes selecionados: {Array.from(selected).sort((a, b) => a - b).join(', ')}
-        </p>
-      )}
-    </div>
-  )
-}
-
-
-
-// ─── Modal: Registrar nova evolução ─────────────────────────────────────────
-const ABAS_EVOLUCAO = ['Resumo AI', 'Comentários Gerais', 'Conduta', 'Exames Realizados', 'Prescrição', 'Odontograma', 'Anexos']
-const PROFISSIONAIS_EVOLUCAO = ['JESSE DOS SANTOS BEZERRA', 'Dr. Carlos Oliveira', 'Dra. Ana Lima']
-
-function NovaEvolucaoModal({ onClose }: { onClose: () => void }) {
-  const [titulo, setTitulo] = useState('')
-  const [profissional, setProfissional] = useState('JESSE DOS SANTOS BEZERRA')
-  const [profOpen, setProfOpen] = useState(false)
-  const [data, setData] = useState(new Date().toLocaleDateString('pt-BR'))
-  const [abaAtiva, setAbaAtiva] = useState('Resumo AI')
-  const [conteudo, setConteudo] = useState('')
-  const [assinado, setAssinado] = useState(false)
-  const [modeloOpen, setModeloOpen] = useState(false)
-  const [modelo, setModelo] = useState('Padrão')
-
-  // Abas customizadas
-  const [abasCustom, setAbasCustom] = useState<{ id: number; titulo: string; conteudo: string }[]>([])
-  const [abaIdCounter, setAbaIdCounter] = useState(0)
-  const [novaAbaOpen, setNovaAbaOpen] = useState(false)
-  const [novaAbaTitulo, setNovaAbaTitulo] = useState('')
-  const [novaAbaErro, setNovaAbaErro] = useState(false)
-  const [editarAbaOpen, setEditarAbaOpen] = useState(false)
-  const [editarAbaId, setEditarAbaId] = useState<number | null>(null)
-  const [editarAbaTitulo, setEditarAbaTitulo] = useState('')
-  const [editarAbaErro, setEditarAbaErro] = useState(false)
-
-  // Anexos
-  const [anexoArquivo, setAnexoArquivo] = useState('')
-  const [anexoSearch, setAnexoSearch] = useState('')
-  const [anexoPagina, setAnexoPagina] = useState(1)
-  const [anexoPageSize, setAnexoPageSize] = useState(5)
-  const [anexoPageSizeOpen, setAnexoPageSizeOpen] = useState(false)
-  const anexos: { nome: string }[] = []
-  const anexosFiltrados = anexos.filter((a) => a.nome.toLowerCase().includes(anexoSearch.toLowerCase()))
-  const anexosTotalPags = Math.max(1, Math.ceil(anexosFiltrados.length / anexoPageSize))
-
-  const MAX_CHARS = 20000
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-5xl h-[92vh] bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] flex-shrink-0">
-          <span className="text-lg font-semibold text-[#F5F0FF]">Registrar nova evolução</span>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[#6B4E8A]">{assinado ? 'Assinado' : 'Não Assinado'}</span>
-              <button
-                onClick={() => setAssinado((v) => !v)}
-                className={`relative w-9 h-5 rounded-full transition-colors ${
-                  assinado ? 'bg-[#7C4DFF]' : 'bg-[#3D2A5A]'
-                }`}
-              >
-                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                  assinado ? 'translate-x-4' : 'translate-x-0.5'
-                }`} />
-              </button>
-            </div>
-            <button className="w-6 h-6 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </button>
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-              <X size={15} />
-            </button>
-          </div>
-        </div>
-
-        {/* Top fields */}
-        <div className="flex items-end gap-4 px-7 pt-5 pb-5 border-b border-[rgba(124,77,255,0.14)] flex-shrink-0">
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Título</label>
-            <input
-              type="text"
-              placeholder="Ex Consulta, Exame, Sessão"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
-            />
-          </div>
-          <div className="w-64">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Profissional <span className="text-[#7C4DFF]">*</span></label>
-            <div className="relative">
-              <button
-                onClick={() => setProfOpen((v) => !v)}
-                className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-              >
-                <span className="truncate text-left">{profissional}</span>
-                <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
-              </button>
-              {profOpen && (
-                <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                  {PROFISSIONAIS_EVOLUCAO.map((p) => (
-                    <button key={p} onClick={() => { setProfissional(p); setProfOpen(false) }}
-                      className={`w-full text-left px-4 py-3 text-sm transition-colors ${
-                        profissional === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'
-                      }`}>{p}</button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="w-44">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Data <span className="text-[#7C4DFF]">*</span></label>
-            <input
-              type="text"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* Body: left sidebar + content */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left tab sidebar */}
-          <div className="w-52 flex-shrink-0 border-r border-[rgba(124,77,255,0.14)] flex flex-col py-3 overflow-y-auto">
-            {ABAS_EVOLUCAO.map((aba) => (
-              <button
-                key={aba}
-                onClick={() => setAbaAtiva(aba)}
-                className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center gap-2.5 ${
-                  abaAtiva === aba
-                    ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)] font-semibold border-r-2 border-[#7C4DFF]'
-                    : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.06)]'
-                }`}
-              >
-                {aba === 'Anexos' && <span>📁</span>}
-                {aba}
-              </button>
-            ))}
-            {abasCustom.map((aba) => (
-              <button
-                key={aba.id}
-                onClick={() => setAbaAtiva(`custom-${aba.id}`)}
-                className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center gap-2.5 ${
-                  abaAtiva === `custom-${aba.id}`
-                    ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)] font-semibold border-r-2 border-[#7C4DFF]'
-                    : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.06)]'
-                }`}
-              >
-                {aba.titulo}
-              </button>
-            ))}
-            <button
-              onClick={() => { setNovaAbaTitulo(''); setNovaAbaErro(false); setNovaAbaOpen(true) }}
-              className="w-full text-left px-5 py-3 text-sm text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.06)] transition-colors flex items-center gap-1.5"
-            >
-              <Plus size={13} /> Nova Aba
-            </button>
-          </div>
-
-          {/* Content area */}
-          <div className="flex-1 flex flex-col p-6 overflow-y-auto">
-            {abaAtiva.startsWith('custom-') ? (() => {
-              const id = parseInt(abaAtiva.replace('custom-', ''))
-              const aba = abasCustom.find((a) => a.id === id)
-              if (!aba) return null
-              return (
-                <div className="flex-1 flex flex-col gap-3">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => { setEditarAbaId(id); setEditarAbaTitulo(aba.titulo); setEditarAbaErro(false); setEditarAbaOpen(true) }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-                      title="Editar aba"
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAbasCustom((prev) => prev.filter((a) => a.id !== id))
-                        setAbaAtiva('Resumo AI')
-                      }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-red-400 hover:border-red-400 transition-colors"
-                      title="Apagar aba"
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    </button>
-                  </div>
-                  <textarea
-                    placeholder="Descrição da nova aba"
-                    value={aba.conteudo}
-                    onChange={(e) => setAbasCustom((prev) => prev.map((a) => a.id === id ? { ...a, conteudo: e.target.value } : a))}
-                    className="flex-1 bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-5 py-4 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed min-h-[300px]"
-                  />
-                </div>
-              )
-            })() : abaAtiva === 'Odontograma' ? (
-              <OdontogramaView />
-            ) : abaAtiva === 'Anexos' ? (
-              <div className="flex-1 flex flex-col gap-5">
-                {/* Upload row */}
-                <div>
-                  <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-[rgba(124,77,255,0.25)]">
-                    <label className="flex-shrink-0 cursor-pointer bg-[#1A0A38] hover:bg-[rgba(124,77,255,0.15)] transition-colors px-5 py-3 text-sm font-medium text-[#F5F0FF] border-r border-[rgba(124,77,255,0.25)]">
-                      Selecione o arquivo
-                      <input type="file" className="hidden" onChange={(e) => setAnexoArquivo(e.target.files?.[0]?.name ?? '')} />
-                    </label>
-                    <span className="flex-1 px-4 text-sm text-[#6B4E8A] truncate bg-[#150830]">
-                      {anexoArquivo || 'nome do arquivo selecionado'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#6B4E8A] mt-1.5">Máximo de 15MB por arquivo.</p>
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-sm text-[#A78BCC]">
-                    Resultados por página:
-                    <div className="relative">
-                      <button
-                        onClick={() => setAnexoPageSizeOpen((v) => !v)}
-                        className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors min-w-[60px] justify-between"
-                      >
-                        {anexoPageSize} <ChevronDown size={12} className="text-[#6B4E8A]" />
-                      </button>
-                      {anexoPageSizeOpen && (
-                        <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                          {[5, 10, 25].map((n) => (
-                            <button key={n} onClick={() => { setAnexoPageSize(n); setAnexoPagina(1); setAnexoPageSizeOpen(false) }}
-                              className={`w-full text-left px-4 py-2 text-sm transition-colors ${anexoPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1.5 ml-auto">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6B4E8A]"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input
-                      value={anexoSearch}
-                      onChange={(e) => { setAnexoSearch(e.target.value); setAnexoPagina(1) }}
-                      placeholder="Pesquisar"
-                      className="bg-transparent text-sm text-[#F5F0FF] placeholder-[#6B4E8A] focus:outline-none w-40"
-                    />
-                  </div>
-                </div>
-
-                {/* Table */}
-                <div className="flex-1 bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden flex flex-col">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-[rgba(124,77,255,0.18)]">
-                        <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">
-                          <span className="flex items-center gap-1">
-                            Nome do Arquivo
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-60"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg>
-                          </span>
-                        </th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Visualizar</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Download</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Apagar</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {anexosFiltrados.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="text-center py-10 text-[#7C4DFF] text-sm">Nenhum registro encontrado</td>
-                        </tr>
-                      ) : (
-                        anexosFiltrados.slice((anexoPagina - 1) * anexoPageSize, anexoPagina * anexoPageSize).map((a, i) => (
-                          <tr key={i} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.05)] transition-colors">
-                            <td className="px-5 py-3 text-[#F5F0FF]">{a.nome}</td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-[#7C4DFF] hover:text-[#A78BCC] transition-colors">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                              </button>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-[#7C4DFF] hover:text-[#A78BCC] transition-colors">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                              </button>
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <button className="text-[#6B4E8A] hover:text-red-400 transition-colors">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                  {/* Pagination */}
-                  <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)] mt-auto">
-                    <button onClick={() => setAnexoPagina(1)} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-                    <button onClick={() => setAnexoPagina((p) => Math.max(1, p - 1))} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
-                    <button onClick={() => setAnexoPagina((p) => Math.min(anexosTotalPags, p + 1))} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-                    <button onClick={() => setAnexoPagina(anexosTotalPags)} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
-                    <div className="relative ml-1">
-                      <button
-                        onClick={() => setAnexoPageSizeOpen((v) => !v)}
-                        className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-                      >
-                        {anexoPageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
-                      </button>
-                      {anexoPageSizeOpen && (
-                        <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                          {[5, 10, 25].map((n) => (
-                            <button key={n} onClick={() => { setAnexoPageSize(n); setAnexoPagina(1); setAnexoPageSizeOpen(false) }}
-                              className={`w-full text-left px-4 py-2 text-sm transition-colors ${anexoPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <label className="block text-xs font-medium text-[#6B4E8A] mb-3">{abaAtiva}</label>
-                <textarea
-                  placeholder={abaAtiva === 'Resumo AI' ? 'Resumos automáticos' : 'Digite aqui...'}
-                  value={conteudo}
-                  onChange={(e) => setConteudo(e.target.value.slice(0, MAX_CHARS))}
-                  className="flex-1 bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-5 py-4 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed"
-                />
-                <p className="text-xs text-[#6B4E8A] mt-1.5">Máximo de {MAX_CHARS.toLocaleString()} caracteres.</p>
-                {abaAtiva === 'Resumo AI' && (
-                  <p className="text-xs text-[#6B4E8A] mt-0.5">* Os resumos gerados por IA podem conter erros. Antes de salvá-lo, verifique e edite o conteúdo se necessário</p>
-                )}
-                {/* AI toolbar */}
-                {abaAtiva === 'Resumo AI' && (
-                  <div className="mt-3 flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 text-xs text-[#A78BCC]">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                      Resumo gravado
-                    </div>
-                    <div className="relative">
-                      <button
-                        onClick={() => setModeloOpen((v) => !v)}
-                        className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-2.5 py-1 text-xs text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-                      >
-                        {modelo} <ChevronDown size={11} className="text-[#6B4E8A]" />
-                      </button>
-                      {modeloOpen && (
-                        <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                          {['Padrão', 'Clínico', 'Resumido'].map((m) => (
-                            <button key={m} onClick={() => { setModelo(m); setModeloOpen(false) }}
-                              className={`w-full text-left px-4 py-2 text-xs transition-colors ${modelo === m ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{m}</button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button className="w-5 h-5 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </button>
-                    <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] bg-[rgba(124,77,255,0.08)] px-3 py-1.5 rounded-lg hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                      Relato
-                    </button>
-                    <button className="w-5 h-5 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </button>
-                    <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] bg-[rgba(124,77,255,0.08)] px-3 py-1.5 rounded-lg hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                      Atendimento
-                    </button>
-                    <button className="w-5 h-5 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </button>
-                    <button className="w-7 h-7 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors" title="Upload">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    </button>
-                    <button className="w-7 h-7 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors" title="Recarregar">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.8"/></svg>
-                    </button>
-                    <div className="ml-auto text-xs text-[#6B4E8A]">
-                      <span className="font-medium text-[#A78BCC]">Créditos:</span> Relatos disponíveis: 5 / 5 &nbsp; Atendimentos disponíveis: 5 / 5
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-7 py-5 border-t border-[rgba(124,77,255,0.14)] flex-shrink-0">
-          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] px-3 py-2 rounded-lg hover:bg-[rgba(124,77,255,0.1)] transition-colors">
-            ✦ Resumir Histórico
-          </button>
-          <div className="flex items-center gap-3">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
-              Cancelar
-            </button>
-            <button onClick={onClose} className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors">
-              Salvar Evolução
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal: Adicionar nova aba */}
-      {novaAbaOpen && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-2xl">
-          <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-[480px] p-7">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-base font-semibold text-[#F5F0FF]">Adicionar nova aba</span>
-              <button onClick={() => setNovaAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="mb-1.5">
-              <input
-                autoFocus
-                type="text"
-                placeholder="Título da nova aba"
-                value={novaAbaTitulo}
-                onChange={(e) => { setNovaAbaTitulo(e.target.value); setNovaAbaErro(false) }}
-                onKeyDown={(e) => e.key === 'Enter' && (() => {
-                  if (!novaAbaTitulo.trim()) { setNovaAbaErro(true); return }
-                  const id = abaIdCounter + 1
-                  setAbaIdCounter(id)
-                  setAbasCustom((prev) => [...prev, { id, titulo: novaAbaTitulo.trim(), conteudo: '' }])
-                  setAbaAtiva(`custom-${id}`)
-                  setNovaAbaOpen(false)
-                })()}
-                className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${novaAbaErro ? 'border-red-500 focus:border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-              />
-              {novaAbaErro && <p className="text-xs text-red-400 mt-1.5">Deve ter no mínimo 1 caracter</p>}
-            </div>
-            <div className="flex items-center justify-end gap-3 mt-6">
-              <button onClick={() => setNovaAbaOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)]">
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  if (!novaAbaTitulo.trim()) { setNovaAbaErro(true); return }
-                  const id = abaIdCounter + 1
-                  setAbaIdCounter(id)
-                  setAbasCustom((prev) => [...prev, { id, titulo: novaAbaTitulo.trim(), conteudo: '' }])
-                  setAbaAtiva(`custom-${id}`)
-                  setNovaAbaOpen(false)
-                }}
-                className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Editar aba */}
-      {editarAbaOpen && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-2xl">
-          <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-[480px] p-7">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-base font-semibold text-[#F5F0FF]">Editar aba</span>
-              <button onClick={() => setEditarAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="mb-1.5">
-              <input
-                autoFocus
-                type="text"
-                placeholder="Título da aba"
-                value={editarAbaTitulo}
-                onChange={(e) => { setEditarAbaTitulo(e.target.value); setEditarAbaErro(false) }}
-                className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${editarAbaErro ? 'border-red-500 focus:border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-              />
-              {editarAbaErro && <p className="text-xs text-red-400 mt-1.5">Deve ter no mínimo 1 caracter</p>}
-            </div>
-            <div className="flex items-center justify-end gap-3 mt-6">
-              <button onClick={() => setEditarAbaOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)]">
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  if (!editarAbaTitulo.trim()) { setEditarAbaErro(true); return }
-                  setAbasCustom((prev) => prev.map((a) => a.id === editarAbaId ? { ...a, titulo: editarAbaTitulo.trim() } : a))
-                  setEditarAbaOpen(false)
-                }}
-                className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Detalhe: aba Evoluções ───────────────────────────────────────────────────
-type Evolucao = { id: number; titulo: string; profissional: string; data: string }
-
-const PAGE_SIZES = [10, 25, 50]
-
-function TabEvolucoes() {
-  const [busca, setBusca] = useState('')
-  const [profFiltro, setProfFiltro] = useState('')
-  const [profOpen, setProfOpen] = useState(false)
-  const [dataFiltro, setDataFiltro] = useState('')
-  const [pagina, setPagina] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [pageSizeOpen, setPageSizeOpen] = useState(false)
-  const [sort, setSort] = useState<{ col: string; dir: 'asc' | 'desc' }>({ col: 'titulo', dir: 'asc' })
-  const [evolucoes] = useState<Evolucao[]>([])
-  const [novaEvolucaoOpen, setNovaEvolucaoOpen] = useState(false)
-
-  const PROFISSIONAIS = ['Dr. Carlos Oliveira', 'Dra. Ana Lima', 'Dr. Felipe Souza']
-
-  function toggleSort(col: string) {
-    setSort((s) => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
-  }
-
-  function SortIcon({ col }: { col: string }) {
-    if (sort.col !== col) return <ChevronsUpDown size={11} className="text-[#6B4E8A]" />
-    return sort.dir === 'asc' ? <ChevronUp size={11} className="text-[#7C4DFF]" /> : <ChevronDown size={11} className="text-[#7C4DFF]" />
-  }
-
-  const totalPages = Math.max(1, Math.ceil(evolucoes.length / pageSize))
-
-  return (
-    <div className="flex-1 overflow-y-auto">
-      {novaEvolucaoOpen && <NovaEvolucaoModal onClose={() => setNovaEvolucaoOpen(false)} />}
-      {/* Sub-header */}
-      <div className="px-6 pt-5 pb-4 border-b border-[rgba(124,77,255,0.14)] flex items-center justify-between gap-4">
-        <h2 className="text-base font-semibold text-[#F5F0FF]">Evoluções</h2>
-        <div className="flex items-center gap-2">
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#150830] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
-            <Printer size={15} />
-          </button>
-          <button onClick={() => setNovaEvolucaoOpen(true)} className="flex items-center gap-1.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
-            <Plus size={12} /> Nova Evolução
-          </button>
-          <button className="flex items-center gap-1.5 text-xs font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] px-3 py-2 rounded-lg transition-colors">
-            Voltar
-          </button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="px-6 py-4 flex items-center gap-3">
-        <input
-          type="text"
-          placeholder="Título"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="flex-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
-        />
-        {/* Profissional dropdown */}
-        <div className="relative w-52">
-          <button
-            onClick={() => setProfOpen((v) => !v)}
-            className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm transition-colors hover:border-[#7C4DFF]"
-          >
-            <span className={profFiltro ? 'text-[#F5F0FF]' : 'text-[#3D2A5A]'}>{profFiltro || 'Profissional'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A]" />
-          </button>
-          {profOpen && (
-            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-              <button onClick={() => { setProfFiltro(''); setProfOpen(false) }} className="w-full text-left px-4 py-2.5 text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.08)] transition-colors">
-                Todos
-              </button>
-              {PROFISSIONAIS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => { setProfFiltro(p); setProfOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${profFiltro === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <input
-          type="date"
-          value={dataFiltro}
-          onChange={(e) => setDataFiltro(e.target.value)}
-          className="w-52 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] transition-colors"
-        />
-        <button className="px-5 py-2.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors">
-          Filtrar
-        </button>
-        <button
-          onClick={() => { setBusca(''); setProfFiltro(''); setDataFiltro('') }}
-          className="px-4 py-2.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
-        >
-          Limpar Filtros
-        </button>
-      </div>
-
-      {/* Table */}
-      <div className="px-6">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.14)]">
-              {[{ col: 'titulo', label: 'TÍTULO' }, { col: 'profissional', label: 'PROFISSIONAL' }, { col: 'data', label: 'DATA' }].map(({ col, label }) => (
-                <th key={col} className="text-left pb-3">
-                  <button onClick={() => toggleSort(col)} className="flex items-center gap-1 text-xs font-bold text-[#6B4E8A] hover:text-[#A78BCC] uppercase tracking-wider transition-colors">
-                    {label} <SortIcon col={col} />
-                  </button>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {evolucoes.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="py-10 text-center text-sm text-[#6B4E8A]">
-                  Nenhum registro encontrado
-                </td>
-              </tr>
-            ) : (
-              evolucoes.map((e) => (
-                <tr key={e.id} className="border-b border-[rgba(124,77,255,0.08)] hover:bg-[rgba(124,77,255,0.05)] transition-colors">
-                  <td className="py-3 pr-4 text-sm text-[#F5F0FF]">{e.titulo}</td>
-                  <td className="py-3 pr-4 text-sm text-[#A78BCC]">{e.profissional}</td>
-                  <td className="py-3 text-sm text-[#A78BCC]">{e.data}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="px-6 py-4 flex items-center justify-center gap-1">
-        <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
-          <ChevronsLeft size={14} />
-        </button>
-        <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
-          <ChevronLeft size={14} />
-        </button>
-        <button onClick={() => setPagina((p) => Math.min(totalPages, p + 1))} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
-          <ChevronRight size={14} />
-        </button>
-        <button onClick={() => setPagina(totalPages)} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
-          <ChevronsRight size={14} />
-        </button>
-        <div className="relative ml-2">
-          <button
-            onClick={() => setPageSizeOpen((v) => !v)}
-            className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-2.5 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-          >
-            {pageSize} <ChevronDown size={12} className="text-[#6B4E8A]" />
-          </button>
-          {pageSizeOpen && (
-            <div className="absolute z-20 bottom-full mb-1 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-              {PAGE_SIZES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => { setPageSize(s); setPagina(1); setPageSizeOpen(false) }}
-                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${s === pageSize ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Detalhe: aba Financeiro ──────────────────────────────────────────────────
-type Evento = { id: number; profissional: string; servicos: string; status: string; pagamento: string }
-type Mensalidade = { id: number; nome: string; profissional: string; paciente: string; data: string; parcela: string; totalParcelas: number; valor: number; pago: number }
-
-const MOCK_MENSALIDADES: Mensalidade[] = [
-  { id: 1, nome: 'JEsse', profissional: 'JESSE DOS SANTOS BEZERRA', paciente: 'Monique Franca', data: '31/03/2026', parcela: '1', totalParcelas: 3, valor: 500, pago: 0 },
-  { id: 2, nome: 'JEsse', profissional: 'JESSE DOS SANTOS BEZERRA', paciente: 'Monique Franca', data: '01/05/2026', parcela: '2', totalParcelas: 3, valor: 500, pago: 0 },
-  { id: 3, nome: 'JEsse', profissional: 'JESSE DOS SANTOS BEZERRA', paciente: 'Monique Franca', data: '31/05/2026', parcela: '3', totalParcelas: 3, valor: 500, pago: 0 },
-]
-
-function TabFinanceiro({ onVoltar }: { onVoltar: () => void }) {
-  // Eventos (top table)
-  const [evtTitulo, setEvtTitulo] = useState('')
-  const [evtTituloOpen, setEvtTituloOpen] = useState(false)
-  const [evtProf, setEvtProf] = useState('')
-  const [evtProfOpen, setEvtProfOpen] = useState(false)
-  const [evtPagina, setEvtPagina] = useState(1)
-  const [evtPageSize, setEvtPageSize] = useState(10)
-  const [evtPageSizeOpen, setEvtPageSizeOpen] = useState(false)
-  const [evtSort, setEvtSort] = useState<{ col: string; dir: 'asc' | 'desc' }>({ col: 'profissional', dir: 'asc' })
-  const eventos: Evento[] = []
-
-  // Mensalidades
-  const [mensalidades, setMensalidades] = useState<Mensalidade[]>(MOCK_MENSALIDADES)
-  const [mensPagina, setMensPagina] = useState(1)
-  const [mensPageSize, setMensPageSize] = useState(10)
-  const [mensPageSizeOpen, setMensPageSizeOpen] = useState(false)
-  const [mensSort, setMensSort] = useState<{ col: string; dir: 'asc' | 'desc' }>({ col: 'data', dir: 'asc' })
-  const [mensIdCounter, setMensIdCounter] = useState(MOCK_MENSALIDADES.length)
-
-  // Modal Adicionar Mensalidade
-  const [addOpen, setAddOpen] = useState(false)
-  const [addTitulo, setAddTitulo] = useState('')
-  const [addProf, setAddProf] = useState('JESSE DOS SANTOS BEZERRA')
-  const [addProfOpen, setAddProfOpen] = useState(false)
-  const [addData, setAddData] = useState(new Date().toLocaleDateString('pt-BR'))
-  const [addParcelas, setAddParcelas] = useState('')
-  const [addValor, setAddValor] = useState('')
-  const [addErros, setAddErros] = useState<Record<string, string>>({})
-
-  // Modal Excluir Mensalidade
-  const [delOpen, setDelOpen] = useState(false)
-  const [delId, setDelId] = useState<number | null>(null)
-  const [delOpcao, setDelOpcao] = useState<'esta' | 'todas' | 'futuras'>('esta')
-
-  const TITULOS_DOC = ['Consulta', 'Exame', 'Sessão', 'Mensalidade']
-  const PROFISSIONAIS_FIN = ['JESSE DOS SANTOS BEZERRA', 'Dr. Carlos Oliveira', 'Dra. Ana Lima']
-
-  function toggleEvtSort(col: string) {
-    setEvtSort((s) => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
-  }
-  function toggleMensSort(col: string) {
-    setMensSort((s) => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
-  }
-
-  const mensFiltradas = [...mensalidades].sort((a, b) => {
-    const dir = mensSort.dir === 'asc' ? 1 : -1
-    if (mensSort.col === 'nome') return a.nome.localeCompare(b.nome) * dir
-    if (mensSort.col === 'profissional') return a.profissional.localeCompare(b.profissional) * dir
-    if (mensSort.col === 'paciente') return a.paciente.localeCompare(b.paciente) * dir
-    if (mensSort.col === 'data') return a.data.localeCompare(b.data) * dir
-    return 0
-  })
-  const mensTotalPags = Math.max(1, Math.ceil(mensFiltradas.length / mensPageSize))
-  const mensSlice = mensFiltradas.slice((mensPagina - 1) * mensPageSize, mensPagina * mensPageSize)
-  const totalRecebido = mensalidades.reduce((s, m) => s + m.pago, 0)
-  const totalAReceber = mensalidades.reduce((s, m) => s + (m.valor - m.pago), 0)
-
-  const evtTotalPags = Math.max(1, Math.ceil(eventos.length / evtPageSize))
-
-  function fmt(val: number) {
-    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-  }
-
-  function SortIcon({ col, cur }: { col: string; cur: { col: string; dir: 'asc' | 'desc' } }) {
-    return (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-        className={col === cur.col ? 'opacity-100 text-[#7C4DFF]' : 'opacity-40'}>
-        {col === cur.col && cur.dir === 'asc'
-          ? <><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5" opacity="0.3"/></>
-          : col === cur.col && cur.dir === 'desc'
-          ? <><path d="M7 15l5 5 5-5" opacity="0.3"/><path d="M7 9l5-5 5 5"/></>
-          : <><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></>}
-      </svg>
-    )
-  }
-
-  return (
-    <div className="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#F5F0FF]">Financeiro</h2>
-        <button
-          onClick={onVoltar}
-          className="px-4 py-1.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
-        >
-          Voltar
-        </button>
-      </div>
-
-      {/* Filter bar */}
-      <div className="flex items-center gap-3">
-        {/* Título dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => { setEvtTituloOpen((v) => !v); setEvtProfOpen(false) }}
-            className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#A78BCC] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
-          >
-            <span className={evtTitulo ? 'text-[#F5F0FF]' : ''}>{evtTitulo || 'Título do documento'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
-          </button>
-          {evtTituloOpen && (
-            <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden min-w-[200px]">
-              <button onClick={() => { setEvtTitulo(''); setEvtTituloOpen(false) }}
-                className="w-full text-left px-4 py-2.5 text-sm text-[#6B4E8A] hover:bg-[rgba(124,77,255,0.08)] transition-colors">Todos</button>
-              {TITULOS_DOC.map((t) => (
-                <button key={t} onClick={() => { setEvtTitulo(t); setEvtTituloOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtTitulo === t ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{t}</button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Profissional dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => { setEvtProfOpen((v) => !v); setEvtTituloOpen(false) }}
-            className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#A78BCC] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
-          >
-            <span className={evtProf ? 'text-[#F5F0FF]' : ''}>{evtProf || 'Selecione um profissio...'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
-          </button>
-          {evtProfOpen && (
-            <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden min-w-[220px]">
-              <button onClick={() => { setEvtProf(''); setEvtProfOpen(false) }}
-                className="w-full text-left px-4 py-2.5 text-sm text-[#6B4E8A] hover:bg-[rgba(124,77,255,0.08)] transition-colors">Todos</button>
-              {PROFISSIONAIS_FIN.map((p) => (
-                <button key={p} onClick={() => { setEvtProf(p); setEvtProfOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtProf === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{p}</button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <button className="px-5 py-2.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors">
-          Filtrar
-        </button>
-      </div>
-
-      {/* Eventos table */}
-      <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.18)]">
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleEvtSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Profissional <SortIcon col="profissional" cur={evtSort} />
-                </button>
-              </th>
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleEvtSort('servicos')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Serviços <SortIcon col="servicos" cur={evtSort} />
-                </button>
-              </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Pagamento</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colSpan={4} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum evento encontrado</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">«</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">‹</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">›</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">»</button>
-          <div className="relative ml-1">
-            <button onClick={() => setEvtPageSizeOpen((v) => !v)}
-              className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-              {evtPageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
-            </button>
-            {evtPageSizeOpen && (
-              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                {[10, 25, 50].map((n) => (
-                  <button key={n} onClick={() => { setEvtPageSize(n); setEvtPagina(1); setEvtPageSizeOpen(false) }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${evtPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mensalidades section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-[#F5F0FF]">Mensalidades</h3>
-          <button
-            onClick={() => { setAddTitulo(''); setAddParcelas(''); setAddValor(''); setAddErros({}); setAddOpen(true) }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            <Plus size={14} /> Adicionar
-          </button>
-        </div>
-
-        <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[rgba(124,77,255,0.18)]">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Ações</th>
-                <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('nome')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                    Nome <SortIcon col="nome" cur={mensSort} />
-                  </button>
-                </th>
-                <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                    Profissional <SortIcon col="profissional" cur={mensSort} />
-                  </button>
-                </th>
-                <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('paciente')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                    Paciente <SortIcon col="paciente" cur={mensSort} />
-                  </button>
-                </th>
-                <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('data')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                    Data <SortIcon col="data" cur={mensSort} />
-                  </button>
-                </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Pagamento</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mensSlice.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum registro encontrado</td>
-                </tr>
-              ) : (
-                mensSlice.map((m) => (
-                  <tr key={m.id} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                        <button
-                          onClick={() => { setDelId(m.id); setDelOpcao('esta'); setDelOpen(true) }}
-                          className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(255,100,100,0.30)] text-red-400 hover:bg-[rgba(255,100,100,0.12)] transition-colors"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.nome}</td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.profissional}</td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.paciente}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="text-[#F5F0FF]">{m.data}</div>
-                      <div className="text-xs text-[#7C4DFF] underline cursor-pointer mt-0.5">Parcela {m.parcela}/{m.totalParcelas}</div>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="text-[#F5F0FF] text-sm">{fmt(m.pago)} de {fmt(m.valor)}</div>
-                      <div className="flex items-center gap-1 mt-0.5 text-xs text-red-400">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke="white" strokeWidth="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="white" strokeWidth="2"/></svg>
-                        Em Aberto
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-
-          {/* Totals row */}
-          {mensalidades.length > 0 && (
-            <div className="flex justify-end gap-8 px-5 py-3 border-t border-[rgba(124,77,255,0.18)] text-sm">
-              <span className="text-[#A78BCC]">Total Recebido: <span className="font-semibold text-[#F5F0FF]">{fmt(totalRecebido)}</span></span>
-              <span className="text-[#A78BCC]">A receber: <span className="font-semibold text-[#F5F0FF]">{fmt(totalAReceber)}</span></span>
-            </div>
-          )}
-
-          {/* Pagination */}
-          <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-            <button onClick={() => setMensPagina(1)} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-            <button onClick={() => setMensPagina((p) => Math.max(1, p - 1))} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
-            {Array.from({ length: Math.min(mensTotalPags, 5) }, (_, i) => i + 1).map((p) => (
-              <button key={p} onClick={() => setMensPagina(p)}
-                className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${mensPagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[#6B4E8A] hover:text-[#F5F0FF]'}`}>
-                {p}
-              </button>
-            ))}
-            <button onClick={() => setMensPagina((p) => Math.min(mensTotalPags, p + 1))} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-            <button onClick={() => setMensPagina(mensTotalPags)} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
-            <div className="relative ml-1">
-              <button onClick={() => setMensPageSizeOpen((v) => !v)}
-                className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-                {mensPageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
-              </button>
-              {mensPageSizeOpen && (
-                <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                  {[10, 25, 50].map((n) => (
-                    <button key={n} onClick={() => { setMensPageSize(n); setMensPagina(1); setMensPageSizeOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${mensPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal: Excluir conta */}
-      {delOpen && (() => {
-        const alvo = mensalidades.find((m) => m.id === delId)
-        if (!alvo) return null
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-md p-8">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-base font-semibold text-[#F5F0FF]">Excluir Conta</span>
-                <button onClick={() => setDelOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                  <X size={15} />
-                </button>
-              </div>
-
-              {/* Warning icon */}
-              <div className="flex justify-center mb-5">
-                <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                </div>
-              </div>
-
-              <p className="text-sm text-center text-[#A78BCC] mb-6 leading-relaxed">
-                <span className="font-bold text-red-400">Atenção:</span> Esta ação não pode ser desfeita. Defina abaixo como deseja excluir esta conta.
-              </p>
-
-              <div className="flex flex-col gap-3 mb-7">
-                {([
-                  { val: 'esta',    label: <>Excluir apenas <strong>esta parcela</strong></> },
-                  { val: 'todas',   label: <>Excluir <strong>todas as parcelas</strong> da conta</> },
-                  { val: 'futuras', label: <>Excluir <strong>esta e todas as parcelas futuras</strong></> },
-                ] as const).map(({ val, label }) => (
-                  <label key={val} className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${delOpcao === val ? 'border-[#7C4DFF]' : 'border-[#3D2A5A] group-hover:border-[#7C4DFF]'}`}>
-                      {delOpcao === val && <div className="w-2.5 h-2.5 rounded-full bg-[#7C4DFF]" />}
-                    </div>
-                    <input type="radio" className="hidden" checked={delOpcao === val} onChange={() => setDelOpcao(val)} />
-                    <span className="text-sm text-[#A78BCC] group-hover:text-[#F5F0FF] transition-colors">{label}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-end gap-3">
-                <button onClick={() => setDelOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)] transition-colors">
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => {
-                    if (delOpcao === 'esta') {
-                      setMensalidades((prev) => prev.filter((m) => m.id !== delId))
-                    } else if (delOpcao === 'todas') {
-                      setMensalidades((prev) => prev.filter((m) => m.nome !== alvo.nome))
-                    } else {
-                      // futuras: remove this parcela and any with higher parcela number in the same group
-                      setMensalidades((prev) => prev.filter((m) =>
-                        m.nome !== alvo.nome || parseInt(m.parcela) < parseInt(alvo.parcela)
-                      ))
-                    }
-                    setDelOpen(false)
-                  }}
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors"
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* Modal: Adicionar conta a receber */}
-      {addOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-[810px] p-9">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-base font-semibold text-[#F5F0FF]">Adicionar conta a receber</span>
-              <button onClick={() => setAddOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-5">
-              {/* Título da Conta */}
-              <div>
-                <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Título da Conta <span className="text-[#7C4DFF]">*</span></label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={addTitulo}
-                  onChange={(e) => { setAddTitulo(e.target.value); setAddErros((p) => ({ ...p, titulo: '' })) }}
-                  className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.titulo ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-                />
-                {addErros.titulo && <p className="text-xs text-red-400 mt-1">{addErros.titulo}</p>}
-              </div>
-
-              {/* Paciente + Profissional */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Paciente</label>
-                  <input
-                    type="text"
-                    value="Monique Franca"
-                    readOnly
-                    className="w-full bg-[#0D0520] border border-[rgba(124,77,255,0.15)] rounded-xl px-4 py-3 text-sm text-[#A78BCC] cursor-not-allowed"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Profissional</label>
-                  <div className="relative">
-                    <button
-                      onClick={() => setAddProfOpen((v) => !v)}
-                      className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
-                    >
-                      <span className="truncate text-left">{addProf}</span>
-                      <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
-                    </button>
-                    {addProfOpen && (
-                      <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                        {PROFISSIONAIS_FIN.map((p) => (
-                          <button key={p} onClick={() => { setAddProf(p); setAddProfOpen(false) }}
-                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${addProf === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{p}</button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Data + Parcelas */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Data do Recebimento <span className="text-[#7C4DFF]">*</span></label>
-                  <input
-                    type="text"
-                    value={addData}
-                    onChange={(e) => { setAddData(e.target.value); setAddErros((p) => ({ ...p, data: '' })) }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none transition-colors ${addErros.data ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-                  />
-                  {addErros.data && <p className="text-xs text-red-400 mt-1">{addErros.data}</p>}
-                </div>
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Número de Parcelas <span className="text-[#7C4DFF]">*</span></label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={addParcelas}
-                    onChange={(e) => { setAddParcelas(e.target.value); setAddErros((p) => ({ ...p, parcelas: '' })) }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none transition-colors ${addErros.parcelas ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-                  />
-                  {addErros.parcelas && <p className="text-xs text-red-400 mt-1">{addErros.parcelas}</p>}
-                </div>
-              </div>
-
-              {/* Valor */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Valor <span className="text-[#7C4DFF]">*</span></label>
-                  <input
-                    type="text"
-                    placeholder="R$ 0,00"
-                    value={addValor}
-                    onChange={(e) => { setAddValor(e.target.value); setAddErros((p) => ({ ...p, valor: '' })) }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.valor ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
-                  />
-                  {addErros.valor && <p className="text-xs text-red-400 mt-1">{addErros.valor}</p>}
-                </div>
-                <div className="flex-1" />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 mt-8">
-              <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  const erros: Record<string, string> = {}
-                  if (!addTitulo.trim()) erros.titulo = 'Campo obrigatório'
-                  if (!addData.trim()) erros.data = 'Campo obrigatório'
-                  if (!addParcelas || parseInt(addParcelas) < 1) erros.parcelas = 'Informe o número de parcelas'
-                  if (!addValor.trim()) erros.valor = 'Campo obrigatório'
-                  if (Object.keys(erros).length > 0) { setAddErros(erros); return }
-
-                  const nParcelas = parseInt(addParcelas)
-                  const valor = parseFloat(addValor.replace(/[^0-9,]/g, '').replace(',', '.')) || 0
-                  const novas: Mensalidade[] = Array.from({ length: nParcelas }, (_, i) => {
-                    const newId = mensIdCounter + i + 1
-                    return { id: newId, nome: addTitulo.trim(), profissional: addProf, paciente: 'Monique Franca', data: addData, parcela: String(i + 1), totalParcelas: nParcelas, valor, pago: 0 }
-                  })
-                  setMensIdCounter((c) => c + nParcelas)
-                  setMensalidades((prev) => [...prev, ...novas])
-                  setAddOpen(false)
-                }}
-                className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Detalhe: aba Documentos ──────────────────────────────────────────────────
-type Documento = { id: number; titulo: string; profissional: string; criadoPor: string; criadoEm: string; conteudo: string; permProf: boolean; permAssist: boolean }
-
-const TEMPLATE_DECLARACAO = `Declaração\n\nDeclaro para os devidos fins, que o(a) Sr.(a) #nome_do_paciente# esteve no consultório para (finalidade) no dia #data_de_hoje# das 00:00 às 00:00 horas realização de tratamento/acompanhamento/avaliação psicológico.\n\n#endereço_do_profissional#, #data_de_hoje#\n\n\n\nNOME COMPLETO`
-const TEMPLATE_ATESTADO = `Atestado Médico\n\nAtesto para os devidos fins que o(a) paciente #nome_do_paciente# esteve sob meus cuidados no dia #data_de_hoje#.\n\n#endereço_do_profissional#, #data_de_hoje#\n\n\n\nNOME COMPLETO`
-const TEMPLATE_RECIBO = `Recibo\n\nRecebi de #nome_do_paciente# a importância referente aos serviços prestados na data de #data_de_hoje#.\n\nValor: R$ ___________\n\n#endereço_do_profissional#, #data_de_hoje#\n\n\n\nNOME COMPLETO`
-
-const TIPOS_DOC = [
-  { id: 'branco',     label: 'Documento em branco',            template: '',                   badge: false },
-  { id: 'declaracao', label: 'Declaração de Comparecimento',   template: TEMPLATE_DECLARACAO,  badge: true  },
-  { id: 'atestado',   label: 'Atestado',                       template: TEMPLATE_ATESTADO,    badge: true  },
-  { id: 'recibo',     label: 'Recibo',                         template: TEMPLATE_RECIBO,      badge: true  },
-]
-
-const PROFISSIONAIS_DOC = ['JESSE DOS SANTOS BEZERRA', 'Dr. Carlos Oliveira', 'Dra. Ana Lima']
-
-const MOCK_DOCUMENTOS: Documento[] = [
-  { id: 1, titulo: 'TEste', profissional: 'JESSE DOS SANTOS BEZERRA', criadoPor: 'JESSE DOS SANTOS BEZERRA', criadoEm: '31/03/2026 14:41', conteudo: TEMPLATE_DECLARACAO, permProf: true, permAssist: true },
-]
-
-function resolveHashtags(text: string): string {
-  const hoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
-  return text
-    .replace(/#nome_do_paciente#/g, 'Monique Franca')
-    .replace(/#data_de_hoje#/g, hoje)
-    .replace(/#endereço_do_profissional#/g, '')
-    .replace(/#[^#\s\n]+#/g, '')
-}
-
-function TabDocumentos({ onVoltar }: { onVoltar: () => void }) {
-  const editOverlayRef = useRef<HTMLDivElement>(null)
-  const [docs, setDocs] = useState<Documento[]>(MOCK_DOCUMENTOS)
-  const [docIdCounter, setDocIdCounter] = useState(MOCK_DOCUMENTOS.length)
-  const [pagina, setPagina] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [pageSizeOpen, setPageSizeOpen] = useState(false)
-  const [sort, setSort] = useState<{ col: string; dir: 'asc' | 'desc' }>({ col: 'titulo', dir: 'asc' })
-
-  // Visualizar
-  const [visualizarId, setVisualizarId] = useState<number | null>(null)
-  // Excluir
-  const [excluirId, setExcluirId] = useState<number | null>(null)
-  // Novo
-  const [novoOpen, setNovoOpen] = useState(false)
-  const [novoTitulo, setNovoTitulo] = useState('')
-  const [novoProf, setNovoProf] = useState('')
-  const [novoProfOpen, setNovoProfOpen] = useState(false)
-  const [novoPermProf, setNovoPermProf] = useState(true)
-  const [novoPermAssist, setNovoPermAssist] = useState(true)
-  const [novoErros, setNovoErros] = useState<Record<string, string>>({})
-  // Editar
-  const [editarOpen, setEditarOpen] = useState(false)
-  const [editarId, setEditarId] = useState<number | null>(null)
-  const [editTitulo, setEditTitulo] = useState('')
-  const [editProf, setEditProf] = useState('')
-  const [editProfOpen, setEditProfOpen] = useState(false)
-  const [editPermProf, setEditPermProf] = useState(true)
-  const [editPermAssist, setEditPermAssist] = useState(true)
-  const [editConteudo, setEditConteudo] = useState('')
-  const [editFormato, setEditFormato] = useState('Título 3')
-  const [editFormatoOpen, setEditFormatoOpen] = useState(false)
-  const [editErros, setEditErros] = useState<Record<string, string>>({})
-
-  function toggleSort(col: string) {
-    setSort((s) => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
-  }
-
-  const sorted = [...docs].sort((a, b) => {
-    const dir = sort.dir === 'asc' ? 1 : -1
-    if (sort.col === 'titulo') return a.titulo.localeCompare(b.titulo) * dir
-    if (sort.col === 'profissional') return a.profissional.localeCompare(b.profissional) * dir
-    if (sort.col === 'criadoPor') return a.criadoPor.localeCompare(b.criadoPor) * dir
-    if (sort.col === 'criadoEm') return a.criadoEm.localeCompare(b.criadoEm) * dir
-    return 0
-  })
-  const totalPags = Math.max(1, Math.ceil(sorted.length / pageSize))
-  const slice = sorted.slice((pagina - 1) * pageSize, pagina * pageSize)
-
-  function SortIcon({ col }: { col: string }) {
-    return (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-        className={col === sort.col ? 'opacity-100 text-[#7C4DFF]' : 'opacity-40'}>
-        {col === sort.col && sort.dir === 'asc'
-          ? <><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5" opacity="0.3"/></>
-          : col === sort.col
-          ? <><path d="M7 15l5 5 5-5" opacity="0.3"/><path d="M7 9l5-5 5 5"/></>
-          : <><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></>}
-      </svg>
-    )
-  }
-
-  function openEditar(doc: Documento) {
-    setEditarId(doc.id); setEditTitulo(doc.titulo); setEditProf(doc.profissional)
-    setEditPermProf(doc.permProf); setEditPermAssist(doc.permAssist)
-    setEditConteudo(doc.conteudo); setEditFormato('Título 3'); setEditErros({})
-    setEditarOpen(true)
-  }
-
-  function openNovoComTemplate(template: string) {
-    const erros: Record<string, string> = {}
-    if (!novoTitulo.trim()) erros.titulo = 'Campo obrigatório'
-    if (!novoProf) erros.prof = 'Campo obrigatório'
-    if (Object.keys(erros).length > 0) { setNovoErros(erros); return }
-    setEditarId(null); setEditTitulo(novoTitulo.trim()); setEditProf(novoProf)
-    setEditPermProf(novoPermProf); setEditPermAssist(novoPermAssist)
-    setEditConteudo(template); setEditFormato('Título 3'); setEditErros({})
-    setNovoOpen(false); setEditarOpen(true)
-  }
-
-  return (
-    <div className="flex-1 flex flex-col gap-5 p-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#F5F0FF]">Documentos</h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => { setNovoTitulo(''); setNovoProf(''); setNovoPermProf(true); setNovoPermAssist(true); setNovoErros({}); setNovoOpen(true) }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            <Plus size={14} /> Novo Documento
-          </button>
-          <button onClick={onVoltar} className="px-4 py-1.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
-            Voltar
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.18)]">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase w-40">Ações</th>
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('titulo')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Título <SortIcon col="titulo" />
-                </button>
-              </th>
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Profissional <SortIcon col="profissional" />
-                </button>
-              </th>
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('criadoPor')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Criado Por <SortIcon col="criadoPor" />
-                </button>
-              </th>
-              <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('criadoEm')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
-                  Criado Em <SortIcon col="criadoEm" />
-                </button>
-              </th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase leading-tight">Assinatura<br/>Prof. / Paci.</th>
-            </tr>
-          </thead>
-          <tbody>
-            {slice.length === 0 ? (
-              <tr><td colSpan={6} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum documento encontrado</td></tr>
-            ) : (
-              slice.map((doc) => (
-                <tr key={doc.id} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => setVisualizarId(doc.id)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Visualizar">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </button>
-                      <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Download">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                      </button>
-                      <button onClick={() => openEditar(doc)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Editar">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-                      <button onClick={() => setExcluirId(doc.id)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(255,100,100,0.30)] text-red-400 hover:bg-[rgba(255,100,100,0.12)] transition-colors" title="Excluir">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.titulo}</td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.profissional}</td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.criadoPor}</td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.criadoEm}</td>
-                  <td className="px-5 py-3.5 text-right text-[#6B4E8A]">– | –</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-          <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
-          {Array.from({ length: Math.min(totalPags, 5) }, (_, i) => i + 1).map((p) => (
-            <button key={p} onClick={() => setPagina(p)}
-              className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${pagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[#6B4E8A] hover:text-[#F5F0FF]'}`}>{p}
-            </button>
-          ))}
-          <button onClick={() => setPagina((p) => Math.min(totalPags, p + 1))} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-          <button onClick={() => setPagina(totalPags)} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
-          <div className="relative ml-1">
-            <button onClick={() => setPageSizeOpen((v) => !v)} className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-              {pageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
-            </button>
-            {pageSizeOpen && (
-              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-                {[10, 25, 50].map((n) => (
-                  <button key={n} onClick={() => { setPageSize(n); setPagina(1); setPageSizeOpen(false) }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${pageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Modal: Visualizar ───────────────────────────────────────── */}
-      {visualizarId !== null && (() => {
-        const doc = docs.find((d) => d.id === visualizarId)
-        if (!doc) return null
-        const rendered = resolveHashtags(doc.conteudo)
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
-              <div className="flex items-center justify-between px-7 py-4 border-b border-gray-200">
-                <span className="text-base font-semibold text-gray-900">{doc.titulo}</span>
-                <button onClick={() => setVisualizarId(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                  <X size={15} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-16 py-12">
-                <div className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap text-center font-serif">{rendered}</div>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* ── Modal: Excluir Documento ────────────────────────────────── */}
-      {excluirId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-base font-semibold text-gray-900 mb-1">Excluir Documento</p>
-                <p className="text-sm text-gray-500">Você tem certeza que deseja excluir este documento?</p>
-              </div>
-              <button onClick={() => setExcluirId(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => { setDocs((prev) => prev.filter((d) => d.id !== excluirId)); setExcluirId(null) }}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors"
-              >Deletar</button>
-              <button onClick={() => setExcluirId(null)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Modal: Novo Documento ───────────────────────────────────── */}
-      {novoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
-            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
-              <span className="text-base font-semibold text-gray-900">Novo Documento</span>
-              <button onClick={() => setNovoOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-5">
-              <p className="text-sm font-semibold text-gray-700">Informações do Documento</p>
-              <div className="flex gap-4">
-                {/* Título */}
-                <div className="flex-1">
-                  <div className="relative">
-                    <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Título <span className="text-purple-600">*</span></label>
-                    <input autoFocus type="text" placeholder="Título do documento" value={novoTitulo}
-                      onChange={(e) => { setNovoTitulo(e.target.value); setNovoErros((p) => ({ ...p, titulo: '' })) }}
-                      className={`w-full border rounded-lg px-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none transition-colors ${novoErros.titulo ? 'border-red-400' : 'border-gray-300 focus:border-purple-500'}`}
-                    />
-                  </div>
-                  {novoErros.titulo && <p className="text-xs text-red-500 mt-1">{novoErros.titulo}</p>}
-                </div>
-                {/* Profissional */}
-                <div className="flex-1">
-                  <div className="relative">
-                    <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Profissional <span className="text-purple-600">*</span></label>
-                    <div className="relative">
-                      <button onClick={() => setNovoProfOpen((v) => !v)}
-                        className={`w-full flex items-center justify-between border rounded-lg px-3 py-3 text-sm hover:border-purple-500 transition-colors ${novoErros.prof ? 'border-red-400' : 'border-gray-300'} ${novoProf ? 'text-gray-900' : 'text-gray-400'}`}>
-                        <span className="truncate text-left">{novoProf || 'Selecione um profissional'}</span>
-                        <ChevronDown size={13} className="text-gray-400 flex-shrink-0" />
-                      </button>
-                      {novoProfOpen && (
-                        <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                          {PROFISSIONAIS_DOC.map((p) => (
-                            <button key={p} onClick={() => { setNovoProf(p); setNovoProfOpen(false); setNovoErros((e) => ({ ...e, prof: '' })) }}
-                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${novoProf === p ? 'text-purple-600 bg-purple-50' : 'text-gray-700 hover:bg-gray-50'}`}>{p}</button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {novoErros.prof && <p className="text-xs text-red-500 mt-1">{novoErros.prof}</p>}
-                </div>
-              </div>
-              {/* Permissões */}
-              <div>
-                <p className="text-xs text-gray-500 mb-3">Permissões deste documento</p>
-                <div className="flex flex-col gap-2.5">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setNovoPermProf((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${novoPermProf ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${novoPermProf ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que outros profissionais visualizem esse documento</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setNovoPermAssist((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${novoPermAssist ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${novoPermAssist ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que assistentes visualizem esse documento</span>
-                  </label>
-                </div>
-              </div>
-              <div className="border-t border-gray-100" />
-              {/* Tipo */}
-              <div>
-                <p className="text-sm text-gray-700 mb-4">Selecione o tipo de documento que deseja criar <span className="text-purple-600">*</span></p>
-                <div className="grid grid-cols-4 gap-3">
-                  {TIPOS_DOC.map((tipo) => (
-                    <button key={tipo.id} onClick={() => openNovoComTemplate(tipo.template)}
-                      className="relative flex flex-col items-center gap-3 border border-gray-200 rounded-xl p-4 hover:border-purple-400 hover:bg-purple-50 transition-colors group">
-                      {tipo.badge && (
-                        <span className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Agendart</span>
-                      )}
-                      {tipo.id === 'branco'
-                        ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        : <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      }
-                      <span className="text-xs text-gray-500 text-center leading-tight group-hover:text-purple-700 transition-colors">{tipo.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <p className="text-sm text-gray-500">Ou realize <button className="text-purple-600 underline hover:text-purple-700 transition-colors">Upload de Documento</button></p>
-            </div>
-            <div className="flex justify-end px-7 py-5 border-t border-gray-100">
-              <button onClick={() => setNovoOpen(false)} className="px-5 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-700 transition-colors">Voltar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Modal: Edição de Documento ──────────────────────────────── */}
-      {editarOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col">
-            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
-              <span className="text-base font-semibold text-gray-900">Edição de Documento</span>
-              <button onClick={() => setEditarOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-5">
-              <p className="text-sm font-semibold text-gray-700">Informações do Documento</p>
-              <div className="flex gap-4">
-                <div className="flex-1 relative">
-                  <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Título <span className="text-purple-600">*</span></label>
-                  <input type="text" value={editTitulo}
-                    onChange={(e) => { setEditTitulo(e.target.value); setEditErros((p) => ({ ...p, titulo: '' })) }}
-                    className={`w-full border rounded-lg px-3 py-3 text-sm text-gray-900 focus:outline-none transition-colors ${editErros.titulo ? 'border-red-400' : 'border-gray-300 focus:border-purple-500'}`}
-                  />
-                  {editErros.titulo && <p className="text-xs text-red-500 mt-1">{editErros.titulo}</p>}
-                </div>
-                <div className="flex-1 relative">
-                  <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Profissional <span className="text-purple-600">*</span></label>
-                  <div className="relative">
-                    <button onClick={() => setEditProfOpen((v) => !v)}
-                      className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 hover:border-purple-500 transition-colors">
-                      <span className="truncate text-left">{editProf || 'Selecione'}</span>
-                      <ChevronDown size={13} className="text-gray-400 flex-shrink-0" />
-                    </button>
-                    {editProfOpen && (
-                      <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                        {PROFISSIONAIS_DOC.map((p) => (
-                          <button key={p} onClick={() => { setEditProf(p); setEditProfOpen(false) }}
-                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${editProf === p ? 'text-purple-600 bg-purple-50' : 'text-gray-700 hover:bg-gray-50'}`}>{p}</button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* Permissões */}
-              <div>
-                <p className="text-xs text-gray-500 mb-3">Permissões deste documento</p>
-                <div className="flex flex-col gap-2.5">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setEditPermProf((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${editPermProf ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editPermProf ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que outros profissionais visualizem esse documento</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setEditPermAssist((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${editPermAssist ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editPermAssist ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que assistentes visualizem esse documento</span>
-                  </label>
-                </div>
-              </div>
-              {/* Rich-text toolbar + editor */}
-              <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-200 flex-wrap bg-gray-50">
-                  <div className="relative">
-                    <button onClick={() => setEditFormatoOpen((v) => !v)}
-                      className="flex items-center gap-1 px-2 py-1 text-xs text-gray-700 hover:bg-gray-200 rounded transition-colors">
-                      {editFormato} <ChevronDown size={10} />
-                    </button>
-                    {editFormatoOpen && (
-                      <div className="absolute z-30 top-full mt-1 left-0 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden min-w-[120px]">
-                        {['Parágrafo', 'Título 1', 'Título 2', 'Título 3'].map((f) => (
-                          <button key={f} onClick={() => { setEditFormato(f); setEditFormatoOpen(false) }}
-                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${editFormato === f ? 'text-purple-600 bg-purple-50' : 'text-gray-700 hover:bg-gray-50'}`}>{f}</button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="w-px h-4 bg-gray-300 mx-1" />
-                  <button className="w-7 h-7 flex items-center justify-center text-sm font-bold text-gray-700 hover:bg-gray-200 rounded transition-colors">B</button>
-                  <button className="w-7 h-7 flex items-center justify-center text-sm italic text-gray-700 hover:bg-gray-200 rounded transition-colors">I</button>
-                  <button className="w-7 h-7 flex items-center justify-center text-sm underline text-gray-700 hover:bg-gray-200 rounded transition-colors">U</button>
-                  <button title="Cor" className="w-7 h-7 flex items-center justify-center hover:bg-gray-200 rounded transition-colors">
-                    <span className="flex flex-col items-center leading-none text-xs font-semibold text-gray-700"><span>A</span><span className="w-4 h-0.5 bg-red-500 mt-0.5" /></span>
-                  </button>
-                  <button title="Destaque" className="w-7 h-7 flex items-center justify-center hover:bg-gray-200 rounded transition-colors">
-                    <span className="flex flex-col items-center leading-none text-xs font-semibold text-gray-700"><span>A</span><span className="w-4 h-0.5 bg-yellow-400 mt-0.5" /></span>
-                  </button>
-                  <div className="w-px h-4 bg-gray-300 mx-1" />
-                  <button title="Alinhar" className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                  </button>
-                  <button title="Lista numerada" className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10H6"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-                  </button>
-                  <button title="Lista" className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
-                  </button>
-                  <button title="Tabela" className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-                  </button>
-                  <button title="Link" className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                  </button>
-                </div>
-                {/* Editor: overlay technique for hashtag highlighting */}
-                <div className="relative min-h-[240px] overflow-hidden">
-                  <div ref={editOverlayRef} className="absolute inset-0 px-4 py-3 text-sm leading-6 whitespace-pre-wrap break-words pointer-events-none select-none overflow-hidden" aria-hidden="true">
-                    {editConteudo.split(/(#[^#\s\n]+#)/g).map((part, i) =>
-                      /^#[^#\s\n]+#$/.test(part)
-                        ? <span key={i} style={{ color: '#f97316' }}>{part}</span>
-                        : <span key={i} style={{ color: 'transparent' }}>{part}</span>
-                    )}
-                  </div>
-                  <textarea
-                    value={editConteudo}
-                    onChange={(e) => setEditConteudo(e.target.value)}
-                    onScroll={(e) => { if (editOverlayRef.current) editOverlayRef.current.scrollTop = e.currentTarget.scrollTop }}
-                    className="relative z-10 w-full min-h-[240px] px-4 py-3 text-sm leading-6 text-gray-900 bg-transparent focus:outline-none resize-none"
-                    style={{ caretColor: '#7c3aed' }}
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Adicione variáveis inserindo hashtag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-gray-100">
-              <button onClick={() => setEditarOpen(false)} className="px-5 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-700 transition-colors">Voltar</button>
-              <button
-                onClick={() => {
-                  const erros: Record<string, string> = {}
-                  if (!editTitulo.trim()) erros.titulo = 'Campo obrigatório'
-                  if (Object.keys(erros).length > 0) { setEditErros(erros); return }
-                  const now = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-                  if (editarId !== null) {
-                    setDocs((prev) => prev.map((d) => d.id === editarId ? { ...d, titulo: editTitulo, profissional: editProf, permProf: editPermProf, permAssist: editPermAssist, conteudo: editConteudo } : d))
-                  } else {
-                    const newId = docIdCounter + 1
-                    setDocIdCounter(newId)
-                    setDocs((prev) => [...prev, { id: newId, titulo: editTitulo, profissional: editProf, criadoPor: editProf, criadoEm: now, conteudo: editConteudo, permProf: editPermProf, permAssist: editPermAssist }])
-                  }
-                  setEditarOpen(false)
-                }}
-                className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-xl transition-colors"
-              >Salvar</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ─── Detalhe: aba placeholder ─────────────────────────────────────────────────
 function TabEmConstrucao({ label }: { label: string }) {
@@ -2786,8 +708,8 @@ const TABS: { id: Tab; label: string; icon: ReactNode; badge?: ReactNode }[] = [
   { id: 'documentos',  label: 'Documentos',     icon: <FileText size={18} /> },
 ]
 
-function ClienteDetalheView({ cliente, onBack }: { cliente: Cliente; onBack: () => void }) {
-  const [tab, setTab] = useState<Tab>('dados')
+function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { cliente: PacienteApi; onBack: () => void; empresaId: string | null; initialTab?: Tab }) {
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'dados')
   const [notasOpen, setNotasOpen] = useState(false)
   const [compartilharOpen, setCompartilharOpen] = useState(false)
 
@@ -2858,12 +780,12 @@ function ClienteDetalheView({ cliente, onBack }: { cliente: Cliente; onBack: () 
         {/* Tab content */}
         <div className="flex-1 overflow-hidden flex">
           <div className="flex-1 overflow-hidden flex">
-            {tab === 'dados'      && <TabDados cliente={cliente} />}
-            {tab === 'timeline'   && <TabLinhaTempo />}
-            {tab === 'anamnese'   && <TabAnamnese />}
-            {tab === 'evolucoes'  && <TabEvolucoes />}
-            {tab === 'financeiro' && <TabFinanceiro onVoltar={() => setTab('dados')} />}
-            {tab === 'documentos' && <TabDocumentos onVoltar={() => setTab('dados')} />}
+            {tab === 'dados'      && <TabDados paciente={cliente} />}
+            {tab === 'timeline'   && <TabLinhaDoTempo pacienteId={cliente.id} empresaId={empresaId ?? ''} onIrParaAnamnese={() => setTab('anamnese')} />}
+            {tab === 'anamnese'   && <TabAnamnese pacienteId={cliente.id} empresaId={empresaId ?? ''} />}
+            {tab === 'evolucoes'  && <TabEvolucoes pacienteId={cliente.id} />}
+            {tab === 'financeiro' && <TabFinanceiro pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
+            {tab === 'documentos' && <TabDocumentos pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
           </div>
           {notasOpen && <NotasCompartilhadasPanel onClose={() => setNotasOpen(false)} />}
           {compartilharOpen && <CompartilharAcessoPanel onClose={() => setCompartilharOpen(false)} />}
@@ -3038,76 +960,185 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
 }
 
 // ─── Modal Criar Cliente ──────────────────────────────────────────────────────
-function CriarClienteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function CriarClienteModal({
+  open,
+  onClose,
+  empresaId,
+  onCreated,
+}: {
+  open: boolean
+  onClose: () => void
+  empresaId: string | null
+  onCreated: (p: PacienteApi) => void
+}) {
   const [infosPessoais, setInfosPessoais] = useState(false)
   const [menorIdade, setMenorIdade] = useState(false)
+  const { toast } = useToast()
+  const [saving, setSaving] = useState(false)
+
+  const [nome, setNome] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [dataNascimento, setDataNascimento] = useState('')
+  const [genero, setGenero] = useState('')
+  const [plano, setPlano] = useState('')
+  const [numeroCarteirinha, setNumeroCarteirinha] = useState('')
+  const [grupo, setGrupo] = useState('')
+  const [comoConheceu, setComoConheceu] = useState('')
+  const [rg, setRg] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [cep, setCep] = useState('')
+  const [email, setEmail] = useState('')
+  const [logradouro, setLogradouro] = useState('')
+  const [numero, setNumero] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
+  const [outrasInformacoes, setOutrasInformacoes] = useState('')
+  const [nomeResponsavel, setNomeResponsavel] = useState('')
+  const [dataNascimentoResp, setDataNascimentoResp] = useState('')
+  const [cpfResponsavel, setCpfResponsavel] = useState('')
+  const [telefoneResponsavel, setTelefoneResponsavel] = useState('')
+
+  function resetForm() {
+    setNome(''); setTelefone(''); setDataNascimento(''); setGenero('')
+    setPlano(''); setNumeroCarteirinha(''); setGrupo(''); setComoConheceu('')
+    setRg(''); setCpf(''); setCep(''); setEmail(''); setLogradouro('')
+    setNumero(''); setComplemento(''); setBairro(''); setCidade('')
+    setOutrasInformacoes(''); setNomeResponsavel(''); setDataNascimentoResp('')
+    setCpfResponsavel(''); setTelefoneResponsavel('')
+    setInfosPessoais(false); setMenorIdade(false)
+  }
+
+  function handleClose() {
+    resetForm()
+    onClose()
+  }
+
+  async function handleSubmit() {
+    if (!nome.trim()) { toast({ title: 'Nome é obrigatório', variant: 'destructive' }); return }
+    if (!telefone.trim()) { toast({ title: 'Telefone é obrigatório', variant: 'destructive' }); return }
+    if (!empresaId) { toast({ title: 'Empresa não identificada. Contate o suporte.', variant: 'destructive' }); return }
+    setSaving(true)
+    try {
+      const body: Record<string, unknown> = {
+        empresaId,
+        nome: nome.trim(),
+        telefone: `+55${telefone.trim()}`,
+        ...(dataNascimento && { dataNascimento }),
+        ...(genero && { genero }),
+        ...(plano && { plano }),
+        ...(numeroCarteirinha && { numeroCarteirinha }),
+        ...(grupo && { grupo }),
+        ...(comoConheceu && { comoConheceu }),
+        ...(rg && { rg }),
+        ...(cpf && { cpf }),
+        ...(cep && { cep }),
+        ...(email && { email }),
+        ...(logradouro && { logradouro }),
+        ...(numero && { numero }),
+        ...(complemento && { complemento }),
+        ...(bairro && { bairro }),
+        ...(cidade && { cidade }),
+        ...(outrasInformacoes && { outrasInformacoes }),
+        ...(nomeResponsavel && { nomeResponsavel }),
+        ...(dataNascimentoResp && { dataNascimentoResp }),
+        ...(cpfResponsavel && { cpfResponsavel }),
+        ...(telefoneResponsavel && { telefoneResponsavel: `+55${telefoneResponsavel.trim()}` }),
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error('Erro ao cadastrar')
+      const criado: PacienteApi = await res.json()
+      onCreated(criado)
+      resetForm()
+      onClose()
+      toast({ title: 'Paciente cadastrado com sucesso!' })
+    } catch {
+      toast({ title: 'Erro ao cadastrar paciente. Verifique os dados e tente novamente.', variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
       <DialogContent showCloseButton={false}
         className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-3xl p-0 gap-0 overflow-hidden">
         <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
           <DialogTitle className="text-base font-bold text-[#F5F0FF]">Criar Cliente</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+          <button onClick={handleClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
             <X size={15} />
           </button>
         </DialogHeader>
         <div className="overflow-y-auto max-h-[68vh] px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Nome" required><input className={INPUT} /></FloatingField>
+            <FloatingField label="Nome" required>
+              <input className={INPUT} value={nome} onChange={(e) => setNome(e.target.value)} />
+            </FloatingField>
             <FloatingField label="Nome Social"><input className={INPUT} /></FloatingField>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="Número de Telefone" required />
-            <DateField label="Data de nascimento" />
+            <PhoneField label="Número de Telefone" required value={telefone} onChange={setTelefone} />
+            <DateField label="Data de nascimento" value={dataNascimento} onChange={setDataNascimento} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} />
-            <FieldSelect label="Convênio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} />
+            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={setGenero} />
+            <FieldSelect label="Convênio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} value={plano} onChange={setPlano} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Número da Carteirinha"><input className={INPUT} /></FloatingField>
-            <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} />
+            <FloatingField label="Número da Carteirinha">
+              <input className={INPUT} value={numeroCarteirinha} onChange={(e) => setNumeroCarteirinha(e.target.value)} />
+            </FloatingField>
+            <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={setGrupo} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} />
+            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={setComoConheceu} />
           </div>
           <Section title="Informações Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="RG"><input className={INPUT} /></FloatingField>
-              <FloatingField label="CPF"><input className={INPUT} /></FloatingField>
+              <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => setRg(e.target.value)} /></FloatingField>
+              <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => setCpf(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="CEP"><input className={INPUT} /></FloatingField>
-              <FloatingField label="Email"><input type="email" className={INPUT} /></FloatingField>
+              <FloatingField label="CEP"><input className={INPUT} value={cep} onChange={(e) => setCep(e.target.value)} /></FloatingField>
+              <FloatingField label="Email"><input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
-              <FloatingField label="Logradouro"><input className={INPUT} /></FloatingField>
-              <FloatingField label="Número"><input className={INPUT} /></FloatingField>
-              <FloatingField label="Complemento"><input className={INPUT} /></FloatingField>
+              <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => setLogradouro(e.target.value)} /></FloatingField>
+              <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => setNumero(e.target.value)} /></FloatingField>
+              <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => setComplemento(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Bairro"><input className={INPUT} /></FloatingField>
-              <FloatingField label="Cidade"><input className={INPUT} /></FloatingField>
+              <FloatingField label="Bairro"><input className={INPUT} value={bairro} onChange={(e) => setBairro(e.target.value)} /></FloatingField>
+              <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => setCidade(e.target.value)} /></FloatingField>
             </div>
             <FloatingField label="Outras Informações">
-              <textarea rows={3} className={INPUT + ' resize-y'} />
+              <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => setOutrasInformacoes(e.target.value)} />
             </FloatingField>
           </Section>
           <Section title="Menor de idade" open={menorIdade} onToggle={() => setMenorIdade((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Nome do responsável"><input className={INPUT} /></FloatingField>
-              <DateField label="Data de nascimento" />
+              <FloatingField label="Nome do responsável">
+                <input className={INPUT} value={nomeResponsavel} onChange={(e) => setNomeResponsavel(e.target.value)} />
+              </FloatingField>
+              <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={setDataNascimentoResp} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="CPF do responsável"><input className={INPUT} /></FloatingField>
-              <PhoneField label="Telefone do responsável" />
+              <FloatingField label="CPF do responsável">
+                <input className={INPUT} value={cpfResponsavel} onChange={(e) => setCpfResponsavel(e.target.value)} />
+              </FloatingField>
+              <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
             </div>
           </Section>
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
-          <button type="button" onClick={onClose} className={BTN_GHOST}>Cancelar</button>
-          <button type="button" className={BTN_PRIMARY}>Cadastrar</button>
+          <button type="button" onClick={handleClose} className={BTN_GHOST}>Cancelar</button>
+          <button type="button" onClick={handleSubmit} disabled={saving} className={BTN_PRIMARY + ' disabled:opacity-50'}>
+            {saving ? 'Cadastrando...' : 'Cadastrar'}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
@@ -3115,19 +1146,26 @@ function CriarClienteModal({ open, onClose }: { open: boolean; onClose: () => vo
 }
 
 // ─── Main View ────────────────────────────────────────────────────────────────
-export function ClientesView() {
+export function ClientesView({ initialPacientes, empresaId }: { initialPacientes: PacienteApi[]; empresaId: string | null }) {
+  const searchParams = useSearchParams()
+  const pacienteIdParam = searchParams.get('pacienteId')
+  const tabParam = (searchParams.get('tab') as Tab | null) ?? 'dados'
+
+  const [pacientes, setPacientes] = useState<PacienteApi[]>(initialPacientes)
   const [modalOpen, setModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [mostrarArquivados, setMostrarArquivados] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [page, setPage] = useState(1)
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+  const [selectedCliente, setSelectedCliente] = useState<PacienteApi | null>(
+    () => pacienteIdParam ? (initialPacientes.find((p) => p.id === pacienteIdParam) ?? null) : null
+  )
 
   if (selectedCliente) {
-    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} />
+    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} />
   }
 
-  const filtered = MOCK_CLIENTES.filter((c) => c.nome.toLowerCase().includes(search.toLowerCase()))
+  const filtered = pacientes.filter((c) => c.nome.toLowerCase().includes(search.toLowerCase()))
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage))
 
   return (
@@ -3164,14 +1202,17 @@ export function ClientesView() {
           </select>
           <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
         </div>
-        <label className="flex items-center gap-2 text-sm text-[#A78BCC] cursor-pointer select-none">
+        <div
+          role="switch"
+          aria-checked={mostrarArquivados}
+          onClick={() => setMostrarArquivados((v) => !v)}
+          className="flex items-center gap-2 text-sm text-[#A78BCC] cursor-pointer select-none"
+        >
           Mostrar arquivados
-          <button type="button" role="switch" aria-checked={mostrarArquivados}
-            onClick={() => setMostrarArquivados((v) => !v)}
-            className={`relative w-9 h-5 rounded-full transition-colors ${mostrarArquivados ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}>
+          <div className={`relative w-9 h-5 rounded-full transition-colors ${mostrarArquivados ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}>
             <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${mostrarArquivados ? 'translate-x-4' : 'translate-x-0.5'}`} />
-          </button>
-        </label>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -3205,9 +1246,9 @@ export function ClientesView() {
                 className="text-sm font-semibold text-[#F5F0FF] truncate text-left hover:text-[#C084FC] transition-colors">
                 {c.nome}
               </button>
-              <span className="text-sm text-[#A78BCC]">{c.telefone}</span>
+              <span className="text-sm text-[#A78BCC]">{c.telefone ?? ''}</span>
               <span className="text-sm text-[#A78BCC]">{c.sessoes}</span>
-              <span className="text-sm text-[#A78BCC]">{c.grupo}</span>
+              <span className="text-sm text-[#A78BCC]">{c.grupo ?? '—'}</span>
               <StatusBadge status={c.statusPagamento} />
             </div>
           ))
@@ -3229,7 +1270,12 @@ export function ClientesView() {
         </div>
       </div>
 
-      <CriarClienteModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <CriarClienteModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        empresaId={empresaId}
+        onCreated={(p) => setPacientes((prev) => [p, ...prev])}
+      />
     </div>
   )
 }

@@ -4,21 +4,23 @@ import { useState } from 'react'
 import {
   User, Calendar, Mail, ShoppingCart, Layers,
   LayoutGrid, Building2, ClipboardCheck, FileText, Lock,
-  ChevronDown, Upload, PenLine, HelpCircle, Check,
+  ChevronDown, HelpCircle, Check, MessageSquare,
   Search, Plus, Pencil, Trash2, Pin, X, AlertTriangle,
   type LucideIcon,
 } from 'lucide-react'
-
-// ─── Shared styles ────────────────────────────────────────────────────────────
-const INP =
-  'w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
-  'focus:outline-none focus:border-[#7C4DFF] transition-colors'
-const LBG = 'bg-[#0D0520]'
-const BTN_GHOST =
-  'px-5 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors'
-const BTN_PRIMARY =
-  'px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
+import { INP, LBG, BTN_GHOST, BTN_PRIMARY, Toggle, Cbx, PhoneInput, SectionFooter } from './shared'
+import { TabConta } from './tab-conta'
+import { TabAgenda as TabAgendaNova } from './tab-agenda'
+import { TabSenhas as TabSenhasNova } from './tab-senhas'
+import { TabAnamneses as TabAnamnesesNova } from './tab-anamneses'
+import { TabUnidades as TabUnidadesNova } from './tab-unidades'
+import { TabSalas as TabSalasNova } from './tab-salas'
+import { TabServicos as TabServicosNova } from './tab-servicos'
+import { TabCreditos as TabCreditosNova } from './tab-creditos'
+import { TabMensagens as TabMensagensNova } from './tab-mensagens'
+import { TabNfse as TabNfseNova } from './tab-nfse'
+import { TabWhatsapp } from './tab-whatsapp'
+import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
 // ─── Tab navigation ───────────────────────────────────────────────────────────
 type TabDef = { id: string; label: string; Icon: LucideIcon; iconColor?: string }
@@ -34,230 +36,8 @@ const TABS: TabDef[] = [
   { id: 'anamneses', label: 'Anamneses', Icon: ClipboardCheck },
   { id: 'nfse',      label: 'NFS-e',     Icon: FileText, iconColor: '#F97316' },
   { id: 'senhas',    label: 'Senhas',    Icon: Lock },
+  { id: 'whatsapp',  label: 'WhatsApp',  Icon: MessageSquare, iconColor: '#4ADE80' },
 ]
-
-// ─── Reusable field components ────────────────────────────────────────────────
-function FInput({ label, req, val, type = 'text' }: {
-  label: string; req?: boolean; val?: string; type?: string
-}) {
-  return (
-    <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
-        {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
-      </label>
-      <input type={type} defaultValue={val} className={INP} />
-    </div>
-  )
-}
-
-function FSelect({ label, req, opts, val }: {
-  label: string; req?: boolean; opts: string[]; val?: string
-}) {
-  return (
-    <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
-        {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
-      </label>
-      <div className="relative">
-        <select defaultValue={val ?? ''} className={INP + ' appearance-none pr-8 cursor-pointer'}>
-          {opts.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
-      </div>
-    </div>
-  )
-}
-
-function PhoneInput({ label, req, val }: { label: string; req?: boolean; val?: string }) {
-  return (
-    <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
-        {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
-      </label>
-      <div className="flex bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
-        <div className="flex items-center gap-1 px-2.5 py-2.5 border-r border-[rgba(124,77,255,0.18)] text-sm text-[#F5F0FF] shrink-0 cursor-pointer">
-          🇧🇷 <span className="text-[#A78BCC] text-xs ml-1">Brasil</span>
-          <ChevronDown size={11} className="text-[#6B4E8A] ml-0.5" />
-        </div>
-        <input defaultValue={val} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none" />
-      </div>
-    </div>
-  )
-}
-
-function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={() => set(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}
-    >
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
-    </button>
-  )
-}
-
-function Cbx({ checked, set, label }: { checked: boolean; set: (v: boolean) => void; label?: string }) {
-  return (
-    <label className="flex items-center gap-2 cursor-pointer select-none group">
-      <button
-        type="button"
-        onClick={() => set(!checked)}
-        className={`w-4 h-4 rounded flex items-center justify-center border transition-colors shrink-0 ${
-          checked
-            ? 'bg-[#7C4DFF] border-[#7C4DFF]'
-            : 'bg-transparent border-[rgba(124,77,255,0.35)] group-hover:border-[#7C4DFF]'
-        }`}
-      >
-        {checked && <Check size={10} strokeWidth={3} className="text-white" />}
-      </button>
-      {label && <span className="text-sm text-[#A78BCC]">{label}</span>}
-    </label>
-  )
-}
-
-function SectionFooter() {
-  return (
-    <div className="flex justify-end gap-3 pt-5 border-t border-[rgba(124,77,255,0.12)]">
-      <button type="button" className={BTN_GHOST}>Cancelar</button>
-      <button type="button" className={BTN_PRIMARY}>Salvar Alterações</button>
-    </div>
-  )
-}
-
-// ─── TAB: CONTA ───────────────────────────────────────────────────────────────
-function TabConta() {
-  return (
-    <div className="space-y-7">
-      <h2 className="text-base font-bold text-[#F5F0FF]">Minha conta</h2>
-
-      <div className="grid grid-cols-2 gap-10">
-        {/* ── Coluna esquerda ── */}
-        <div className="space-y-4">
-          <div className="flex flex-col items-center gap-1.5 pb-3">
-            <div className="w-28 h-28 rounded-xl bg-[#150830] border-2 border-dashed border-[rgba(124,77,255,0.25)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors">
-              <User size={52} className="text-[#6B4E8A]" strokeWidth={1} />
-            </div>
-            <p className="text-sm text-[#A78BCC]">jesse.9001@gmail.com</p>
-            <p className="text-sm font-semibold text-[#7C4DFF]">Proprietário da Clínica</p>
-          </div>
-
-          <FInput label="Nome" req val="JESSE DOS SANTOS BEZERRA" />
-          <FInput label="CEP" val="54410-390" />
-          <div className="grid grid-cols-[5.5rem_1fr] gap-3">
-            <FInput label="Número" val="61" />
-            <FInput label="Complemento" />
-          </div>
-          <FInput label="Cidade" val="Jaboatão dos Guararapes" />
-          <PhoneInput label="Número de Telefone" req val="(81) 99708-8404" />
-          <FSelect label="Tipo" req
-            opts={['Dentista', 'Médico', 'Fisioterapeuta', 'Psicólogo', 'Nutricionista']}
-            val="Dentista" />
-          <FSelect label="Conselho"
-            opts={['Selecione um conselho', 'CRO', 'CFM', 'CREFITO', 'CFF', 'CFN']}
-            val="Selecione um conselho" />
-        </div>
-
-        {/* ── Coluna direita ── */}
-        <div className="space-y-4">
-          <div className="flex flex-col items-center gap-1.5 pb-3">
-            <p className="text-xs font-medium text-[#A78BCC]">Logo da Clínica</p>
-            <div className="w-28 h-28 rounded-xl bg-[#150830] border-2 border-dashed border-[rgba(124,77,255,0.25)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors">
-              <Building2 size={40} className="text-[#6B4E8A]" strokeWidth={1} />
-            </div>
-          </div>
-
-          <FInput label="Nome Comercial da Clínica" />
-          <FSelect label="Gênero" req
-            opts={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']}
-            val="Masculino" />
-          <FInput label="Logradouro" val="Rua José Braz Moscow" />
-          <FInput label="Bairro" val="Piedade" />
-          <FSelect label="Duração da sessão" req
-            opts={['30 minutos', '40 minutos', '50 minutos', '60 minutos']}
-            val="40 minutos" />
-          <FInput label="Telefone comercial" />
-          <FInput label="Especialidade" />
-          <FInput label="Número do conselho" />
-        </div>
-      </div>
-
-      {/* ── Assinatura ── */}
-      <div>
-        <div className="flex items-start gap-2 mb-4">
-          <PenLine size={16} className="text-[#7C4DFF] mt-0.5 shrink-0" />
-          <div>
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Assinatura</h3>
-            <p className="text-xs text-[#A78BCC] mt-0.5">
-              Escolha entre enviar uma imagem pronta ou criar uma assinatura manual. Salvamos no tamanho ideal para uso nos documentos.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* Pré-visualização */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4">
-            <p className="text-sm font-medium text-[#F5F0FF] mb-0.5">Pré-visualização</p>
-            <p className="text-xs text-[#A78BCC] mb-3">Assim a assinatura vai aparecer nos documentos</p>
-            <div
-              className="h-32 rounded-lg border border-dashed border-[rgba(124,77,255,0.20)] flex flex-col items-center justify-center"
-              style={{ backgroundImage: 'repeating-conic-gradient(#150830 0% 25%, #0D0520 0% 50%)', backgroundSize: '14px 14px' }}
-            >
-              <p className="text-xs text-[#6B4E8A] font-medium">Nenhuma assinatura cadastrada</p>
-              <p className="text-[10px] text-[#6B4E8A] mt-1 text-center px-6">
-                Envie uma imagem ou crie uma assinatura para começar
-              </p>
-            </div>
-          </div>
-
-          {/* Opções */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4 flex flex-col gap-3">
-            <div>
-              <p className="text-sm font-medium text-[#F5F0FF]">Adicionar assinatura</p>
-              <p className="text-xs text-[#A78BCC]">Escolha uma das opções abaixo</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.18)] hover:border-[#7C4DFF] transition-colors">
-              <div className="flex items-start gap-2.5">
-                <Upload size={15} className="text-[#7C4DFF] mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-[#F5F0FF]">Enviar imagem</p>
-                  <p className="text-xs text-[#A78BCC]">Selecione um arquivo e recorte para manter a assinatura bem enquadrada.</p>
-                </div>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold transition-colors shrink-0 ml-3">
-                <Upload size={11} />
-                Selecionar
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.18)] hover:border-[#7C4DFF] transition-colors">
-              <div className="flex items-start gap-2.5">
-                <PenLine size={15} className="text-[#7C4DFF] mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-[#F5F0FF]">Criar agora</p>
-                  <p className="text-xs text-[#A78BCC]">Assine com mouse ou toque. Vamos ajustar e padronizar automaticamente para documentos.</p>
-                </div>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] text-[#A78BCC] hover:text-[#F5F0FF] text-xs font-semibold transition-colors shrink-0 ml-3">
-                <PenLine size={11} />
-                Criar
-              </button>
-            </div>
-
-            <p className="text-[10px] text-[#6B4E8A]">
-              <span className="font-semibold text-[#A78BCC]">Dica:</span> Prefira uma assinatura mais larga do que alta. O sistema centraliza e mantém a transparência para melhor resultado nos documentos.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <SectionFooter />
-    </div>
-  )
-}
 
 // ─── TAB: AGENDA ──────────────────────────────────────────────────────────────
 type DayRow = { label: string; abertura: string; fechamento: string; aberto: boolean }
@@ -1700,21 +1480,28 @@ function TabSenhas() {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export function ConfiguracoesView() {
+export function ConfiguracoesView({
+  initialUsuario,
+  initialEmpresa,
+}: {
+  initialUsuario?: UsuarioData | null
+  initialEmpresa?: EmpresaData | null
+}) {
   const [active, setActive] = useState('conta')
 
   const content = (() => {
     switch (active) {
-      case 'conta':      return <TabConta />
-      case 'agenda':     return <TabAgenda />
-      case 'mensagens':  return <TabMensagens />
-      case 'creditos':   return <TabCreditos />
-      case 'servicos':   return <TabServicos />
-      case 'salas':      return <TabSalas />
-      case 'unidades':   return <TabUnidades />
-      case 'anamneses':  return <TabAnamneses />
-      case 'nfse':       return <TabNfse />
-      case 'senhas':     return <TabSenhas />
+      case 'conta':      return <TabConta initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'agenda':     return <TabAgendaNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'mensagens':  return <TabMensagensNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'creditos':   return <TabCreditosNova initialUsuario={initialUsuario} />
+      case 'servicos':   return <TabServicosNova initialEmpresa={initialEmpresa} />
+      case 'salas':      return <TabSalasNova initialEmpresa={initialEmpresa} />
+      case 'unidades':   return <TabUnidadesNova initialEmpresa={initialEmpresa} />
+      case 'anamneses':  return <TabAnamnesesNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'nfse':       return <TabNfseNova initialEmpresa={initialEmpresa} />
+      case 'senhas':     return <TabSenhasNova initialUsuario={initialUsuario} />
+      case 'whatsapp':   return <TabWhatsapp initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
       default: {
         const tab = TABS.find((t) => t.id === active)
         return <TabPlaceholder label={tab?.label ?? ''} />

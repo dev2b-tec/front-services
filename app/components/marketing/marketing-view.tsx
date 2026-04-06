@@ -136,10 +136,105 @@ function HorarioTable() {
   )
 }
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface ProfissionalApi {
+  id: string
+  nome: string
+  email: string
+  telefone?: string
+  tipo?: string
+  conselho?: string
+  numeroConselho?: string
+  especialidade?: string
+  genero?: string
+  duracaoSessao?: number
+  periodoMinimo?: string
+  periodoMaximo?: string
+  tempoAntecedencia?: string
+  disponivel?: boolean
+  cep?: string
+  logradouro?: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  cidade?: string
+  empresaId?: string
+  telefoneComercial?: string
+  observacoes?: string
+}
+
+interface TabAutoProps {
+  prof: ProfissionalApi
+  empresaId: string | null
+}
+
 // ─── TAB: AUTO AGENDAMENTO ────────────────────────────────────────────────────
-function TabAutoAgendamento() {
-  const [disponivel, setDisponivel] = useState(true)
+function TabAutoAgendamento({ prof, empresaId }: TabAutoProps) {
+  const [form, setForm] = useState<Partial<ProfissionalApi>>(() => ({ ...prof }))
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+
+  // Keep form in sync when a different prof is selected
+  const prevProfId = useRef(prof.id)
+  if (prevProfId.current !== prof.id) {
+    prevProfId.current = prof.id
+    // Reset form to new prof data (outside render cycle — safe pattern)
+    Promise.resolve().then(() => {
+      setForm({ ...prof })
+      setSaved(false)
+      setSaveError(null)
+    })
+  }
+
+  function setF<K extends keyof ProfissionalApi>(field: K, value: ProfissionalApi[K]) {
+    setForm((p) => ({ ...p, [field]: value }))
+    setSaved(false)
+  }
+
+  async function handleSave() {
+    setSaving(true); setSaveError(null)
+    try {
+      const body: Record<string, unknown> = {
+        nome: form.nome,
+        telefone: form.telefone,
+        tipo: form.tipo,
+        conselho: form.conselho,
+        numeroConselho: form.numeroConselho,
+        especialidade: form.especialidade,
+        genero: form.genero,
+        duracaoSessao: form.duracaoSessao ? Number(form.duracaoSessao) : undefined,
+        periodoMinimo: form.periodoMinimo,
+        periodoMaximo: form.periodoMaximo,
+        tempoAntecedencia: form.tempoAntecedencia,
+        disponivel: form.disponivel,
+        cep: form.cep,
+        logradouro: form.logradouro,
+        numero: form.numero,
+        complemento: form.complemento,
+        bairro: form.bairro,
+        cidade: form.cidade,
+        telefoneComercial: form.telefoneComercial,
+        observacoes: form.observacoes,
+      }
+      Object.keys(body).forEach((k) => body[k] === undefined && delete body[k])
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${prof.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+      setSaved(true)
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao salvar')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const clinicLink = empresaId ? `https://app.dev2b.tec.br/sites/empresa/${empresaId}` : ''
+  const profLink = `https://app.dev2b.tec.br/sites/profissional/${prof.id}`
 
   return (
     <div className="space-y-6">
@@ -178,12 +273,12 @@ function TabAutoAgendamento() {
           <span className="text-xs text-[#A78BCC]">Profissional Disponível?</span>
           <div className="flex rounded-md overflow-hidden border border-[rgba(124,77,255,0.25)]">
             <button
-              onClick={() => setDisponivel(true)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${disponivel ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              onClick={() => setF('disponivel', true)}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel !== false ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
             >Sim</button>
             <button
-              onClick={() => setDisponivel(false)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${!disponivel ? 'bg-[#EF4444] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              onClick={() => setF('disponivel', false)}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel === false ? 'bg-[#EF4444] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
             >Não</button>
           </div>
         </div>
@@ -191,71 +286,132 @@ function TabAutoAgendamento() {
       <p className="text-xs text-[#A78BCC] -mt-4">Configure e acesse as configurações do Auto Agendamento do profissional.</p>
 
       {/* Links */}
-      <div className="grid grid-cols-2 gap-4">
-        {[
-          { label: 'Link Global da Clínica',   val: 'https://agendart.tech/aa/210013315588a' },
-          { label: 'Link do Profissional',      val: 'https://agendart.tech/aa/320401917c684' },
-        ].map(({ label, val }) => (
-          <div key={label}>
-            <p className="text-xs font-medium text-[#A78BCC] mb-1.5">{label}</p>
+      <div className={`grid gap-4 ${clinicLink ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {clinicLink && (
+          <div>
+            <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Link Global da Clínica</p>
             <div className="flex items-center gap-2">
-              <input readOnly value={val} className={INP + ' flex-1 text-xs'} />
-              <button className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[rgba(124,77,255,0.12)] text-[#7C4DFF] text-xs font-semibold border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors shrink-0">
-                <Copy size={12} />
-                Copiar
-              </button>
-              <button className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[rgba(34,197,94,0.10)] text-[#22C55E] text-xs font-semibold border border-[rgba(34,197,94,0.2)] hover:border-[#22C55E] transition-colors shrink-0">
-                <ExternalLink size={12} />
-                Abrir
-              </button>
+              <input readOnly value={clinicLink} className={INP + ' flex-1 text-xs'} />
+              <CopyLink url={clinicLink} />
             </div>
           </div>
-        ))}
+        )}
+        <div>
+          <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Link do Profissional</p>
+          <div className="flex items-center gap-2">
+            <input readOnly value={profLink} className={INP + ' flex-1 text-xs'} />
+            <CopyLink url={profLink} />
+          </div>
+        </div>
       </div>
 
       {/* Dados do profissional */}
       <div className="grid grid-cols-3 gap-4">
-        <FInput label="Nome"  req val="JESSE DOS SANTOS BEZERRA" />
-        <FInput label="Email" req val="jesse.9001@gmail.com" />
-        <FSelect label="Gênero" req opts={['Masculino', 'Feminino', 'Outro']} val="Masculino" />
-        <FSelect label="Tipo" req opts={['Dentista', 'Médico', 'Fisioterapeuta', 'Psicólogo']} val="Dentista" />
-        <FInput label="Especialidade" />
-        <FSelect label="Conselho" opts={['Selecione um conselho', 'CRO', 'CFM', 'CREFITO']} val="Selecione um conselho" />
-        <FInput label="Número do conselho" />
-        <FSelect label="Duração da sessão" req opts={['30 minutos', '40 minutos', '50 minutos', '60 minutos']} val="40 minutos" />
-        <FInput label="CEP" req val="54410-390" />
-        <FInput label="Logradouro" req val="Rua José Braz Moscow" />
+        <CFInput label="Nome" req value={form.nome ?? ''} onChange={(v) => setF('nome', v)} />
+        <CFInput label="Email" req value={form.email ?? ''} disabled />
+        <CFSelect label="Gênero" opts={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={form.genero ?? ''} onChange={(v) => setF('genero', v)} />
+        <CFSelect label="Tipo" req opts={['Dentista', 'Médico', 'Fisioterapeuta', 'Psicólogo', 'Nutricionista', 'Enfermeiro', 'Outro']} value={form.tipo ?? ''} onChange={(v) => setF('tipo', v)} />
+        <CFInput label="Especialidade" value={form.especialidade ?? ''} onChange={(v) => setF('especialidade', v)} />
+        <CFSelect label="Conselho" opts={['CRM', 'CRO', 'CFP', 'CREFITO', 'CRN', 'COREN', 'Outro']} value={form.conselho ?? ''} onChange={(v) => setF('conselho', v)} />
+        <CFInput label="Número do conselho" value={form.numeroConselho ?? ''} onChange={(v) => setF('numeroConselho', v)} />
+        <CFSelect label="Duração da sessão (min)" req opts={['20', '30', '40', '45', '50', '60', '90', '120']} value={form.duracaoSessao ? String(form.duracaoSessao) : ''} onChange={(v) => setF('duracaoSessao', v ? Number(v) : undefined)} />
+        <CFInput label="CEP" req value={form.cep ?? ''} onChange={(v) => setF('cep', v)} />
+        <CFInput label="Logradouro" req value={form.logradouro ?? ''} onChange={(v) => setF('logradouro', v)} />
         <div className="grid grid-cols-2 gap-3">
-          <FInput label="Número"     req val="61" />
-          <FInput label="Complemento" />
+          <CFInput label="Número" req value={form.numero ?? ''} onChange={(v) => setF('numero', v)} />
+          <CFInput label="Complemento" value={form.complemento ?? ''} onChange={(v) => setF('complemento', v)} />
         </div>
-        <FInput label="Bairro" req val="Piedade" />
-        <FInput label="Celular"            req val="(81) 99708-8404" />
-        <FInput label="Telefone comercial" />
+        <CFInput label="Bairro" req value={form.bairro ?? ''} onChange={(v) => setF('bairro', v)} />
+        <CFInput label="Cidade" req value={form.cidade ?? ''} onChange={(v) => setF('cidade', v)} />
+        <CFInput label="Celular" req value={form.telefone ?? ''} onChange={(v) => setF('telefone', v)} />
+        <CFInput label="Telefone comercial" value={form.telefoneComercial ?? ''} onChange={(v) => setF('telefoneComercial', v)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <FSelect label="Período mínimo para agendamento" opts={['A partir de amanhã', 'A partir de hoje', 'Em 2 dias', 'Em 3 dias']} val="A partir de amanhã" />
-        <FSelect label="Período máximo para agendamento" opts={['Até 8 semanas', 'Até 4 semanas', 'Até 2 semanas', 'Sem limite']} val="Até 8 semanas" />
-        <FSelect label="Tempo de Antecedência para Edição" opts={['Sem restrição', '24 horas', '48 horas', '1 semana']} val="Sem restrição" />
+      <div className="grid grid-cols-3 gap-4">
+        <CFSelect label="Período mínimo para agendamento" opts={['A partir de hoje', 'A partir de amanhã', 'Após 2 dias', 'Após 3 dias', 'Após 1 semana']} value={form.periodoMinimo ?? ''} onChange={(v) => setF('periodoMinimo', v)} />
+        <CFSelect label="Período máximo para agendamento" opts={['Até 1 semana', 'Até 2 semanas', 'Até 1 mês', 'Até 2 meses', 'Até 3 meses', 'Até 6 meses']} value={form.periodoMaximo ?? ''} onChange={(v) => setF('periodoMaximo', v)} />
+        <CFSelect label="Tempo de Antecedência" opts={['Sem restrição', '1 hora antes', '2 horas antes', '6 horas antes', '12 horas antes', '24 horas antes', '48 horas antes']} value={form.tempoAntecedencia ?? ''} onChange={(v) => setF('tempoAntecedencia', v)} />
       </div>
 
+      {/* Observações */}
       <div>
-        <p className="text-sm font-semibold text-[#F5F0FF] mb-2">Observações</p>
-        <div className="rounded-md border border-[rgba(124,77,255,0.25)] bg-[#0D0520] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-[rgba(124,77,255,0.15)] flex-wrap">
-            {['Parágrafo', 'B', 'I', 'U'].map((t) => (
-              <button key={t} className="px-2 py-0.5 rounded text-xs text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] transition-colors">{t}</button>
-            ))}
-          </div>
-          <textarea rows={4} className="w-full bg-transparent px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none resize-none" />
-        </div>
+        <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Observações</p>
+        <textarea
+          rows={4}
+          value={form.observacoes ?? ''}
+          onChange={(e) => setF('observacoes', e.target.value)}
+          className={INP + ' resize-none'}
+          placeholder="Informações adicionais sobre o profissional..."
+        />
       </div>
 
-      <div className="flex justify-end pt-4 border-t border-[rgba(124,77,255,0.12)]">
-        <button className={BTN_PRIMARY}>Salvar</button>
+      <div className="flex items-center justify-between pt-4 border-t border-[rgba(124,77,255,0.12)]">
+        <div>
+          {saveError && <p className="text-xs text-red-400">{saveError}</p>}
+          {saved && <p className="text-xs text-green-400">Alterações salvas com sucesso.</p>}
+        </div>
+        <button onClick={handleSave} disabled={saving} className={BTN_PRIMARY + ' flex items-center gap-2 disabled:opacity-60'}>
+          {saving && <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {saving ? 'Salvando...' : 'Salvar'}
+        </button>
       </div>
     </div>
+  )
+}
+
+// ─── Controlled helpers (used in TabAutoAgendamento) ─────────────────────────
+function CFInput({ label, req, value, onChange, disabled }: {
+  label: string; req?: boolean; value: string; onChange?: (v: string) => void; disabled?: boolean
+}) {
+  return (
+    <div className="relative">
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+        {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
+      </label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disabled}
+        className={INP + (disabled ? ' opacity-60 cursor-not-allowed' : '')}
+      />
+    </div>
+  )
+}
+
+function CFSelect({ label, req, opts, value, onChange }: {
+  label: string; req?: boolean; opts: string[]; value: string; onChange: (v: string) => void
+}) {
+  return (
+    <div className="relative">
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+        {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
+      </label>
+      <div className="relative">
+        <select value={value} onChange={(e) => onChange(e.target.value)} className={INP + ' appearance-none pr-8 cursor-pointer'}>
+          <option value="">Selecione</option>
+          {opts.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+      </div>
+    </div>
+  )
+}
+
+function CopyLink({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <>
+      <button onClick={async () => { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[rgba(124,77,255,0.12)] text-[#7C4DFF] text-xs font-semibold border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors shrink-0">
+        {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+        {copied ? 'Copiado!' : 'Copiar'}
+      </button>
+      <a href={url} target="_blank" rel="noopener noreferrer"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[rgba(34,197,94,0.10)] text-[#22C55E] text-xs font-semibold border border-[rgba(34,197,94,0.2)] hover:border-[#22C55E] transition-colors shrink-0">
+        <ExternalLink size={12} />Abrir
+      </a>
+    </>
   )
 }
 
@@ -411,8 +567,7 @@ const SITE_SUBTABS: { id: SiteSubTab; label: string }[] = [
   { id: 'redes',   label: 'Redes Sociais e Contatos' },
 ]
 
-type BlogPost = { id: number; titulo: string; data: string; status: 'Publicado' | 'Rascunho' }
-const MOCK_BLOG: BlogPost[] = []
+type BlogPost = { id: string; titulo: string; data: string; status: 'Publicado' | 'Rascunho' | 'Preview' }
 
 function ImageUploadBox({ label, desc, wide }: { label: string; desc: string; wide?: boolean }) {
   return (
@@ -426,17 +581,33 @@ function ImageUploadBox({ label, desc, wide }: { label: string; desc: string; wi
   )
 }
 
-function TabMeuSite() {
+function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
   const [configured, setConfigured] = useState(false)
-  const [linkSlug, setLinkSlug] = useState('dev2b')
+  const [siteConfigId, setSiteConfigId] = useState<string | null>(null)
+  const [linkSlug, setLinkSlug] = useState('')
   const [corPrincipal, setCorPrincipal] = useState('#00B4A6')
   const [disponibilidade, setDisponibilidade] = useState<'ativo' | 'inativo'>('ativo')
+  const [sobreMim, setSobreMim] = useState('')
+  const [servicos, setServicos] = useState('')
+  const [slogan, setSlogan] = useState('')
+  const [tituloPagina, setTituloPagina] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [emailContato, setEmailContato] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [websiteLink, setWebsiteLink] = useState('')
+  const [instagram, setInstagram] = useState('')
+  const [facebook, setFacebook] = useState('')
+  const [linkedin, setLinkedin] = useState('')
+  const [youtube, setYoutube] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [subTab, setSubTab] = useState<SiteSubTab>('imagens')
   const [blogSearch, setBlogSearch] = useState('')
   const [blogPage, setBlogPage] = useState(1)
   const [blogPageSize, setBlogPageSize] = useState(10)
   const [blogPageSizeOpen, setBlogPageSizeOpen] = useState(false)
-  const [posts, setPosts] = useState<BlogPost[]>(MOCK_BLOG)
+  const [posts, setPosts] = useState<BlogPost[]>([])
   const [novaPublOpen, setNovaPublOpen] = useState(false)
   const [novaPublTitulo, setNovaPublTitulo] = useState('')
   const [novaPublData, setNovaPublData] = useState('')
@@ -445,13 +616,85 @@ function TabMeuSite() {
   const [novaPublConteudo, setNovaPublConteudo] = useState('')
   const [novaPublImageSrc, setNovaPublImageSrc] = useState<string | null>(null)
   const novaPublImageRef = useRef<HTMLInputElement>(null)
-  const [postIdCounter, setPostIdCounter] = useState(1)
   const [logoSrc, setLogoSrc] = useState<string | null>(null)
   const [perfilSrc, setPerfilSrc] = useState<string | null>(null)
   const [bannerSrc, setBannerSrc] = useState<string | null>(null)
   const logoRef = useRef<HTMLInputElement>(null)
   const perfilRef = useRef<HTMLInputElement>(null)
   const bannerRef = useRef<HTMLInputElement>(null)
+
+  // Load site config when prof changes
+  const prevProfId = useRef<string | null>(null)
+  if (prevProfId.current !== prof.id) {
+    prevProfId.current = prof.id
+    Promise.resolve().then(async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/usuario/${prof.id}`)
+        if (res.status === 204 || !res.ok) { setConfigured(false); return }
+        const data = await res.json()
+        setSiteConfigId(data.id)
+        setLinkSlug(data.linkSlug ?? '')
+        setCorPrincipal(data.corPrincipal ?? '#00B4A6')
+        setDisponibilidade((data.disponibilidade ?? 'ativo') as 'ativo' | 'inativo')
+        setSobreMim(data.sobreMim ?? '')
+        setServicos(data.servicos ?? '')
+        setSlogan(data.slogan ?? '')
+        setTituloPagina(data.tituloPagina ?? '')
+        setWhatsapp(data.whatsapp ?? '')
+        setEmailContato(data.emailContato ?? '')
+        setTelefone(data.telefone ?? '')
+        setWebsiteLink(data.websiteLink ?? '')
+        setInstagram(data.instagram ?? '')
+        setFacebook(data.facebook ?? '')
+        setLinkedin(data.linkedin ?? '')
+        setYoutube(data.youtube ?? '')
+        setPosts((data.posts ?? []).map((p: { id: string; titulo: string; dataPublicacao?: string; status: string }) => ({
+          id: p.id,
+          titulo: p.titulo,
+          data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
+          status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
+        } as BlogPost)))
+        setConfigured(true)
+      } catch { setConfigured(false) }
+    })
+  }
+
+  async function handleSave() {
+    setSaving(true); setSaveError(null); setSaved(false)
+    try {
+      const body = {
+        linkSlug: linkSlug || undefined,
+        corPrincipal: corPrincipal || undefined,
+        disponibilidade,
+        sobreMim: sobreMim || undefined,
+        servicos: servicos || undefined,
+        slogan: slogan || undefined,
+        tituloPagina: tituloPagina || undefined,
+        whatsapp: whatsapp || undefined,
+        emailContato: emailContato || undefined,
+        telefone: telefone || undefined,
+        websiteLink: websiteLink || undefined,
+        instagram: instagram || undefined,
+        facebook: facebook || undefined,
+        linkedin: linkedin || undefined,
+        youtube: youtube || undefined,
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/usuario/${prof.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+      const data = await res.json()
+      setSiteConfigId(data.id)
+      setConfigured(true)
+      setSaved(true)
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao salvar')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   function handleImageFile(file: File, set: (src: string) => void) {
     const reader = new FileReader()
@@ -463,16 +706,38 @@ function TabMeuSite() {
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / blogPageSize))
   const pagePosts = filteredPosts.slice((blogPage - 1) * blogPageSize, blogPage * blogPageSize)
 
-  function savePost() {
-    if (!novaPublTitulo.trim()) return
-    const statusLabel = novaPublStatus || 'Rascunho'
-    setPosts((prev) => [
-      ...prev,
-      { id: postIdCounter, titulo: novaPublTitulo.trim(), data: novaPublData || new Date().toLocaleDateString('pt-BR'), status: (statusLabel === 'Publicado' ? 'Publicado' : 'Rascunho') as 'Publicado' | 'Rascunho' },
-    ])
-    setPostIdCounter((n) => n + 1)
+  async function savePost() {
+    if (!novaPublTitulo.trim() || !siteConfigId) return
+    const statusMap: Record<string, string> = { 'Publicado': 'PUBLICADO', 'Preview': 'PREVIEW', 'Rascunho': 'RASCUNHO' }
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/usuario/${prof.id}/blog`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: novaPublTitulo.trim(),
+          dataPublicacao: novaPublData || null,
+          status: statusMap[novaPublStatus] ?? 'RASCUNHO',
+          conteudo: novaPublConteudo,
+        }),
+      })
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+      const p = await res.json()
+      setPosts((prev) => [...prev, {
+        id: p.id,
+        titulo: p.titulo,
+        data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
+        status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
+      } as BlogPost])
+    } catch { /* silently ignore */ }
     setNovaPublTitulo(''); setNovaPublData(''); setNovaPublStatus(''); setNovaPublConteudo(''); setNovaPublImageSrc(null)
     setNovaPublOpen(false)
+  }
+
+  async function deletePost(id: string) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/blog/${id}`, { method: 'DELETE' })
+      setPosts((prev) => prev.filter((x) => x.id !== id))
+    } catch { /* silently ignore */ }
   }
 
   if (!configured) {
@@ -527,7 +792,7 @@ function TabMeuSite() {
           <h3 className="text-sm font-semibold text-[#F5F0FF]">Meu Site & Blog</h3>
           <p className="text-xs text-[#A78BCC] mt-0.5">Configure as informações do website e blog.</p>
         </div>
-        <a href={`https://agendart.tech/p/${linkSlug}`} target="_blank" rel="noreferrer"
+        <a href={`https://site.dev2b.tec.br/p/${linkSlug}`} target="_blank" rel="noreferrer"
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
           <Eye size={13} /> Preview
         </a>
@@ -542,7 +807,7 @@ function TabMeuSite() {
           </label>
           <div className="flex bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
             <span className="flex items-center px-3 text-xs text-[#6B4E8A] border-r border-[rgba(124,77,255,0.18)] shrink-0 whitespace-nowrap">
-              https://agendart.tech/p/
+              https://site.dev2b.tec.br/p/
             </span>
             <input
               type="text"
@@ -742,7 +1007,7 @@ function TabMeuSite() {
                   <span className="text-sm text-[#A78BCC]">{p.data}</span>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${p.status === 'Publicado' ? 'bg-[rgba(34,197,94,0.12)] text-[#22C55E]' : 'bg-[rgba(124,77,255,0.12)] text-[#A78BCC]'}`}>{p.status}</span>
                   <button
-                    onClick={() => setPosts((prev) => prev.filter((x) => x.id !== p.id))}
+                    onClick={() => deletePost(p.id)}
                     className="w-7 h-7 rounded-full bg-[rgba(239,68,68,0.08)] text-[#EF4444] flex items-center justify-center hover:bg-[rgba(239,68,68,0.18)] transition-colors"
                   ><X size={12} /></button>
                 </div>
@@ -786,8 +1051,15 @@ function TabMeuSite() {
         </div>
       </div>
 
-      <div className="flex justify-end pt-2 border-t border-[rgba(124,77,255,0.12)]">
-        <button className={BTN_PRIMARY}>Salvar</button>
+      <div className="flex items-center justify-between pt-2 border-t border-[rgba(124,77,255,0.12)]">
+        <div>
+          {saveError && <p className="text-xs text-red-400">{saveError}</p>}
+          {saved && <p className="text-xs text-green-400">Alterações salvas com sucesso.</p>}
+        </div>
+        <button onClick={handleSave} disabled={saving} className={BTN_PRIMARY + ' flex items-center gap-2 disabled:opacity-60'}>
+          {saving && <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {saving ? 'Salvando...' : 'Salvar'}
+        </button>
       </div>
 
       {/* ── Modal: Nova Publicação ── */}
@@ -1061,19 +1333,20 @@ const MKT_TABS: MktTabDef[] = [
 ]
 
 // ─── Main component ───────────────────────────────────────────────────────────
-const PROFISSIONAIS = ['JESSE DOS SANTOS BEZERRA', 'Maria Silva', 'João Neto']
-
-export function MarketingView() {
-  const [profissional, setProfissional] = useState(PROFISSIONAIS[0])
+export function MarketingView({ empresaId, profissionais }: { empresaId: string | null; profissionais: ProfissionalApi[] }) {
+  const [selectedId, setSelectedId] = useState<string>('')
+  const [profDropdown, setProfDropdown] = useState(false)
   const [tab, setTab] = useState<MktTab>('auto')
 
-  const content = (() => {
+  const selected = profissionais.find((p) => p.id === selectedId) ?? null
+
+  const content = selected ? (() => {
     switch (tab) {
-      case 'auto':  return <TabAutoAgendamento />
-      case 'site':  return <TabMeuSite />
+      case 'auto':  return <TabAutoAgendamento key={selected.id} prof={selected} empresaId={empresaId} />
+      case 'site':  return <TabMeuSite key={selected.id} prof={selected} />
       case 'venda': return <TabVendaMais />
     }
-  })()
+  })() : null
 
   return (
     <div className="p-8 space-y-6">
@@ -1085,20 +1358,45 @@ export function MarketingView() {
       {/* Profissional selector */}
       <div>
         <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Profissional</p>
-        <div className="relative">
-          <select
-            value={profissional}
-            onChange={(e) => setProfissional(e.target.value)}
-            className={INP + ' appearance-none pr-8 cursor-pointer'}
+        <div className="relative w-full">
+          <button
+            onClick={() => setProfDropdown((o) => !o)}
+            className="w-full flex items-center justify-between gap-2 bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm hover:border-[#7C4DFF] transition-colors"
           >
-            <option value="">Selecione um profissional</option>
-            {PROFISSIONAIS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+            <span className={selected ? 'text-[#F5F0FF]' : 'text-[#6B4E8A]'}>
+              {selected ? selected.nome : 'Selecione um profissional...'}
+            </span>
+            <ChevronDown size={13} className="text-[#A78BCC] shrink-0" />
+          </button>
+          {profDropdown && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setProfDropdown(false)} />
+              <div className="absolute left-0 top-full mt-1 w-full z-20 bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-lg shadow-xl max-h-56 overflow-y-auto">
+                {profissionais.length === 0 ? (
+                  <div className="px-3 py-3 text-sm text-[#6B4E8A] text-center">Nenhum profissional encontrado</div>
+                ) : (
+                  profissionais.map((p) => (
+                    <button key={p.id} onClick={() => { setSelectedId(p.id); setProfDropdown(false); setTab('auto') }}
+                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-[rgba(124,77,255,0.15)] transition-colors ${p.id === selectedId ? 'text-[#7C4DFF] font-medium' : 'text-[#F5F0FF]'}`}>
+                      <div className="font-medium">{p.nome}</div>
+                      {p.especialidade && <div className="text-xs text-[#A78BCC]">{p.especialidade}</div>}
+                    </button>
+                  ))
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {profissional && (
+      {!selected && (
+        <div className="flex flex-col items-center py-20 text-center text-[#6B4E8A]">
+          <User size={48} className="mb-4 opacity-30" />
+          <p className="text-sm">Selecione um profissional para configurar o marketing.</p>
+        </div>
+      )}
+
+      {selected && (
         <div className="flex gap-5">
           {/* Sub-menu lateral */}
           <aside className="flex flex-col w-[90px] shrink-0 gap-0.5">
