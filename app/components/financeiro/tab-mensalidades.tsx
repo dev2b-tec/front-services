@@ -5,10 +5,10 @@ import { Search, Filter, Plus, Upload, ChevronDown, X, Check } from 'lucide-reac
 
 // ─── Shared styles (dark theme) ───────────────────────────────────────────────
 const INP =
-  'w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-xl ' +
-  'px-4 py-3 text-sm text-[#F5F0FF] placeholder:text-[#3D2A5A] ' +
+  'w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl ' +
+  'px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder:text-[#3D2A5A] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
-const LBL = 'block text-xs font-medium text-[#6B4E8A] mb-1.5'
+const LBL = 'block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5'
 const JOIN = (base: string, extra: string) => `${base} ${extra}`
 
 function fmtBRL(v: number) {
@@ -51,9 +51,9 @@ type Option = { id: string; nome: string }
 function StatusBadge({ status }: { status: string }) {
   const cfg: Record<string, string> = {
     PAGO:      'bg-[rgba(34,197,94,0.12)] text-[#22C55E] border border-[rgba(34,197,94,0.25)]',
-    EM_ABERTO: 'bg-[rgba(124,77,255,0.10)] text-[#A78BCC] border border-[rgba(124,77,255,0.25)]',
+    EM_ABERTO: 'bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)]',
     ATRASADO:  'bg-[rgba(239,68,68,0.12)] text-[#EF4444] border border-[rgba(239,68,68,0.25)]',
-    CANCELADO: 'bg-[rgba(107,78,138,0.20)] text-[#6B4E8A] border border-[rgba(124,77,255,0.15)]',
+    CANCELADO: 'bg-[rgba(107,78,138,0.20)] text-[var(--d2b-text-muted)] border border-[var(--d2b-border)]',
   }
   const label: Record<string, string> = {
     PAGO: 'Pago', EM_ABERTO: 'Em Aberto', ATRASADO: 'Atrasado', CANCELADO: 'Cancelado',
@@ -127,11 +127,11 @@ function ModalAdicionar({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
+      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)]">
-          <h3 className="text-base font-bold text-[#F5F0FF]">Adicionar Mensalidade</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)]">
+          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Adicionar Mensalidade</h3>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -163,7 +163,7 @@ function ModalAdicionar({
                   <option value="">Selecione um paciente</option>
                   {pacientes.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
               </div>
             </div>
             <div>
@@ -177,7 +177,7 @@ function ModalAdicionar({
                   <option value="">Selecione um profissional</option>
                   {profissionais.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -230,7 +230,7 @@ function ModalAdicionar({
 
           {/* Parcela preview */}
           {n > 0 && total > 0 && (
-            <p className="text-sm font-semibold text-[#A78BCC]">
+            <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">
               {n} {n === 1 ? 'parcela de' : 'parcelas mensais de'}{' '}
               <span className="text-[#7C4DFF]">{fmtBRL(valorParcela)}</span>
             </p>
@@ -238,8 +238,8 @@ function ModalAdicionar({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[rgba(124,77,255,0.18)] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.20)] hover:border-[rgba(124,77,255,0.40)] hover:text-[#F5F0FF] transition-colors">
+        <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[var(--d2b-border-strong)] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
           <button
@@ -302,10 +302,10 @@ function ModalEditar({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)]">
-          <h3 className="text-base font-bold text-[#F5F0FF]">Editar Mensalidade</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)]">
+          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Mensalidade</h3>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -338,7 +338,7 @@ function ModalEditar({
                   <option value="">Nenhum</option>
                   {profissionais.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -362,7 +362,7 @@ function ModalEditar({
                     <option key={s} value={s}>{s === 'EM_ABERTO' ? 'Em Aberto' : s.charAt(0) + s.slice(1).toLowerCase()}</option>
                   ))}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -406,14 +406,14 @@ function ModalEditar({
                   <option value="">Selecione</option>
                   {METODOS.map((m) => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-[rgba(124,77,255,0.18)] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.20)] hover:border-[rgba(124,77,255,0.40)] hover:text-[#F5F0FF] transition-colors">
+        <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[var(--d2b-border-strong)] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
           <button
@@ -459,10 +459,10 @@ function ModalExcluir({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
+      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
         <div className="flex items-center justify-between mb-6">
-          <span className="text-base font-semibold text-[#F5F0FF]">Excluir Mensalidade</span>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+          <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Excluir Mensalidade</span>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -476,28 +476,28 @@ function ModalExcluir({
           </div>
         </div>
 
-        <p className="text-sm text-center text-[#A78BCC] mb-6 leading-relaxed">
+        <p className="text-sm text-center text-[var(--d2b-text-secondary)] mb-6 leading-relaxed">
           <span className="font-bold text-red-400">Atenção:</span> Esta ação não pode ser desfeita. Defina abaixo como deseja excluir esta conta.
         </p>
 
         <div className="flex flex-col gap-3 mb-7">
           {([
-            { val: 'esta',    label: <>Excluir apenas <strong className="text-[#F5F0FF]">esta parcela</strong></> },
-            { val: 'todas',   label: <>Excluir <strong className="text-[#F5F0FF]">todas as parcelas</strong> da conta</> },
-            { val: 'futuras', label: <>Excluir <strong className="text-[#F5F0FF]">esta e as futuras</strong></> },
+            { val: 'esta',    label: <>Excluir apenas <strong className="text-[var(--d2b-text-primary)]">esta parcela</strong></> },
+            { val: 'todas',   label: <>Excluir <strong className="text-[var(--d2b-text-primary)]">todas as parcelas</strong> da conta</> },
+            { val: 'futuras', label: <>Excluir <strong className="text-[var(--d2b-text-primary)]">esta e as futuras</strong></> },
           ] as const).map(({ val, label }) => (
             <label key={val} className="flex items-center gap-3 cursor-pointer group">
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${opcao === val ? 'border-[#7C4DFF]' : 'border-[#3D2A5A] group-hover:border-[#7C4DFF]'}`}>
                 {opcao === val && <div className="w-2.5 h-2.5 rounded-full bg-[#7C4DFF]" />}
               </div>
               <input type="radio" className="hidden" checked={opcao === val} onChange={() => setOpcao(val)} />
-              <span className="text-sm text-[#A78BCC] group-hover:text-[#F5F0FF] transition-colors">{label}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)] group-hover:text-[var(--d2b-text-primary)] transition-colors">{label}</span>
             </label>
           ))}
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)] transition-colors">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[var(--d2b-border-strong)] transition-colors">
             Cancelar
           </button>
           <button
@@ -525,7 +525,7 @@ function Pagination({ page, totalPages, pageSize, onPage, onPageSize }: {
         const actions = [() => onPage(1), () => onPage(Math.max(1, page - 1)), () => onPage(Math.min(totalPages, page + 1)), () => onPage(totalPages)]
         return (
           <button key={sym} onClick={actions[i]}
-            className="w-7 h-7 flex items-center justify-center rounded text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] hover:text-[#F5F0FF] transition-colors">
+            className="w-7 h-7 flex items-center justify-center rounded text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors">
             {sym}
           </button>
         )
@@ -533,14 +533,14 @@ function Pagination({ page, totalPages, pageSize, onPage, onPageSize }: {
       <span className="w-7 h-7 flex items-center justify-center rounded bg-[#7C4DFF] text-white text-xs font-semibold">{page}</span>
       <div className="relative ml-1">
         <button onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-1 px-2 py-1.5 border border-[rgba(124,77,255,0.25)] rounded text-xs text-[#A78BCC] hover:border-[#7C4DFF] transition-colors">
+          className="flex items-center gap-1 px-2 py-1.5 border border-[var(--d2b-border-strong)] rounded text-xs text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">
           {pageSize} <ChevronDown size={11} />
         </button>
         {open && (
-          <div className="absolute bottom-full mb-1 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-xl overflow-hidden z-20">
+          <div className="absolute bottom-full mb-1 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl overflow-hidden z-20">
             {[5, 10, 20, 50].map((n) => (
               <button key={n} onClick={() => { onPageSize(n); setOpen(false) }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-[rgba(124,77,255,0.12)] transition-colors ${pageSize === n ? 'text-[#7C4DFF] font-semibold' : 'text-[#F5F0FF]'}`}>
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--d2b-hover)] transition-colors ${pageSize === n ? 'text-[#7C4DFF] font-semibold' : 'text-[var(--d2b-text-primary)]'}`}>
                 {n}
               </button>
             ))}
@@ -657,13 +657,13 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
         />
       )}
 
-      <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
+      <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-[rgba(124,77,255,0.12)]">
+        <div className="px-6 pt-6 pb-4 border-b border-[var(--d2b-border)]">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-base font-bold text-[#F5F0FF]">Mensalidades</h2>
-              <p className="text-xs text-[#A78BCC] mt-0.5">Controle o recebimento mensal de seus pacientes e de outras contas da sua clínica.</p>
+              <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Mensalidades</h2>
+              <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Controle o recebimento mensal de seus pacientes e de outras contas da sua clínica.</p>
             </div>
             <button
               onClick={() => setModalAdd(true)}
@@ -674,16 +674,16 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
           </div>
           <div className="flex items-center gap-2 mt-4">
             <div className="relative">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
               <input
                 type="text"
                 placeholder="Pesquisar"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-                className="bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-lg pl-8 pr-3 py-2 text-sm text-[#F5F0FF] placeholder:text-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors w-48"
+                className="bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-lg pl-8 pr-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors w-48"
               />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-lg hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
               <Filter size={13} /> Filtrar
             </button>
           </div>
@@ -693,34 +693,34 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[rgba(124,77,255,0.12)] bg-[#0D0520]">
-                <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left w-24">AÇÕES</th>
-                <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left">NOME</th>
+              <tr className="border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-main)]">
+                <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left w-24">AÇÕES</th>
+                <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">NOME</th>
                 {['PROFISSIONAL', 'PACIENTE', 'DATA'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left">
-                    <button className="flex items-center gap-1 hover:text-[#A78BCC] transition-colors">
+                  <th key={h} className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">
+                    <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors">
                       {h} <ChevronDown size={10} />
                     </button>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-right">PAGAMENTO</th>
+                <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-right">PAGAMENTO</th>
               </tr>
             </thead>
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-[#6B4E8A]">
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-[var(--d2b-text-muted)]">
                     {!empresaId ? 'Empresa não identificada.' : 'Nenhuma mensalidade encontrada.'}
                   </td>
                 </tr>
               ) : pageRows.map((r) => (
-                <tr key={r.id} className="border-b border-[rgba(124,77,255,0.08)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
+                <tr key={r.id} className="border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
                   {/* Ações */}
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditRow(r)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors"
                         title="Editar"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -743,19 +743,19 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
                     </div>
                   </td>
                   {/* Nome */}
-                  <td className="px-4 py-4 font-semibold text-[#F5F0FF]">{r.titulo}</td>
+                  <td className="px-4 py-4 font-semibold text-[var(--d2b-text-primary)]">{r.titulo}</td>
                   {/* Profissional */}
-                  <td className="px-4 py-4 text-[#A78BCC]">{r.usuarioNome}</td>
+                  <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.usuarioNome}</td>
                   {/* Paciente */}
-                  <td className="px-4 py-4 text-[#A78BCC]">{r.pacienteNome}</td>
+                  <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.pacienteNome}</td>
                   {/* Data */}
                   <td className="px-4 py-4">
-                    <p className="text-[#A78BCC]">{r.dataVencimento}</p>
+                    <p className="text-[var(--d2b-text-secondary)]">{r.dataVencimento}</p>
                     <p className="text-xs text-[#7C4DFF] mt-0.5">Parcela {r.numeroParcela}/{r.totalParcelas}</p>
                   </td>
                   {/* Pagamento */}
                   <td className="px-4 py-4 text-right">
-                    <p className="text-sm font-medium text-[#F5F0FF]">
+                    <p className="text-sm font-medium text-[var(--d2b-text-primary)]">
                       {fmtBRL(r.valorPago)} de {fmtBRL(r.valorParcela)}
                     </p>
                     <div className="flex items-center justify-end mt-0.5">
@@ -769,17 +769,17 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[rgba(124,77,255,0.12)] flex items-center justify-between flex-wrap gap-3">
-          <button className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+        <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
+          <button className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             <Upload size={13} /> Exportar Dados
           </button>
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-xs text-[#A78BCC]">
-                Total Recebido: <span className="font-semibold text-[#F5F0FF]">{fmtBRL(totalRecebido)}</span>
+              <p className="text-xs text-[var(--d2b-text-secondary)]">
+                Total Recebido: <span className="font-semibold text-[var(--d2b-text-primary)]">{fmtBRL(totalRecebido)}</span>
               </p>
-              <p className="text-xs text-[#A78BCC]">
-                A receber: <span className="font-semibold text-[#F5F0FF]">{fmtBRL(aReceber)}</span>
+              <p className="text-xs text-[var(--d2b-text-secondary)]">
+                A receber: <span className="font-semibold text-[var(--d2b-text-primary)]">{fmtBRL(aReceber)}</span>
               </p>
             </div>
             <Pagination

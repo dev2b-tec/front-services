@@ -14,10 +14,10 @@ function SignInRedirect() {
   }, [callbackUrl])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0D0520]">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--d2b-bg-main)]">
       <div className="flex flex-col items-center gap-4">
         <div className="w-8 h-8 border-2 border-[#7C4DFF] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-[#A78BCC]">Redirecionando para autenticação...</p>
+        <p className="text-sm text-[var(--d2b-text-secondary)]">Redirecionando para autenticação...</p>
       </div>
     </div>
   )

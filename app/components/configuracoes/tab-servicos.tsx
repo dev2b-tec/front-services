@@ -155,8 +155,8 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Serviços da Clínica</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Serviços da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
             Edite os serviços prestados pela sua consultório ou clínica. Eles estarão disponíveis para especificar os agendamentos realizados.
           </p>
         </div>
@@ -173,20 +173,20 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
       {/* Filtros */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
           <input
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Pesquisar Serviço..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
           />
         </div>
 
         <select
           value={filtroTipo}
           onChange={(e) => setFiltroTipo(e.target.value)}
-          className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+          className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
         >
           <option value="TODOS">Todos</option>
           <option value="GERAL">Geral</option>
@@ -198,18 +198,18 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+        <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-[#A78BCC]">
+          <p className="text-xs text-[var(--d2b-text-secondary)]">
             Exibindo {servicosFiltrados.length} de {servicos.length} serviços
           </p>
 
           <div className="space-y-3">
             {/* Formulário criar novo */}
             {criandoNovo && (
-              <div className="p-4 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
-                <h4 className="text-sm font-semibold text-[#F5F0FF] mb-3">ATENDIMENTO</h4>
+              <div className="p-4 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+                <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">ATENDIMENTO</h4>
                 
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <input
@@ -217,13 +217,13 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                     value={novoNome}
                     onChange={(e) => setNovoNome(e.target.value)}
                     placeholder="Nome do serviço"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                   
                   <select
                     value={novoTipo}
                     onChange={(e) => setNovoTipo(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   >
                     <option value="GERAL">Geral</option>
                     <option value="PARTICULAR">Particular</option>
@@ -238,7 +238,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                     onChange={(e) => setNovoValor(e.target.value)}
                     placeholder="R$ 0,00"
                     step="0.01"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
                 
@@ -256,7 +256,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                       setNovoTipo('GERAL')
                       setNovoValor('')
                     }}
-                    className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold transition-colors"
+                    className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold transition-colors"
                   >
                     Cancelar
                   </button>
@@ -268,7 +268,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
             {servicosFiltrados.map(servico => (
               <div
                 key={servico.id}
-                className="p-4 rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] hover:border-[rgba(124,77,255,0.35)] transition-colors"
+                className="p-4 rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] hover:border-[var(--d2b-border-strong)] transition-colors"
               >
                 {editingId === servico.id ? (
                   <div className="space-y-3">
@@ -277,13 +277,13 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                         type="text"
                         value={editNome}
                         onChange={(e) => setEditNome(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                        className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                       />
                       
                       <select
                         value={editTipo}
                         onChange={(e) => setEditTipo(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                        className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                       >
                         <option value="GERAL">Geral</option>
                         <option value="PARTICULAR">Particular</option>
@@ -297,7 +297,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                         value={editValor}
                         onChange={(e) => setEditValor(e.target.value)}
                         step="0.01"
-                        className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                        className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                       />
                     </div>
                     
@@ -310,7 +310,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                        className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
                       >
                         Cancelar
                       </button>
@@ -322,10 +322,10 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                       <Briefcase size={20} className="text-[#7C4DFF]" />
                       
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-[#F5F0FF]">{servico.nome}</h4>
+                        <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">{servico.nome}</h4>
                       </div>
 
-                      <span className="text-xs px-3 py-1 rounded-full bg-[rgba(124,77,255,0.15)] text-[#A78BCC]">
+                      <span className="text-xs px-3 py-1 rounded-full bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)]">
                         {servico.tipo === 'GERAL' ? 'Geral' : 
                          servico.tipo === 'PARTICULAR' ? 'Particular' :
                          servico.tipo === 'AMIL_SAUDE' ? 'Amil Saúde' :
@@ -333,7 +333,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                          servico.tipo === 'APAS' ? 'APAS' : servico.tipo}
                       </span>
 
-                      <span className="text-sm font-bold text-[#F5F0FF] min-w-[100px] text-right">
+                      <span className="text-sm font-bold text-[var(--d2b-text-primary)] min-w-[100px] text-right">
                         {servico.valor ? `R$ ${servico.valor.toFixed(2)}` : '-'}
                       </span>
                     </div>
@@ -341,7 +341,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                     <div className="flex items-center gap-2 ml-4">
                       <button
                         onClick={() => handleEditar(servico)}
-                        className="p-2 rounded-lg hover:bg-[rgba(124,77,255,0.15)] text-[#A78BCC] hover:text-[#7C4DFF] transition-colors"
+                        className="p-2 rounded-lg hover:bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors"
                         title="Editar"
                       >
                         <Pencil size={16} />
@@ -349,7 +349,7 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
                       
                       <button
                         onClick={() => handleDeletar(servico.id)}
-                        className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                        className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                         title="Excluir"
                       >
                         <Trash2 size={16} />
@@ -361,12 +361,12 @@ export function TabServicos({ initialEmpresa }: TabServicosProps) {
             ))}
 
             {servicosFiltrados.length === 0 && !criandoNovo && (
-              <div className="p-12 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#0D0520]">
-                <Briefcase size={48} className="mx-auto mb-4 text-[#6B4E8A]" />
-                <p className="text-sm text-[#A78BCC]">
+              <div className="p-12 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)]">
+                <Briefcase size={48} className="mx-auto mb-4 text-[var(--d2b-text-muted)]" />
+                <p className="text-sm text-[var(--d2b-text-secondary)]">
                   {busca || filtroTipo !== 'TODOS' ? 'Nenhum serviço encontrado' : 'Nenhum serviço cadastrado'}
                 </p>
-                <p className="text-xs text-[#6B4E8A] mt-1">
+                <p className="text-xs text-[var(--d2b-text-muted)] mt-1">
                   {busca || filtroTipo !== 'TODOS' ? 'Tente ajustar os filtros' : 'Clique em "Adicionar Novo Serviço" para começar'}
                 </p>
               </div>

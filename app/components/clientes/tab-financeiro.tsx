@@ -147,10 +147,10 @@ export function TabFinanceiro({
     <div className="flex-1 flex flex-col gap-6 p-6 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#F5F0FF]">Financeiro</h2>
+        <h2 className="text-lg font-semibold text-[var(--d2b-text-primary)]">Financeiro</h2>
         <button
           onClick={onVoltar}
-          className="px-4 py-1.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
+          className="px-4 py-1.5 text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
         >
           Voltar
         </button>
@@ -162,18 +162,18 @@ export function TabFinanceiro({
         <div className="relative">
           <button
             onClick={() => { setEvtTituloOpen((v) => !v); setEvtProfOpen(false) }}
-            className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#A78BCC] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
+            className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
           >
-            <span className={evtTitulo ? 'text-[#F5F0FF]' : ''}>{evtTitulo || 'Título do documento'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
+            <span className={evtTitulo ? 'text-[var(--d2b-text-primary)]' : ''}>{evtTitulo || 'Título do documento'}</span>
+            <ChevronDown size={13} className="text-[var(--d2b-text-muted)] flex-shrink-0" />
           </button>
           {evtTituloOpen && (
-            <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden min-w-[200px]">
+            <div className="absolute z-30 top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden min-w-[200px]">
               <button onClick={() => { setEvtTitulo(''); setEvtTituloOpen(false) }}
-                className="w-full text-left px-4 py-2.5 text-sm text-[#6B4E8A] hover:bg-[rgba(124,77,255,0.08)] transition-colors">Todos</button>
+                className="w-full text-left px-4 py-2.5 text-sm text-[var(--d2b-text-muted)] hover:bg-[var(--d2b-hover)] transition-colors">Todos</button>
               {TITULOS_DOC.map((t) => (
                 <button key={t} onClick={() => { setEvtTitulo(t); setEvtTituloOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtTitulo === t ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{t}</button>
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtTitulo === t ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{t}</button>
               ))}
             </div>
           )}
@@ -183,18 +183,18 @@ export function TabFinanceiro({
         <div className="relative">
           <button
             onClick={() => { setEvtProfOpen((v) => !v); setEvtTituloOpen(false) }}
-            className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#A78BCC] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
+            className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors min-w-[200px] justify-between"
           >
-            <span className={evtProf ? 'text-[#F5F0FF]' : ''}>{evtProf || 'Selecione um profissio...'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
+            <span className={evtProf ? 'text-[var(--d2b-text-primary)]' : ''}>{evtProf || 'Selecione um profissio...'}</span>
+            <ChevronDown size={13} className="text-[var(--d2b-text-muted)] flex-shrink-0" />
           </button>
           {evtProfOpen && (
-            <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden min-w-[220px]">
+            <div className="absolute z-30 top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden min-w-[220px]">
               <button onClick={() => { setEvtProf(''); setEvtProfOpen(false) }}
-                className="w-full text-left px-4 py-2.5 text-sm text-[#6B4E8A] hover:bg-[rgba(124,77,255,0.08)] transition-colors">Todos</button>
+                className="w-full text-left px-4 py-2.5 text-sm text-[var(--d2b-text-muted)] hover:bg-[var(--d2b-hover)] transition-colors">Todos</button>
               {usuarios.map((u) => (
                 <button key={u.id} onClick={() => { setEvtProf(u.nome); setEvtProfOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtProf === u.nome ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{u.nome}</button>
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${evtProf === u.nome ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{u.nome}</button>
               ))}
             </div>
           )}
@@ -206,45 +206,45 @@ export function TabFinanceiro({
       </div>
 
       {/* Eventos table */}
-      <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
+      <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.18)]">
+            <tr className="border-b border-[var(--d2b-border)]">
               <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleEvtSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                <button onClick={() => toggleEvtSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                   Profissional <SortIcon col="profissional" cur={evtSort} />
                 </button>
               </th>
               <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleEvtSort('servicos')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                <button onClick={() => toggleEvtSort('servicos')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                   Serviços <SortIcon col="servicos" cur={evtSort} />
                 </button>
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Pagamento</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase">Status</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase">Pagamento</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colSpan={4} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum evento encontrado</td>
+              <td colSpan={4} className="text-center py-10 text-[var(--d2b-text-muted)] text-sm">Nenhum evento encontrado</td>
             </tr>
           </tbody>
         </table>
-        <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">«</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">‹</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">›</button>
-          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] disabled:opacity-30 text-xs">»</button>
+        <div className="flex items-center justify-center gap-2 py-3 border-t border-[var(--d2b-border)]">
+          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] disabled:opacity-30 text-xs">«</button>
+          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] disabled:opacity-30 text-xs">‹</button>
+          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] disabled:opacity-30 text-xs">›</button>
+          <button disabled className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] disabled:opacity-30 text-xs">»</button>
           <div className="relative ml-1">
             <button onClick={() => setEvtPageSizeOpen((v) => !v)}
-              className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-              {evtPageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
+              className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-1 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
+              {evtPageSize} <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
             </button>
             {evtPageSizeOpen && (
-              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                 {[10, 25, 50].map((n) => (
                   <button key={n} onClick={() => { setEvtPageSize(n); setEvtPagina(1); setEvtPageSizeOpen(false) }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${evtPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${evtPageSize === n ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{n}</button>
                 ))}
               </div>
             )}
@@ -255,7 +255,7 @@ export function TabFinanceiro({
       {/* Mensalidades section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-[#F5F0FF]">Mensalidades</h3>
+          <h3 className="text-base font-semibold text-[var(--d2b-text-primary)]">Mensalidades</h3>
           <button
             onClick={() => { setAddTitulo(''); setAddProf(null); setAddParcelas(''); setAddValor(''); setAddData(new Date().toLocaleDateString('pt-BR')); setAddErros({}); setAddOpen(true) }}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
@@ -264,45 +264,45 @@ export function TabFinanceiro({
           </button>
         </div>
 
-        <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
+        <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[rgba(124,77,255,0.18)]">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Ações</th>
+              <tr className="border-b border-[var(--d2b-border)]">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase">Ações</th>
                 <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('nome')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                  <button onClick={() => toggleMensSort('nome')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                     Nome <SortIcon col="nome" cur={mensSort} />
                   </button>
                 </th>
                 <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                  <button onClick={() => toggleMensSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                     Profissional <SortIcon col="profissional" cur={mensSort} />
                   </button>
                 </th>
                 <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('paciente')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                  <button onClick={() => toggleMensSort('paciente')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                     Paciente <SortIcon col="paciente" cur={mensSort} />
                   </button>
                 </th>
                 <th className="text-left px-5 py-3.5">
-                  <button onClick={() => toggleMensSort('data')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                  <button onClick={() => toggleMensSort('data')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                     Data <SortIcon col="data" cur={mensSort} />
                   </button>
                 </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Pagamento</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase">Pagamento</th>
               </tr>
             </thead>
             <tbody>
               {mensSlice.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum registro encontrado</td>
+                  <td colSpan={6} className="text-center py-10 text-[var(--d2b-text-muted)] text-sm">Nenhum registro encontrado</td>
                 </tr>
               ) : (
                 mensSlice.map((m) => (
-                  <tr key={m.id} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
+                  <tr key={m.id} className="border-t border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
-                        <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                        <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </button>
                         <button
@@ -313,15 +313,15 @@ export function TabFinanceiro({
                         </button>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.nome}</td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.profissional}</td>
-                    <td className="px-5 py-3.5 text-[#F5F0FF]">{m.paciente}</td>
+                    <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{m.nome}</td>
+                    <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{m.profissional}</td>
+                    <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{m.paciente}</td>
                     <td className="px-5 py-3.5">
-                      <div className="text-[#F5F0FF]">{m.data}</div>
+                      <div className="text-[var(--d2b-text-primary)]">{m.data}</div>
                       <div className="text-xs text-[#7C4DFF] underline cursor-pointer mt-0.5">Parcela {m.parcela}/{m.totalParcelas}</div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="text-[#F5F0FF] text-sm">{fmt(m.pago)} de {fmt(m.valor)}</div>
+                      <div className="text-[var(--d2b-text-primary)] text-sm">{fmt(m.pago)} de {fmt(m.valor)}</div>
                       <div className="flex items-center gap-1 mt-0.5 text-xs text-red-400">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke="white" strokeWidth="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="white" strokeWidth="2"/></svg>
                         Em Aberto
@@ -335,34 +335,34 @@ export function TabFinanceiro({
 
           {/* Totals row */}
           {mensalidades.length > 0 && (
-            <div className="flex justify-end gap-8 px-5 py-3 border-t border-[rgba(124,77,255,0.18)] text-sm">
-              <span className="text-[#A78BCC]">Total Recebido: <span className="font-semibold text-[#F5F0FF]">{fmt(totalRecebido)}</span></span>
-              <span className="text-[#A78BCC]">A receber: <span className="font-semibold text-[#F5F0FF]">{fmt(totalAReceber)}</span></span>
+            <div className="flex justify-end gap-8 px-5 py-3 border-t border-[var(--d2b-border)] text-sm">
+              <span className="text-[var(--d2b-text-secondary)]">Total Recebido: <span className="font-semibold text-[var(--d2b-text-primary)]">{fmt(totalRecebido)}</span></span>
+              <span className="text-[var(--d2b-text-secondary)]">A receber: <span className="font-semibold text-[var(--d2b-text-primary)]">{fmt(totalAReceber)}</span></span>
             </div>
           )}
 
           {/* Pagination */}
-          <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-            <button onClick={() => setMensPagina(1)} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-            <button onClick={() => setMensPagina((p) => Math.max(1, p - 1))} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
+          <div className="flex items-center justify-center gap-2 py-3 border-t border-[var(--d2b-border)]">
+            <button onClick={() => setMensPagina(1)} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">«</button>
+            <button onClick={() => setMensPagina((p) => Math.max(1, p - 1))} disabled={mensPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">‹</button>
             {Array.from({ length: Math.min(mensTotalPags, 5) }, (_, i) => i + 1).map((p) => (
               <button key={p} onClick={() => setMensPagina(p)}
-                className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${mensPagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[#6B4E8A] hover:text-[#F5F0FF]'}`}>
+                className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${mensPagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)]'}`}>
                 {p}
               </button>
             ))}
-            <button onClick={() => setMensPagina((p) => Math.min(mensTotalPags, p + 1))} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-            <button onClick={() => setMensPagina(mensTotalPags)} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
+            <button onClick={() => setMensPagina((p) => Math.min(mensTotalPags, p + 1))} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">›</button>
+            <button onClick={() => setMensPagina(mensTotalPags)} disabled={mensPagina === mensTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">»</button>
             <div className="relative ml-1">
               <button onClick={() => setMensPageSizeOpen((v) => !v)}
-                className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-                {mensPageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
+                className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-1 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
+                {mensPageSize} <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
               </button>
               {mensPageSizeOpen && (
-                <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+                <div className="absolute z-30 bottom-full mb-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                   {[10, 25, 50].map((n) => (
                     <button key={n} onClick={() => { setMensPageSize(n); setMensPagina(1); setMensPageSizeOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${mensPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${mensPageSize === n ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{n}</button>
                   ))}
                 </div>
               )}
@@ -377,10 +377,10 @@ export function TabFinanceiro({
         if (!alvo) return null
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-md p-8">
               <div className="flex items-center justify-between mb-6">
-                <span className="text-base font-semibold text-[#F5F0FF]">Excluir Conta</span>
-                <button onClick={() => setDelOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Excluir Conta</span>
+                <button onClick={() => setDelOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <X size={15} />
                 </button>
               </div>
@@ -394,7 +394,7 @@ export function TabFinanceiro({
                 </div>
               </div>
 
-              <p className="text-sm text-center text-[#A78BCC] mb-6 leading-relaxed">
+              <p className="text-sm text-center text-[var(--d2b-text-secondary)] mb-6 leading-relaxed">
                 <span className="font-bold text-red-400">Atenção:</span> Esta ação não pode ser desfeita. Defina abaixo como deseja excluir esta conta.
               </p>
 
@@ -409,13 +409,13 @@ export function TabFinanceiro({
                       {delOpcao === val && <div className="w-2.5 h-2.5 rounded-full bg-[#7C4DFF]" />}
                     </div>
                     <input type="radio" className="hidden" checked={delOpcao === val} onChange={() => setDelOpcao(val)} />
-                    <span className="text-sm text-[#A78BCC] group-hover:text-[#F5F0FF] transition-colors">{label}</span>
+                    <span className="text-sm text-[var(--d2b-text-secondary)] group-hover:text-[var(--d2b-text-primary)] transition-colors">{label}</span>
                   </label>
                 ))}
               </div>
 
               <div className="flex items-center justify-end gap-3">
-                <button onClick={() => setDelOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)] transition-colors">
+                <button onClick={() => setDelOpen(false)} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[var(--d2b-border-strong)] transition-colors">
                   Cancelar
                 </button>
                 <button
@@ -449,10 +449,10 @@ export function TabFinanceiro({
       {/* Modal: Adicionar conta a receber */}
       {addOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-full max-w-[810px] p-9">
+          <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-[810px] p-9">
             <div className="flex items-center justify-between mb-6">
-              <span className="text-base font-semibold text-[#F5F0FF]">Adicionar conta a receber</span>
-              <button onClick={() => setAddOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+              <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Adicionar conta a receber</span>
+              <button onClick={() => setAddOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
                 <X size={15} />
               </button>
             </div>
@@ -460,13 +460,13 @@ export function TabFinanceiro({
             <div className="flex flex-col gap-5">
               {/* Título da Conta */}
               <div>
-                <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Título da Conta <span className="text-[#7C4DFF]">*</span></label>
+                <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Título da Conta <span className="text-[#7C4DFF]">*</span></label>
                 <input
                   autoFocus
                   type="text"
                   value={addTitulo}
                   onChange={(e) => { setAddTitulo(e.target.value); setAddErros((p) => ({ ...p, titulo: '' })) }}
-                  className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.titulo ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                  className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.titulo ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
                 />
                 {addErros.titulo && <p className="text-xs text-red-400 mt-1">{addErros.titulo}</p>}
               </div>
@@ -474,31 +474,31 @@ export function TabFinanceiro({
               {/* Paciente + Profissional */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Paciente</label>
+                  <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Paciente</label>
                   <input
                     type="text"
                     value={pacienteNome}
                     readOnly
-                    className="w-full bg-[#0D0520] border border-[rgba(124,77,255,0.15)] rounded-xl px-4 py-3 text-sm text-[#A78BCC] cursor-not-allowed"
+                    className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-secondary)] cursor-not-allowed"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Profissional</label>
+                  <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Profissional</label>
                   <div className="relative">
                     <button
                       onClick={() => setAddProfOpen((v) => !v)}
-                      className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+                      className="w-full flex items-center justify-between bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
                     >
-                      <span className={`truncate text-left ${addProf ? '' : 'text-[#6B4E8A]'}`}>{addProf?.nome ?? 'Selecione um profissional'}</span>
-                      <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
+                      <span className={`truncate text-left ${addProf ? '' : 'text-[var(--d2b-text-muted)]'}`}>{addProf?.nome ?? 'Selecione um profissional'}</span>
+                      <ChevronDown size={13} className="text-[var(--d2b-text-muted)] flex-shrink-0" />
                     </button>
                     {addProfOpen && (
-                      <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+                      <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                         <button onClick={() => { setAddProf(null); setAddProfOpen(false) }}
-                          className="w-full text-left px-4 py-2.5 text-sm text-[#6B4E8A] hover:bg-[rgba(124,77,255,0.08)] transition-colors">Nenhum</button>
+                          className="w-full text-left px-4 py-2.5 text-sm text-[var(--d2b-text-muted)] hover:bg-[var(--d2b-hover)] transition-colors">Nenhum</button>
                         {usuarios.map((u) => (
                           <button key={u.id} onClick={() => { setAddProf(u); setAddProfOpen(false) }}
-                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${addProf?.id === u.id ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{u.nome}</button>
+                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${addProf?.id === u.id ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{u.nome}</button>
                         ))}
                       </div>
                     )}
@@ -509,23 +509,23 @@ export function TabFinanceiro({
               {/* Data + Parcelas */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Data do Recebimento <span className="text-[#7C4DFF]">*</span></label>
+                  <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Data do Recebimento <span className="text-[#7C4DFF]">*</span></label>
                   <input
                     type="text"
                     value={addData}
                     onChange={(e) => { setAddData(e.target.value); setAddErros((p) => ({ ...p, data: '' })) }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none transition-colors ${addErros.data ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                    className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none transition-colors ${addErros.data ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
                   />
                   {addErros.data && <p className="text-xs text-red-400 mt-1">{addErros.data}</p>}
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Número de Parcelas <span className="text-[#7C4DFF]">*</span></label>
+                  <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Número de Parcelas <span className="text-[#7C4DFF]">*</span></label>
                   <input
                     type="number"
                     min={1}
                     value={addParcelas}
                     onChange={(e) => { setAddParcelas(e.target.value); setAddErros((p) => ({ ...p, parcelas: '' })) }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none transition-colors ${addErros.parcelas ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                    className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none transition-colors ${addErros.parcelas ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
                   />
                   {addErros.parcelas && <p className="text-xs text-red-400 mt-1">{addErros.parcelas}</p>}
                 </div>
@@ -534,7 +534,7 @@ export function TabFinanceiro({
               {/* Valor */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Valor <span className="text-[#7C4DFF]">*</span></label>
+                  <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Valor <span className="text-[#7C4DFF]">*</span></label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -549,7 +549,7 @@ export function TabFinanceiro({
                       setAddValor(formatted)
                       setAddErros((p) => ({ ...p, valor: '' }))
                     }}
-                    className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.valor ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                    className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none transition-colors ${addErros.valor ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
                   />
                   {addErros.valor && <p className="text-xs text-red-400 mt-1">{addErros.valor}</p>}
                 </div>
@@ -564,7 +564,7 @@ export function TabFinanceiro({
                 if (!n || n < 1 || !total) return null
                 const parcela = total / n
                 return (
-                  <p className="text-sm font-semibold text-[#A78BCC]">
+                  <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">
                     {n} {n === 1 ? 'parcela' : 'parcelas'} {n === 1 ? 'de' : 'mensais de'}{' '}
                     {parcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </p>
@@ -573,7 +573,7 @@ export function TabFinanceiro({
             </div>
 
             <div className="flex items-center justify-end gap-3 mt-8">
-              <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
+              <button onClick={() => setAddOpen(false)} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">
                 Cancelar
               </button>
               <button

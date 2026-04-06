@@ -140,15 +140,15 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
   return (
     <div className="space-y-7">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-[#F5F0FF]">Ativar Senhas</h2>
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Ativar Senhas</h2>
       </div>
 
       {/* Senha Financeiro */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Senha Financeiro</h3>
-            <p className="text-xs text-[#A78BCC] mt-0.5">Defina uma nova senha</p>
+            <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Senha Financeiro</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Defina uma nova senha</p>
           </div>
           
           <button
@@ -164,7 +164,7 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+          <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
         ) : senhasFinanceiro.length > 0 ? (
           <div className="grid gap-3">
             {senhasFinanceiro.map(senha => (
@@ -177,8 +177,8 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-sm text-[#A78BCC]">Nenhuma senha cadastrada</p>
+          <div className="p-8 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhuma senha cadastrada</p>
           </div>
         )}
       </div>
@@ -187,8 +187,8 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Senha de Prontuário</h3>
-            <p className="text-xs text-[#A78BCC] mt-0.5">Defina uma nova senha</p>
+            <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Senha de Prontuário</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Defina uma nova senha</p>
           </div>
           
           <button
@@ -204,7 +204,7 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+          <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
         ) : senhasProntuario.length > 0 ? (
           <div className="grid gap-3">
             {senhasProntuario.map(senha => (
@@ -217,8 +217,8 @@ export function TabSenhas({ initialUsuario }: TabSenhasProps) {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-sm text-[#A78BCC]">Nenhuma senha cadastrada</p>
+          <div className="p-8 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhuma senha cadastrada</p>
           </div>
         )}
       </div>

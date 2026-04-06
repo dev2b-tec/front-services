@@ -21,7 +21,7 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden bg-[#0D0520]">
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--d2b-bg-main)' }}>
 
         {/* ── Sidebar (menu lateral) ── */}
         <Sidebar />

@@ -192,46 +192,46 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF]">Compra de Créditos</h2>
-        <p className="text-xs text-[#A78BCC] mt-1">
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Compra de Créditos</h2>
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
           Gerencie as Permissões e a compra de créditos.
         </p>
       </div>
 
       {/* Permissões */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[#F5F0FF]">Permissões de envio de mensagens</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Permissões de envio de mensagens</h3>
         
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] cursor-pointer hover:border-[#7C4DFF] transition-colors">
-          <input type="checkbox" className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
-          <span className="text-sm text-[#F5F0FF]">Permitir envio no WhatsApp automático por <span className="text-[#7C4DFF]">profissionais</span> da clínica.</span>
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          <input type="checkbox" className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
+          <span className="text-sm text-[var(--d2b-text-primary)]">Permitir envio no WhatsApp automático por <span className="text-[#7C4DFF]">profissionais</span> da clínica.</span>
         </label>
 
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] cursor-pointer hover:border-[#7C4DFF] transition-colors">
-          <input type="checkbox" className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
-          <span className="text-sm text-[#F5F0FF]">Permitir envio no WhatsApp automático por <span className="text-[#7C4DFF]">assistentes</span> da clínica.</span>
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          <input type="checkbox" className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
+          <span className="text-sm text-[var(--d2b-text-primary)]">Permitir envio no WhatsApp automático por <span className="text-[#7C4DFF]">assistentes</span> da clínica.</span>
         </label>
       </div>
 
       {/* Permissões de assinatura eletrônica */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[#F5F0FF]">Permissões de assinatura eletrônica</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Permissões de assinatura eletrônica</h3>
         
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] cursor-pointer hover:border-[#7C4DFF] transition-colors">
-          <input type="checkbox" className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
-          <span className="text-sm text-[#F5F0FF]">Permitir assinatura eletrônica por <span className="text-[#7C4DFF]">profissionais</span> da clínica.</span>
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          <input type="checkbox" className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
+          <span className="text-sm text-[var(--d2b-text-primary)]">Permitir assinatura eletrônica por <span className="text-[#7C4DFF]">profissionais</span> da clínica.</span>
         </label>
 
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] cursor-pointer hover:border-[#7C4DFF] transition-colors">
-          <input type="checkbox" className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
-          <span className="text-sm text-[#F5F0FF]">Permitir assinatura eletrônica por <span className="text-[#7C4DFF]">assistentes</span> da clínica.</span>
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          <input type="checkbox" className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]" />
+          <span className="text-sm text-[var(--d2b-text-primary)]">Permitir assinatura eletrônica por <span className="text-[#7C4DFF]">assistentes</span> da clínica.</span>
         </label>
       </div>
 
       {/* Créditos */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[#F5F0FF]">Créditos</h3>
+          <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Créditos</h3>
           <button
             onClick={handleAbrirDialogComprar}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors"
@@ -241,72 +241,72 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
           </button>
         </div>
 
-        <p className="text-xs text-[#A78BCC]">
+        <p className="text-xs text-[var(--d2b-text-secondary)]">
           Compre créditos para utilizar as funcionalidades de envio de mensagem e assinatura eletrônica.
         </p>
 
         {/* Cards de Créditos */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-6 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-xs text-[#A78BCC] mb-2">Total créditos disponíveis para uso</p>
-            <p className="text-3xl font-bold text-[#F5F0FF]">{saldo}</p>
+          <div className="p-6 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-xs text-[var(--d2b-text-secondary)] mb-2">Total créditos disponíveis para uso</p>
+            <p className="text-3xl font-bold text-[var(--d2b-text-primary)]">{saldo}</p>
           </div>
 
-          <div className="p-6 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-xs text-[#A78BCC] mb-2">Créditos comprados</p>
-            <p className="text-3xl font-bold text-[#F5F0FF]">{saldo}</p>
+          <div className="p-6 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-xs text-[var(--d2b-text-secondary)] mb-2">Créditos comprados</p>
+            <p className="text-3xl font-bold text-[var(--d2b-text-primary)]">{saldo}</p>
           </div>
 
-          <div className="p-6 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-xs text-[#A78BCC] mb-2">Créditos vão expirar de produtividade</p>
-            <p className="text-3xl font-bold text-[#F5F0FF]">0</p>
+          <div className="p-6 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-xs text-[var(--d2b-text-secondary)] mb-2">Créditos vão expirar de produtividade</p>
+            <p className="text-3xl font-bold text-[var(--d2b-text-primary)]">0</p>
           </div>
 
-          <div className="p-6 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
-            <p className="text-xs text-[#A78BCC] mb-2">Créditos comerciais, aguardando confirmação do pagamento</p>
-            <p className="text-3xl font-bold text-[#F5F0FF]">0</p>
+          <div className="p-6 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+            <p className="text-xs text-[var(--d2b-text-secondary)] mb-2">Créditos comerciais, aguardando confirmação do pagamento</p>
+            <p className="text-3xl font-bold text-[var(--d2b-text-primary)]">0</p>
           </div>
         </div>
       </div>
 
       {/* Dialog Comprar Créditos */}
       <Dialog open={dialogComprarOpen} onOpenChange={setDialogComprarOpen}>
-        <DialogContent className="max-w-2xl bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+        <DialogContent className="max-w-2xl bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#F5F0FF]">Comprar Créditos</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">Comprar Créditos</DialogTitle>
           </DialogHeader>
 
           {etapa === 1 ? (
             <div className="space-y-4 pt-2">
-              <p className="text-sm text-[#A78BCC]">
+              <p className="text-sm text-[var(--d2b-text-secondary)]">
                 Compre créditos para poder programar o disparo de suas mensagens e assinar documentos eletronicamente.
               </p>
 
-              <ul className="text-xs text-[#A78BCC] space-y-1 pl-5 list-disc">
+              <ul className="text-xs text-[var(--d2b-text-secondary)] space-y-1 pl-5 list-disc">
                 <li>1 mensagem: 1 crédito;</li>
                 <li>1 documento assinado: 10 créditos;</li>
               </ul>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-[#F5F0FF]">Número de Créditos</label>
+                <label className="block text-sm font-medium text-[var(--d2b-text-primary)]">Número de Créditos</label>
                 <input
                   type="number"
                   value={quantidade}
                   onChange={(e) => setQuantidade(parseInt(e.target.value) || 0)}
                   min="1"
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
 
-              <div className="p-4 rounded-lg bg-[#120328] border border-[rgba(124,77,255,0.25)]">
-                <p className="text-sm text-[#A78BCC]">Valor A Pagar</p>
+              <div className="p-4 rounded-lg bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)]">
+                <p className="text-sm text-[var(--d2b-text-secondary)]">Valor A Pagar</p>
                 <p className="text-2xl font-bold text-[#7C4DFF]">R$ {valorTotal.toFixed(2)}</p>
               </div>
 
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setDialogComprarOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                  className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
                 >
                   Cancelar
                 </button>
@@ -320,15 +320,15 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
             </div>
           ) : (
             <div className="space-y-4 pt-2 max-h-[70vh] overflow-y-auto">
-              <div className="p-4 rounded-lg bg-[#120328] border border-[rgba(124,77,255,0.25)]">
-                <p className="text-sm text-[#A78BCC]">Detalhes da compra</p>
-                <p className="text-sm text-[#F5F0FF]">{quantidade} créditos</p>
+              <div className="p-4 rounded-lg bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)]">
+                <p className="text-sm text-[var(--d2b-text-secondary)]">Detalhes da compra</p>
+                <p className="text-sm text-[var(--d2b-text-primary)]">{quantidade} créditos</p>
                 <p className="text-lg font-bold text-[#7C4DFF]">Valor: R$ {valorTotal.toFixed(2)}</p>
               </div>
 
               {/* Informações do Pagador */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-[#F5F0FF]">Informações do Pagador</h4>
+                <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Informações do Pagador</h4>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <input
@@ -336,7 +336,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                     value={nomeCompleto}
                     onChange={(e) => setNomeCompleto(e.target.value)}
                     placeholder="Nome Completo*"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                   
                   <input
@@ -344,7 +344,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email*"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
@@ -352,7 +352,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                   <select
                     value={pais}
                     onChange={(e) => setPais(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   >
                     <option value="BRA">Brasil</option>
                   </select>
@@ -362,13 +362,13 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                     value={numeroTelefone}
                     onChange={(e) => setNumeroTelefone(e.target.value)}
                     placeholder="Número do Telefone"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <select
                     value={tipoDocumento}
                     onChange={(e) => setTipoDocumento(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   >
                     <option value="CPF">CPF</option>
                     <option value="CNPJ">CNPJ</option>
@@ -380,20 +380,20 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                   value={numeroDocumento}
                   onChange={(e) => setNumeroDocumento(e.target.value)}
                   placeholder="Número do Documento*"
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
 
               {/* Endereço de Cobrança */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-[#F5F0FF]">Endereço de Cobrança</h4>
+                <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Endereço de Cobrança</h4>
                 
                 <input
                   type="text"
                   value={cep}
                   onChange={(e) => setCep(e.target.value)}
                   placeholder="CEP"
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
 
                 <div className="grid grid-cols-2 gap-3">
@@ -402,7 +402,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                     value={logradouro}
                     onChange={(e) => setLogradouro(e.target.value)}
                     placeholder="Logradouro"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                   
                   <input
@@ -410,7 +410,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                     value={complemento}
                     onChange={(e) => setComplemento(e.target.value)}
                     placeholder="Complemento"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
@@ -419,13 +419,13 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                   value={bairro}
                   onChange={(e) => setBairro(e.target.value)}
                   placeholder="Bairro"
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
 
               {/* Método de Pagamento */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-[#F5F0FF]">Método de Pagamento</h4>
+                <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Método de Pagamento</h4>
                 
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -437,7 +437,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                       onChange={(e) => setMetodoPagamento(e.target.value)}
                       className="w-4 h-4 text-[#7C4DFF] focus:ring-[#7C4DFF]"
                     />
-                    <span className="text-sm text-[#F5F0FF]">Cartão de Crédito</span>
+                    <span className="text-sm text-[var(--d2b-text-primary)]">Cartão de Crédito</span>
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -449,7 +449,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                       onChange={(e) => setMetodoPagamento(e.target.value)}
                       className="w-4 h-4 text-[#7C4DFF] focus:ring-[#7C4DFF]"
                     />
-                    <span className="text-sm text-[#F5F0FF]">Boleto Bancário</span>
+                    <span className="text-sm text-[var(--d2b-text-primary)]">Boleto Bancário</span>
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -461,7 +461,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                       onChange={(e) => setMetodoPagamento(e.target.value)}
                       className="w-4 h-4 text-[#7C4DFF] focus:ring-[#7C4DFF]"
                     />
-                    <span className="text-sm text-[#F5F0FF]">PIX</span>
+                    <span className="text-sm text-[var(--d2b-text-primary)]">PIX</span>
                   </label>
                 </div>
 
@@ -472,7 +472,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                       value={nomeCartao}
                       onChange={(e) => setNomeCartao(e.target.value)}
                       placeholder="Nome no Cartão*"
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                     />
 
                     <input
@@ -480,7 +480,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                       value={numeroCartao}
                       onChange={(e) => setNumeroCartao(e.target.value)}
                       placeholder="Número Completo*"
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                     />
 
                     <div className="grid grid-cols-2 gap-3">
@@ -490,7 +490,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                         onChange={(e) => setCvv(e.target.value)}
                         placeholder="CVV*"
                         maxLength={4}
-                        className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                        className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                       />
                       
                       <input
@@ -498,7 +498,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
                         value={expiracao}
                         onChange={(e) => setExpiracao(e.target.value)}
                         placeholder="Expiração (MM/AAAA)*"
-                        className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                        className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                       />
                     </div>
                   </div>
@@ -508,7 +508,7 @@ export function TabCreditos({ initialUsuario }: TabCreditosProps) {
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button
                   onClick={() => setEtapa(1)}
-                  className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                  className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
                 >
                   Voltar
                 </button>

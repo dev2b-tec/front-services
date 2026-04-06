@@ -46,12 +46,12 @@ function ContaUsuario({
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-1.5 pb-3">
         <div
-          className="relative w-28 h-28 rounded-xl bg-[#150830] border-2 border-dashed border-[rgba(124,77,255,0.25)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
+          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
           onClick={() => fileRef.current?.click()}
         >
           {data.fotoUrl
             ? <AvatarImage userId={data.id} fotoUrl={data.fotoUrl} />
-            : <User size={52} className="text-[#6B4E8A]" strokeWidth={1} />
+            : <User size={52} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
           }
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
             {uploading
@@ -63,7 +63,7 @@ function ContaUsuario({
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-        <p className="text-sm text-[#A78BCC]">{data.email ?? ''}</p>
+        <p className="text-sm text-[var(--d2b-text-secondary)]">{data.email ?? ''}</p>
       </div>
 
       <FInput
@@ -183,14 +183,14 @@ function ContaEmpresa({
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-1.5 pb-3">
-        <p className="text-xs font-medium text-[#A78BCC]">Logo da Clínica</p>
+        <p className="text-xs font-medium text-[var(--d2b-text-secondary)]">Logo da Clínica</p>
         <div
-          className="relative w-28 h-28 rounded-xl bg-[#150830] border-2 border-dashed border-[rgba(124,77,255,0.25)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
+          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
           onClick={() => fileRef.current?.click()}
         >
           {data.logoUrl
             ? <img src={data.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-            : <Building2 size={40} className="text-[#6B4E8A]" strokeWidth={1} />
+            : <Building2 size={40} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
           }
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
             {uploading
@@ -377,7 +377,7 @@ export function TabConta({
 
   return (
     <div className="space-y-7">
-      <h2 className="text-base font-bold text-[#F5F0FF]">Minha conta</h2>
+      <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Minha conta</h2>
 
       <div className="grid grid-cols-2 gap-10">
         {/* ── Coluna esquerda ── */}
@@ -400,8 +400,8 @@ export function TabConta({
         <div className="flex items-start gap-2 mb-4">
           <PenLine size={16} className="text-[#7C4DFF] mt-0.5 shrink-0" />
           <div>
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Assinatura</h3>
-            <p className="text-xs text-[#A78BCC] mt-0.5">
+            <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Assinatura</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">
               Escolha entre enviar uma imagem pronta ou criar uma assinatura manual. Salvamos no tamanho ideal para uso nos documentos.
             </p>
           </div>
@@ -409,18 +409,18 @@ export function TabConta({
 
         <div className="grid grid-cols-2 gap-4">
           {/* Pré-visualização */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4">
-            <p className="text-sm font-medium text-[#F5F0FF] mb-0.5">Pré-visualização</p>
-            <p className="text-xs text-[#A78BCC] mb-3">Assim a assinatura vai aparecer nos documentos</p>
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] p-4">
+            <p className="text-sm font-medium text-[var(--d2b-text-primary)] mb-0.5">Pré-visualização</p>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Assim a assinatura vai aparecer nos documentos</p>
             <div
-              className="h-32 rounded-lg border border-dashed border-[rgba(124,77,255,0.20)] flex items-center justify-center overflow-hidden bg-white"
+              className="h-32 rounded-lg border border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center overflow-hidden bg-white"
             >
               {signaturePreview ? (
                 <img src={signaturePreview} alt="Assinatura" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center justify-center">
-                  <p className="text-xs text-[#6B4E8A] font-medium">Nenhuma assinatura cadastrada</p>
-                  <p className="text-[10px] text-[#6B4E8A] mt-1 text-center px-6">
+                  <p className="text-xs text-[var(--d2b-text-muted)] font-medium">Nenhuma assinatura cadastrada</p>
+                  <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1 text-center px-6">
                     Envie uma imagem ou crie uma assinatura para começar
                   </p>
                 </div>
@@ -429,18 +429,18 @@ export function TabConta({
           </div>
 
           {/* Opções */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4 flex flex-col gap-3">
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] p-4 flex flex-col gap-3">
             <div>
-              <p className="text-sm font-medium text-[#F5F0FF]">Adicionar assinatura</p>
-              <p className="text-xs text-[#A78BCC]">Escolha uma das opções abaixo</p>
+              <p className="text-sm font-medium text-[var(--d2b-text-primary)]">Adicionar assinatura</p>
+              <p className="text-xs text-[var(--d2b-text-secondary)]">Escolha uma das opções abaixo</p>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.18)] hover:border-[#7C4DFF] transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--d2b-border)] hover:border-[#7C4DFF] transition-colors">
               <div className="flex items-start gap-2.5">
                 <Upload size={15} className="text-[#7C4DFF] mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#F5F0FF]">Enviar imagem</p>
-                  <p className="text-xs text-[#A78BCC]">Selecione um arquivo e recorte para manter a assinatura bem enquadrada.</p>
+                  <p className="text-sm font-medium text-[var(--d2b-text-primary)]">Enviar imagem</p>
+                  <p className="text-xs text-[var(--d2b-text-secondary)]">Selecione um arquivo e recorte para manter a assinatura bem enquadrada.</p>
                 </div>
               </div>
               <button 
@@ -459,25 +459,25 @@ export function TabConta({
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.18)] hover:border-[#7C4DFF] transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--d2b-border)] hover:border-[#7C4DFF] transition-colors">
               <div className="flex items-start gap-2.5">
                 <PenLine size={15} className="text-[#7C4DFF] mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#F5F0FF]">Criar agora</p>
-                  <p className="text-xs text-[#A78BCC]">Assine com mouse ou toque. Vamos ajustar e padronizar automaticamente para documentos.</p>
+                  <p className="text-sm font-medium text-[var(--d2b-text-primary)]">Criar agora</p>
+                  <p className="text-xs text-[var(--d2b-text-secondary)]">Assine com mouse ou toque. Vamos ajustar e padronizar automaticamente para documentos.</p>
                 </div>
               </div>
               <button 
                 onClick={() => setSignatureDialogOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] text-[#A78BCC] hover:text-[#F5F0FF] text-xs font-semibold transition-colors shrink-0 ml-3"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] text-xs font-semibold transition-colors shrink-0 ml-3"
               >
                 <PenLine size={11} />
                 Criar
               </button>
             </div>
 
-            <p className="text-[10px] text-[#6B4E8A]">
-              <span className="font-semibold text-[#A78BCC]">Dica:</span> Prefira uma assinatura mais larga do que alta. O sistema centraliza e mantém a transparência para melhor resultado nos documentos.
+            <p className="text-[10px] text-[var(--d2b-text-muted)]">
+              <span className="font-semibold text-[var(--d2b-text-secondary)]">Dica:</span> Prefira uma assinatura mais larga do que alta. O sistema centraliza e mantém a transparência para melhor resultado nos documentos.
             </p>
           </div>
         </div>

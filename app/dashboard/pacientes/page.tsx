@@ -281,13 +281,13 @@ export default function PacientesPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#0D0520] p-6">
+    <div className="min-h-screen bg-[var(--d2b-bg-main)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[#F5F0FF]">Pacientes da Clínica</h1>
-            <p className="text-sm text-[#A78BCC] mt-1">Crie e gerencie pacientes atendidos pela clínica.</p>
+            <h1 className="text-2xl font-bold text-[var(--d2b-text-primary)]">Pacientes da Clínica</h1>
+            <p className="text-sm text-[var(--d2b-text-secondary)] mt-1">Crie e gerencie pacientes atendidos pela clínica.</p>
           </div>
           <button
             onClick={() => {
@@ -304,58 +304,58 @@ export default function PacientesPage() {
         {/* Filtros */}
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
             <input
               type="text"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleBuscar()}
               placeholder="Pesquisar..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
             />
           </div>
 
           <select
             value={filtroStatus}
             onChange={(e) => setFiltroStatus(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+            className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
           >
             <option value="TODOS">Todos profissionais</option>
             <option value="EM_ABERTO">Em Aberto</option>
             <option value="QUITADO">Quitado</option>
           </select>
 
-          <button className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm">
+          <button className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm">
             Mostrar arquivados
           </button>
         </div>
 
         {/* Lista */}
         {loading ? (
-          <div className="p-12 text-center text-[#A78BCC]">Carregando...</div>
+          <div className="p-12 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
         ) : (
           <div className="space-y-3">
             {pacientesFiltrados.map(paciente => (
               <div
                 key={paciente.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] hover:border-[rgba(124,77,255,0.35)] transition-colors"
+                className="flex items-center justify-between p-4 rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] hover:border-[var(--d2b-border-strong)] transition-colors"
               >
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-[rgba(124,77,255,0.15)] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-[var(--d2b-hover)] flex items-center justify-center">
                     <User size={20} className="text-[#7C4DFF]" />
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-[#F5F0FF]">{paciente.nome}</h3>
+                    <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">{paciente.nome}</h3>
                     <div className="flex items-center gap-4 mt-1">
                       {paciente.telefone && (
-                        <span className="text-xs text-[#A78BCC] flex items-center gap-1">
+                        <span className="text-xs text-[var(--d2b-text-secondary)] flex items-center gap-1">
                           <Phone size={12} />
                           {paciente.telefone}
                         </span>
                       )}
                       {paciente.dataNascimento && (
-                        <span className="text-xs text-[#A78BCC] flex items-center gap-1">
+                        <span className="text-xs text-[var(--d2b-text-secondary)] flex items-center gap-1">
                           <Calendar size={12} />
                           {new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')}
                         </span>
@@ -364,12 +364,12 @@ export default function PacientesPage() {
                   </div>
 
                   <div className="text-center">
-                    <p className="text-xs text-[#A78BCC]">SESSÕES</p>
-                    <p className="text-sm font-bold text-[#F5F0FF]">{paciente.sessoes || 0}</p>
+                    <p className="text-xs text-[var(--d2b-text-secondary)]">SESSÕES</p>
+                    <p className="text-sm font-bold text-[var(--d2b-text-primary)]">{paciente.sessoes || 0}</p>
                   </div>
 
                   <div className="text-center min-w-[100px]">
-                    <p className="text-xs text-[#A78BCC]">STATUS DO PAGAMENTO</p>
+                    <p className="text-xs text-[var(--d2b-text-secondary)]">STATUS DO PAGAMENTO</p>
                     <span className={`text-xs px-2 py-1 rounded ${
                       paciente.statusPagamento === 'QUITADO' 
                         ? 'bg-[rgba(34,197,94,0.15)] text-[#22C55E]' 
@@ -383,13 +383,13 @@ export default function PacientesPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleEditar(paciente)}
-                    className="p-2 rounded-lg hover:bg-[rgba(124,77,255,0.15)] text-[#A78BCC] hover:text-[#7C4DFF] transition-colors"
+                    className="p-2 rounded-lg hover:bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors"
                   >
                     <Pencil size={16} />
                   </button>
                   <button
                     onClick={() => handleDeletar(paciente.id)}
-                    className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                    className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -398,9 +398,9 @@ export default function PacientesPage() {
             ))}
 
             {pacientesFiltrados.length === 0 && (
-              <div className="p-12 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328]">
-                <User size={48} className="mx-auto mb-4 text-[#6B4E8A]" />
-                <p className="text-sm text-[#A78BCC]">Nenhum paciente encontrado</p>
+              <div className="p-12 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+                <User size={48} className="mx-auto mb-4 text-[var(--d2b-text-muted)]" />
+                <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhum paciente encontrado</p>
               </div>
             )}
           </div>
@@ -408,9 +408,9 @@ export default function PacientesPage() {
 
         {/* Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-[#F5F0FF]">
+              <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">
                 {editando ? 'Editar Cliente' : 'Criar Cliente'}
               </DialogTitle>
             </DialogHeader>
@@ -423,14 +423,14 @@ export default function PacientesPage() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Nome*"
-                  className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
 
                 <input
                   type="date"
                   value={dataNascimento}
                   onChange={(e) => setDataNascimento(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
 
                 <input
@@ -438,13 +438,13 @@ export default function PacientesPage() {
                   value={telefone}
                   onChange={(e) => setTelefone(e.target.value)}
                   placeholder="Telefone"
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
 
                 <select
                   value={genero}
                   onChange={(e) => setGenero(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 >
                   <option value="">Selecione um gênero</option>
                   <option value="MASCULINO">Masculino</option>
@@ -455,7 +455,7 @@ export default function PacientesPage() {
                 <select
                   value={plano}
                   onChange={(e) => setPlano(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 >
                   <option value="">Selecione um plano</option>
                   <option value="PARTICULAR">Particular</option>
@@ -467,13 +467,13 @@ export default function PacientesPage() {
                   value={numeroCarteirinha}
                   onChange={(e) => setNumeroCarteirinha(e.target.value)}
                   placeholder="Número da Carteirinha"
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
 
                 <select
                   value={grupo}
                   onChange={(e) => setGrupo(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 >
                   <option value="">Selecione um grupo</option>
                   <option value="GRUPO_A">Grupo A</option>
@@ -483,7 +483,7 @@ export default function PacientesPage() {
                 <select
                   value={comoConheceu}
                   onChange={(e) => setComoConheceu(e.target.value)}
-                  className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 >
                   <option value="">Como conheceu?</option>
                   <option value="INDICACAO">Indicação</option>
@@ -496,7 +496,7 @@ export default function PacientesPage() {
               {/* Informações Pessoais */}
               <button
                 onClick={() => setInfoExpanded(!infoExpanded)}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#7C4DFF] text-sm font-semibold hover:bg-[rgba(124,77,255,0.05)] transition-colors"
+                className="w-full flex items-center justify-between p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[#7C4DFF] text-sm font-semibold hover:bg-[var(--d2b-hover)] transition-colors"
               >
                 Informações Pessoais
                 <ChevronDown size={16} className={`transition-transform ${infoExpanded ? 'rotate-180' : ''}`} />
@@ -509,7 +509,7 @@ export default function PacientesPage() {
                     value={rg}
                     onChange={(e) => setRg(e.target.value)}
                     placeholder="RG"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -517,7 +517,7 @@ export default function PacientesPage() {
                     value={cpf}
                     onChange={(e) => setCpf(e.target.value)}
                     placeholder="CPF"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -525,7 +525,7 @@ export default function PacientesPage() {
                     value={cep}
                     onChange={(e) => setCep(e.target.value)}
                     placeholder="CEP"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -533,7 +533,7 @@ export default function PacientesPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -541,7 +541,7 @@ export default function PacientesPage() {
                     value={logradouro}
                     onChange={(e) => setLogradouro(e.target.value)}
                     placeholder="Logradouro"
-                    className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -549,7 +549,7 @@ export default function PacientesPage() {
                     value={numero}
                     onChange={(e) => setNumero(e.target.value)}
                     placeholder="Número"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -557,7 +557,7 @@ export default function PacientesPage() {
                     value={complemento}
                     onChange={(e) => setComplemento(e.target.value)}
                     placeholder="Complemento"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -565,7 +565,7 @@ export default function PacientesPage() {
                     value={bairro}
                     onChange={(e) => setBairro(e.target.value)}
                     placeholder="Bairro"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -573,7 +573,7 @@ export default function PacientesPage() {
                     value={cidade}
                     onChange={(e) => setCidade(e.target.value)}
                     placeholder="Cidade"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <textarea
@@ -581,7 +581,7 @@ export default function PacientesPage() {
                     onChange={(e) => setOutrasInformacoes(e.target.value)}
                     placeholder="Outras informações"
                     rows={3}
-                    className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none"
+                    className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none"
                   />
                 </div>
               )}
@@ -589,7 +589,7 @@ export default function PacientesPage() {
               {/* Menor de Idade */}
               <button
                 onClick={() => setMenorExpanded(!menorExpanded)}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#7C4DFF] text-sm font-semibold hover:bg-[rgba(124,77,255,0.05)] transition-colors"
+                className="w-full flex items-center justify-between p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[#7C4DFF] text-sm font-semibold hover:bg-[var(--d2b-hover)] transition-colors"
               >
                 Menor de idade
                 <ChevronDown size={16} className={`transition-transform ${menorExpanded ? 'rotate-180' : ''}`} />
@@ -602,7 +602,7 @@ export default function PacientesPage() {
                     value={nomeResponsavel}
                     onChange={(e) => setNomeResponsavel(e.target.value)}
                     placeholder="Nome do responsável"
-                    className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -610,7 +610,7 @@ export default function PacientesPage() {
                     value={dataNascimentoResp}
                     onChange={(e) => setDataNascimentoResp(e.target.value)}
                     placeholder="Data de nascimento"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -618,7 +618,7 @@ export default function PacientesPage() {
                     value={cpfResponsavel}
                     onChange={(e) => setCpfResponsavel(e.target.value)}
                     placeholder="CPF do responsável"
-                    className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
 
                   <input
@@ -626,7 +626,7 @@ export default function PacientesPage() {
                     value={telefoneResponsavel}
                     onChange={(e) => setTelefoneResponsavel(e.target.value)}
                     placeholder="Telefone do responsável"
-                    className="col-span-2 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                    className="col-span-2 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
               )}
@@ -638,7 +638,7 @@ export default function PacientesPage() {
                     setDialogOpen(false)
                     limparForm()
                   }}
-                  className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                  className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
                 >
                   Cancelar
                 </button>

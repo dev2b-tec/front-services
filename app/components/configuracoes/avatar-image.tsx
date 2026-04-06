@@ -50,7 +50,7 @@ export function AvatarImage({ userId, fotoUrl, size = 112, fallbackIcon }: Avata
   }
 
   if (error || !imageUrl) {
-    return fallbackIcon || <User size={52} className="text-[#6B4E8A]" strokeWidth={1} />
+    return fallbackIcon || <User size={52} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
   }
 
   return (

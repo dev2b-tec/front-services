@@ -154,18 +154,18 @@ export function SistemaMensagensModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-lg p-0 gap-0"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-lg p-0 gap-0"
       >
         {/* ── Header ── */}
-        <DialogHeader className="flex-row items-center justify-between px-5 py-3.5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-sm font-bold text-[#F5F0FF]">Sistema de Mensagens</DialogTitle>
+        <DialogHeader className="flex-row items-center justify-between px-5 py-3.5 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-sm font-bold text-[var(--d2b-text-primary)]">Sistema de Mensagens</DialogTitle>
           <div className="flex items-center gap-2">
-            <button className="text-xs font-medium text-[#7C4DFF] border border-[rgba(124,77,255,0.25)] px-3 py-1 rounded-md hover:bg-[rgba(124,77,255,0.1)] transition-colors">
+            <button className="text-xs font-medium text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
               Editar Mensagens
             </button>
             <button
               onClick={onClose}
-              className="w-7 h-7 flex items-center justify-center rounded-md text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors"
             >
               <X size={15} />
             </button>
@@ -174,12 +174,12 @@ export function SistemaMensagensModal({
 
         {/* ── Warning banners ── */}
         {(loadingInstancia || !empresaId) ? (
-          <div className="mx-4 mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(124,77,255,0.08)] border border-[rgba(124,77,255,0.18)]">
+          <div className="mx-4 mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--d2b-hover)] border border-[var(--d2b-border)]">
             {loadingInstancia
               ? <Loader2 size={13} className="animate-spin text-[#7C4DFF]" />
-              : <WifiOff size={13} className="text-[#A78BCC]" />
+              : <WifiOff size={13} className="text-[var(--d2b-text-secondary)]" />
             }
-            <span className="text-xs text-[#A78BCC]">
+            <span className="text-xs text-[var(--d2b-text-secondary)]">
               {loadingInstancia ? 'Verificando instância WhatsApp...' : 'Empresa não identificada.'}
             </span>
           </div>
@@ -210,12 +210,12 @@ export function SistemaMensagensModal({
             return (
               <div
                 key={m.id}
-                className="rounded-xl border border-[rgba(124,77,255,0.12)] bg-[#150830] overflow-hidden"
+                className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-elevated)] overflow-hidden"
               >
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>
-                    <p className="text-sm font-semibold text-[#F5F0FF]">{m.titulo}</p>
-                    <p className="text-xs text-[#A78BCC] mt-0.5">{m.desc}</p>
+                    <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">{m.titulo}</p>
+                    <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">{m.desc}</p>
                   </div>
                   <button
                     onClick={() => handleEnviar(m.id)}
@@ -232,19 +232,19 @@ export function SistemaMensagensModal({
 
                 {/* Inline textarea for "Personalize" */}
                 {showTextArea && (
-                  <div className="px-4 pb-3 space-y-2 border-t border-[rgba(124,77,255,0.12)]">
+                  <div className="px-4 pb-3 space-y-2 border-t border-[var(--d2b-border)]">
                     <textarea
                       value={customText}
                       onChange={(e) => setCustomText(e.target.value)}
                       rows={3}
                       autoFocus
                       placeholder="Digite sua mensagem personalizada..."
-                      className="w-full mt-2 bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+                      className="w-full mt-2 bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
                     />
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => { setCustomExpanded(false); setCustomText('') }}
-                        className="px-3 py-1.5 text-xs text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-md hover:border-[#7C4DFF] transition-colors"
+                        className="px-3 py-1.5 text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-md hover:border-[#7C4DFF] transition-colors"
                       >
                         Cancelar
                       </button>

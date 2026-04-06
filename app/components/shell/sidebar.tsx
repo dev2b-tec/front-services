@@ -55,7 +55,7 @@ function Logo({ collapsed }: { collapsed: boolean }) {
       {/* Nome — some quando collapsed */}
       {!collapsed && (
         <span className="text-base font-bold tracking-tight leading-none">
-          <span className="text-[#F5F0FF]">DEV</span>
+          <span className="text-[var(--d2b-text-primary)]">DEV</span>
           <span className="text-[#7C4DFF]">2B</span>
         </span>
       )}
@@ -78,16 +78,20 @@ export function Sidebar() {
       {/* Header: logo + fechar (mobile) / toggle (desktop) */}
       <div
         className={cn(
-          'flex items-center h-14 px-3 flex-shrink-0 border-b border-[rgba(124,77,255,0.12)]',
+          'flex items-center h-14 px-3 flex-shrink-0 border-b',
           collapsed ? 'justify-center' : 'justify-between',
         )}
+        style={{ borderColor: 'var(--d2b-border)' }}
       >
         <Logo collapsed={collapsed} />
 
         {/* Fechar no mobile */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="md:hidden p-1.5 rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+          className="md:hidden p-1.5 rounded-lg transition-colors"
+          style={{ color: 'var(--d2b-text-secondary)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
           aria-label="Fechar menu"
         >
           <X size={16} />
@@ -97,7 +101,10 @@ export function Sidebar() {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="hidden md:flex p-1.5 rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+            className="hidden md:flex p-1.5 rounded-lg transition-colors"
+            style={{ color: 'var(--d2b-text-secondary)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             aria-label="Recolher menu"
           >
             <ChevronLeft size={16} />
@@ -111,12 +118,12 @@ export function Sidebar() {
           <div key={gi}>
             {/* Título do grupo */}
             {group.title && !collapsed && (
-              <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#6B4E8A]">
+              <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--d2b-text-muted)' }}>
                 {group.title}
               </p>
             )}
             {group.title && collapsed && (
-              <div className="mx-auto mb-1 w-4 h-px bg-[rgba(124,77,255,0.18)]" />
+              <div className="mx-auto mb-1 w-4 h-px" style={{ background: 'var(--d2b-border)' }} />
             )}
 
             <ul className="space-y-0.5">
@@ -131,11 +138,14 @@ export function Sidebar() {
                       onClick={() => setMobileOpen(false)}
                       className={cn(
                         'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-150',
-                        active
-                          ? 'bg-[rgba(124,77,255,0.18)] text-[#F5F0FF]'
-                          : 'text-[#A78BCC] hover:bg-[rgba(124,77,255,0.10)] hover:text-[#F5F0FF]',
                         collapsed && 'justify-center px-0',
                       )}
+                      style={{
+                        color: active ? 'var(--d2b-text-primary)' : 'var(--d2b-text-secondary)',
+                        background: active ? 'var(--d2b-active)' : 'transparent',
+                      }}
+                      onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)'; (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-primary)' } }}
+                      onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-secondary)' } }}
                       title={collapsed ? item.label : undefined}
                     >
                       {/* Indicador ativo */}
@@ -164,7 +174,8 @@ export function Sidebar() {
 
                       {/* Tooltip no collapsed */}
                       {collapsed && (
-                        <span className="pointer-events-none absolute left-full ml-2 z-50 hidden group-hover:flex items-center whitespace-nowrap rounded-md bg-[#150830] border border-[rgba(124,77,255,0.25)] px-2.5 py-1.5 text-xs font-medium text-[#F5F0FF] shadow-xl">
+                        <span className="pointer-events-none absolute left-full ml-2 z-50 hidden group-hover:flex items-center whitespace-nowrap rounded-md border px-2.5 py-1.5 text-xs font-medium shadow-xl"
+                          style={{ background: 'var(--d2b-bg-elevated)', borderColor: 'var(--d2b-border-strong)', color: 'var(--d2b-text-primary)' }}>
                           {item.label}
                           {item.badge && (
                             <span className="ml-1.5 min-w-[16px] h-4 px-1 rounded-full bg-[#7C4DFF] text-[9px] font-bold text-white flex items-center justify-center">
@@ -183,19 +194,22 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="flex-shrink-0 border-t border-[rgba(124,77,255,0.12)] p-2">
+      <div className="flex-shrink-0 border-t p-2" style={{ borderColor: 'var(--d2b-border)' }}>
         {collapsed ? (
           // Botão de expandir quando collapsed
           <button
             onClick={() => setCollapsed(false)}
-            className="hidden md:flex w-full items-center justify-center p-2 rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+            className="hidden md:flex w-full items-center justify-center p-2 rounded-lg transition-colors"
+            style={{ color: 'var(--d2b-text-secondary)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--d2b-text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             aria-label="Expandir menu"
           >
             <ChevronRight size={16} />
           </button>
         ) : (
           <div className="px-2 py-1.5">
-            <p className="text-[10px] text-[#6B4E8A]">DEV2B v1.0.0</p>
+            <p className="text-[10px]" style={{ color: 'var(--d2b-text-muted)' }}>DEV2B v1.0.0</p>
           </div>
         )}
       </div>
@@ -207,9 +221,10 @@ export function Sidebar() {
       {/* ── DESKTOP sidebar ─────────────────────────────── */}
       <aside
         className={cn(
-          'hidden md:flex flex-col flex-shrink-0 h-screen sticky top-0 bg-[#120328] border-r border-[rgba(124,77,255,0.18)] transition-all duration-300 ease-in-out overflow-hidden',
+          'hidden md:flex flex-col flex-shrink-0 h-screen sticky top-0 border-r transition-all duration-300 ease-in-out overflow-hidden',
           collapsed ? 'w-[56px]' : 'w-[220px]',
         )}
+        style={{ background: 'var(--d2b-bg-surface)', borderColor: 'var(--d2b-border)' }}
       >
         {inner}
       </aside>
@@ -217,16 +232,18 @@ export function Sidebar() {
       {/* ── MOBILE: backdrop + drawer ────────────────────── */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 backdrop-blur-sm md:hidden"
+          style={{ background: 'var(--d2b-overlay)' }}
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
       )}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-screen w-[220px] bg-[#120328] border-r border-[rgba(124,77,255,0.18)] flex flex-col transition-transform duration-300 ease-in-out md:hidden',
+          'fixed top-0 left-0 z-50 h-screen w-[220px] border-r flex flex-col transition-transform duration-300 ease-in-out md:hidden',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
+        style={{ background: 'var(--d2b-bg-surface)', borderColor: 'var(--d2b-border)' }}
       >
         {inner}
       </aside>

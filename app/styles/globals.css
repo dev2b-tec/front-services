@@ -3,6 +3,47 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Dev2B design tokens ─────────────────────────────────────────────────── */
+/* Dark mode (default) */
+:root {
+  --d2b-bg-main:          #0D0520;
+  --d2b-bg-surface:       #120328;
+  --d2b-bg-elevated:      #150830;
+  --d2b-text-primary:     #F5F0FF;
+  --d2b-text-secondary:   #A78BCC;
+  --d2b-text-muted:       #6B4E8A;
+  --d2b-brand:            #7C4DFF;
+  --d2b-brand-dim:        rgba(124, 77, 255, 0.15);
+  --d2b-border:           rgba(124, 77, 255, 0.18);
+  --d2b-border-strong:    rgba(124, 77, 255, 0.25);
+  --d2b-hover:            rgba(124, 77, 255, 0.10);
+  --d2b-active:           rgba(124, 77, 255, 0.18);
+  --d2b-input-bg:         #0D0520;
+  --d2b-topbar-bg:        rgba(18, 3, 40, 0.80);
+  --d2b-shadow:           rgba(0, 0, 0, 0.40);
+  --d2b-overlay:          rgba(0, 0, 0, 0.60);
+}
+
+/* Light mode */
+html[data-theme="light"] {
+  --d2b-bg-main:          #FFFFFF;
+  --d2b-bg-surface:       #FFFFFF;
+  --d2b-bg-elevated:      #F3F4F6;
+  --d2b-text-primary:     #111827;
+  --d2b-text-secondary:   #6B7280;
+  --d2b-text-muted:       #9CA3AF;
+  --d2b-brand:            #7C4DFF;
+  --d2b-brand-dim:        rgba(124, 77, 255, 0.10);
+  --d2b-border:           #E5E7EB;
+  --d2b-border-strong:    #D1D5DB;
+  --d2b-hover:            #F9FAFB;
+  --d2b-active:           rgba(124, 77, 255, 0.10);
+  --d2b-input-bg:         #FFFFFF;
+  --d2b-topbar-bg:        rgba(255, 255, 255, 0.95);
+  --d2b-shadow:           rgba(0, 0, 0, 0.08);
+  --d2b-overlay:          rgba(0, 0, 0, 0.40);
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -120,6 +161,21 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    background: var(--d2b-bg-main);
+    color: var(--d2b-text-primary);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+}
+
+/* ── Forçar CSS vars em todos os backgrounds temáticos ─────────────────────── */
+/* Usamos @layer utilities para ter precedência sobre Tailwind classes */
+@layer utilities {
+  .d2b-bg-main     { background-color: var(--d2b-bg-main)     !important; }
+  .d2b-bg-surface  { background-color: var(--d2b-bg-surface)  !important; }
+  .d2b-bg-elevated { background-color: var(--d2b-bg-elevated) !important; }
+  .d2b-bg-input    { background-color: var(--d2b-input-bg)    !important; }
+  .d2b-text-primary   { color: var(--d2b-text-primary)   !important; }
+  .d2b-text-secondary { color: var(--d2b-text-secondary) !important; }
+  .d2b-text-muted     { color: var(--d2b-text-muted)     !important; }
+  .d2b-border      { border-color: var(--d2b-border)      !important; }
 }

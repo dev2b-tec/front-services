@@ -419,7 +419,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
   }
 
   if (loading) {
-    return <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+    return <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
   }
 
   // Wizard de configuração inicial
@@ -428,7 +428,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-xl font-bold text-[#F5F0FF]">Vamos começar!</h2>
+          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Vamos começar!</h2>
         </div>
 
         {/* Progress Bar */}
@@ -438,13 +438,13 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                 step < passoAtual ? 'bg-[#7C4DFF] text-white' :
                 step === passoAtual ? 'bg-[#7C4DFF] text-white' :
-                'bg-[#120328] text-[#6B4E8A] border border-[rgba(124,77,255,0.25)]'
+                'bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-muted)] border border-[var(--d2b-border-strong)]'
               }`}>
                 {step < passoAtual ? <Check size={16} /> : step}
               </div>
               {step < 5 && (
                 <div className={`w-24 h-0.5 ${
-                  step < passoAtual ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+                  step < passoAtual ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
                 }`} />
               )}
             </div>
@@ -504,7 +504,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
           {passoAtual > 1 && (
             <button
               onClick={passoAnterior}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
             >
               <ArrowLeft size={16} />
               Voltar
@@ -534,24 +534,24 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
         {passoAtual === 6 && (
           <div className="space-y-6 max-w-2xl mx-auto">
             <div className="text-center">
-              <h3 className="text-lg font-bold text-[#F5F0FF] mb-2">Buscar dados da sua empresa na Receita Federal</h3>
-              <p className="text-sm text-[#A78BCC]">
+              <h3 className="text-lg font-bold text-[var(--d2b-text-primary)] mb-2">Buscar dados da sua empresa na Receita Federal</h3>
+              <p className="text-sm text-[var(--d2b-text-secondary)]">
                 Para iniciar a configuração da Nota Fiscal de Serviço Eletrônica (NFS-e), precisamos buscar os dados oficiais da sua empresa na Receita Federal. Digite o CNPJ da clínica abaixo para prosseguir automaticamente todas as informações necessárias.
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-[#F5F0FF] mb-2">CNPJ da Clínica*</label>
+                <label className="block text-sm font-semibold text-[var(--d2b-text-primary)] mb-2">CNPJ da Clínica*</label>
                 <input
                   type="text"
                   value={formatCnpj(cnpjInput)}
                   onChange={(e) => setCnpjInput(e.target.value.replace(/\D/g, ''))}
                   placeholder="00.000.000/0000-00"
                   maxLength={18}
-                  className="w-full px-4 py-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-4 py-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 />
-                <p className="text-xs text-[#6B4E8A] mt-2">* Todos dados do que será necessário validar os dados com seus clientes</p>
+                <p className="text-xs text-[var(--d2b-text-muted)] mt-2">* Todos dados do que será necessário validar os dados com seus clientes</p>
               </div>
 
               <div className="p-4 rounded-lg border border-[rgba(59,130,246,0.25)] bg-[rgba(59,130,246,0.05)]">
@@ -559,7 +559,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                   <AlertCircle size={20} className="text-[#3B82F6] mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-[#3B82F6] mb-1">Processo obrigatório:</p>
-                    <p className="text-xs text-[#A78BCC]">
+                    <p className="text-xs text-[var(--d2b-text-secondary)]">
                       O busca automática é necessário para prosseguir com as dados oficiais da sua empresa (razão social, endereço e afins) que estão na Receita Federal. Este processo garante a integração adequada com os sistemas governamentais para emissão da NFS-e.
                     </p>
                   </div>
@@ -569,7 +569,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
               <div className="flex items-center justify-center gap-4 pt-4">
                 <button
                   onClick={() => setPassoAtual(5)}
-                  className="flex items-center gap-2 px-6 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
+                  className="flex items-center gap-2 px-6 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
                 >
                   <ArrowLeft size={16} />
                   Voltar
@@ -593,13 +593,13 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
   return (
     <div className="space-y-6">
       {/* Abas */}
-      <div className="flex items-center gap-1 border-b border-[rgba(124,77,255,0.25)]">
+      <div className="flex items-center gap-1 border-b border-[var(--d2b-border-strong)]">
         <button
           onClick={() => setAbaAtiva('dados')}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             abaAtiva === 'dados'
               ? 'text-[#7C4DFF] border-b-2 border-[#7C4DFF]'
-              : 'text-[#A78BCC] hover:text-[#F5F0FF]'
+              : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           Dados da clínica / Nota
@@ -609,7 +609,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             abaAtiva === 'certificado'
               ? 'text-[#7C4DFF] border-b-2 border-[#7C4DFF]'
-              : 'text-[#A78BCC] hover:text-[#F5F0FF]'
+              : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           Certificado digital
@@ -619,7 +619,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             abaAtiva === 'cnae'
               ? 'text-[#7C4DFF] border-b-2 border-[#7C4DFF]'
-              : 'text-[#A78BCC] hover:text-[#F5F0FF]'
+              : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           CNAE e dados fiscais
@@ -629,136 +629,136 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
       {/* Conteúdo das Abas */}
       {abaAtiva === 'dados' && configuracao && (
         <div className="space-y-6">
-          <h3 className="text-base font-bold text-[#F5F0FF]">Dados da empresa para NFS-e</h3>
+          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Dados da empresa para NFS-e</h3>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Nome Fantasia*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Nome Fantasia*</label>
               <input
                 type="text"
                 value={configuracao.nomeFantasia || ''}
                 readOnly
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Razão Social*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Razão Social*</label>
               <input
                 type="text"
                 value={configuracao.razaoSocial || ''}
                 readOnly
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">CNPJ*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">CNPJ*</label>
               <input
                 type="text"
                 value={formatCnpj(configuracao.cnpj)}
                 readOnly
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Inscrição Estadual</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Inscrição Estadual</label>
               <input
                 type="text"
                 placeholder="-"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Inscrição Municipal*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Inscrição Municipal*</label>
               <input
                 type="text"
                 placeholder="-"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">E-mail*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">E-mail*</label>
               <input
                 type="email"
                 value={configuracao.email || ''}
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
               />
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-[#F5F0FF] mb-4">Endereço</h4>
+            <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-4">Endereço</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">CEP*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">CEP*</label>
                 <input
                   type="text"
                   value={configuracao.cep || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">UF*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">UF*</label>
                 <input
                   type="text"
                   value={configuracao.uf || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-xs text-[#A78BCC] mb-2">Cidade*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Cidade*</label>
                 <input
                   type="text"
                   value={configuracao.municipio || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-xs text-[#A78BCC] mb-2">Logradouro*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Logradouro*</label>
                 <input
                   type="text"
                   value={configuracao.logradouro || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Número*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Número*</label>
                 <input
                   type="text"
                   value={configuracao.numero || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Complemento</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Complemento</label>
                 <input
                   type="text"
                   value={configuracao.complemento || ''}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-xs text-[#A78BCC] mb-2">Bairro*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Bairro*</label>
                 <input
                   type="text"
                   value={configuracao.bairro || ''}
                   readOnly
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm"
                 />
               </div>
             </div>
@@ -774,11 +774,11 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
 
       {abaAtiva === 'certificado' && (
         <div className="space-y-6">
-          <h3 className="text-base font-bold text-[#F5F0FF]">Certificado digital</h3>
+          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Certificado digital</h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[#F5F0FF] mb-2">Certificado A1</label>
+              <label className="block text-sm font-semibold text-[var(--d2b-text-primary)] mb-2">Certificado A1</label>
               <div className="flex items-center gap-3">
                 <input
                   ref={fileInputRef}
@@ -794,26 +794,26 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                   <Upload size={16} />
                   Selecione o certificado A1
                 </button>
-                <span className="text-xs text-[#A78BCC]">
+                <span className="text-xs text-[var(--d2b-text-secondary)]">
                   {certificadoFile ? certificadoFile.name : 'No file chosen'}
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#F5F0FF] mb-2">Senha do certificado*</label>
+              <label className="block text-sm font-semibold text-[var(--d2b-text-primary)] mb-2">Senha do certificado*</label>
               <input
                 type="password"
                 value={senhaCertificado}
                 onChange={(e) => setSenhaCertificado(e.target.value)}
                 placeholder="Digite a senha do certificado"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
               />
             </div>
 
             <div>
-              <h4 className="text-sm font-semibold text-[#F5F0FF] mb-3">Instruções</h4>
-              <ul className="space-y-2 text-xs text-[#A78BCC]">
+              <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Instruções</h4>
+              <ul className="space-y-2 text-xs text-[var(--d2b-text-secondary)]">
                 <li>• O certificado deve estar no formato .p12 ou .pfx</li>
                 <li>• O tamanho máximo do arquivo é 2MB</li>
                 <li>• Certifique-se de que a senha do certificado está correta</li>
@@ -825,7 +825,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
             {!certificadoFile ? (
               <div className="p-4 rounded-lg bg-[rgba(255,193,7,0.1)] border border-[rgba(255,193,7,0.25)]">
                 <p className="text-sm font-semibold text-[#FFC107] mb-2">Nenhum certificado carregado.</p>
-                <p className="text-xs text-[#A78BCC]">Por favor, selecione um certificado para carregar.</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)]">Por favor, selecione um certificado para carregar.</p>
               </div>
             ) : (
               <div className="p-4 rounded-lg bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.25)]">
@@ -852,7 +852,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
       {abaAtiva === 'cnae' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#F5F0FF]">CNAE e Dados Fiscais</h3>
+            <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">CNAE e Dados Fiscais</h3>
             <button 
               onClick={() => {
                 limparFormCnae()
@@ -866,34 +866,34 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
           </div>
 
           {loadingCnaes ? (
-            <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+            <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
           ) : cnaes.length === 0 ? (
-            <div className="p-8 text-center rounded-lg border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328]">
-              <FileText size={48} className="mx-auto mb-4 text-[#6B4E8A]" />
-              <p className="text-sm text-[#A78BCC]">Nenhum CNAE cadastrado</p>
-              <p className="text-xs text-[#6B4E8A] mt-2">Clique em "Novo CNAE" para adicionar</p>
+            <div className="p-8 text-center rounded-lg border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+              <FileText size={48} className="mx-auto mb-4 text-[var(--d2b-text-muted)]" />
+              <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhum CNAE cadastrado</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mt-2">Clique em "Novo CNAE" para adicionar</p>
             </div>
           ) : (
             <div className="space-y-3">
               {cnaes.map((cnae) => (
                 <div
                   key={cnae.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] hover:border-[rgba(124,77,255,0.35)] transition-colors"
+                  className="flex items-center justify-between p-4 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] hover:border-[var(--d2b-border-strong)] transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <h4 className="text-sm font-semibold text-[#F5F0FF]">{cnae.codigoCnae}</h4>
+                      <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">{cnae.codigoCnae}</h4>
                       {cnae.padrao && (
-                        <span className="text-xs px-2 py-0.5 rounded bg-[rgba(124,77,255,0.15)] text-[#7C4DFF]">Padrão</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-[var(--d2b-hover)] text-[#7C4DFF]">Padrão</span>
                       )}
                       {!cnae.ativo && (
                         <span className="text-xs px-2 py-0.5 rounded bg-[rgba(239,68,68,0.15)] text-[#EF4444]">Inativo</span>
                       )}
                     </div>
                     {cnae.discriminacaoServicos && (
-                      <p className="text-xs text-[#A78BCC] mt-1 line-clamp-1">{cnae.discriminacaoServicos}</p>
+                      <p className="text-xs text-[var(--d2b-text-secondary)] mt-1 line-clamp-1">{cnae.discriminacaoServicos}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-[#6B4E8A]">
+                    <div className="flex items-center gap-4 mt-2 text-xs text-[var(--d2b-text-muted)]">
                       {cnae.codigoFederal && <span>Federal: {cnae.codigoFederal}</span>}
                       {cnae.codigoMunicipal && <span>Municipal: {cnae.codigoMunicipal}</span>}
                       <span>ISS: {cnae.aliquotaIss}%</span>
@@ -902,14 +902,14 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditarCnae(cnae)}
-                      className="p-2 rounded-lg hover:bg-[rgba(124,77,255,0.15)] text-[#A78BCC] hover:text-[#7C4DFF] transition-colors"
+                      className="p-2 rounded-lg hover:bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors"
                       title="Editar"
                     >
                       <Pencil size={16} />
                     </button>
                     <button
                       onClick={() => handleDeletarCnae(cnae.id)}
-                      className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                      className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                       title="Excluir"
                     >
                       <Trash2 size={16} />
@@ -924,9 +924,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
 
       {/* Dialog Novo CNAE */}
       <Dialog open={dialogCnaeOpen} onOpenChange={setDialogCnaeOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#F5F0FF]">
+            <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">
               {cnaeEditando ? 'Editar CNAE' : 'Novo CNAE'}
             </DialogTitle>
           </DialogHeader>
@@ -934,23 +934,23 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
           <div className="space-y-4 pt-2">
             {/* Código CNAE */}
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Código CNAE*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Código CNAE*</label>
               <input
                 type="text"
                 value={codigoCnae}
                 onChange={(e) => setCodigoCnae(e.target.value)}
                 placeholder="Digite o código CNAE"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
               />
             </div>
 
             {/* Tipo de Tributação */}
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Tipo de Tributação</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Tipo de Tributação</label>
               <select
                 value={tipoTributacao}
                 onChange={(e) => setTipoTributacao(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
               >
                 <option value="MUNICIPIO">Tributação no município</option>
                 <option value="FORA_MUNICIPIO">Tributação fora do município</option>
@@ -959,50 +959,50 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
 
             {/* Discriminação dos Serviços */}
             <div>
-              <label className="block text-xs text-[#A78BCC] mb-2">Discriminação dos Serviços*</label>
+              <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Discriminação dos Serviços*</label>
               <textarea
                 value={discriminacaoServicos}
                 onChange={(e) => setDiscriminacaoServicos(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none"
               />
             </div>
 
             {/* Códigos Federal e Municipal */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Código Federal do Serviço (LC 116/03)*</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Código Federal do Serviço (LC 116/03)*</label>
                 <input
                   type="text"
                   value={codigoFederal}
                   onChange={(e) => setCodigoFederal(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Código Municipal do Serviço</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Código Municipal do Serviço</label>
                 <input
                   type="text"
                   value={codigoMunicipal}
                   onChange={(e) => setCodigoMunicipal(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
             </div>
 
             {/* Retenções de Tributos */}
             <div>
-              <h4 className="text-sm font-semibold text-[#F5F0FF] mb-3">Retenções de Tributos</h4>
+              <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Retenções de Tributos</h4>
               <div className="grid grid-cols-3 gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={issRetido}
                     onChange={(e) => setIssRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">ISS Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">ISS Retido</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1010,9 +1010,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={irRetido}
                     onChange={(e) => setIrRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">IR Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">IR Retido</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1020,9 +1020,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={inssRetido}
                     onChange={(e) => setInssRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">INSS Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">INSS Retido</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1030,9 +1030,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={csllRetido}
                     onChange={(e) => setCsllRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">CSLL Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">CSLL Retido</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1040,9 +1040,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={pisRetido}
                     onChange={(e) => setPisRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">PIS Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">PIS Retido</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1050,19 +1050,19 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={cofinsRetido}
                     onChange={(e) => setCofinsRetido(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">COFINS Retido</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">COFINS Retido</span>
                 </label>
               </div>
             </div>
 
             {/* Alíquotas */}
             <div>
-              <h4 className="text-sm font-semibold text-[#F5F0FF] mb-3">Alíquotas (%)</h4>
+              <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Alíquotas (%)</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">ISS (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">ISS (%)</label>
                   <input
                     type="number"
                     value={aliquotaIss}
@@ -1070,12 +1070,12 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">INSS (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">INSS (%)</label>
                   <input
                     type="number"
                     value={aliquotaInss}
@@ -1083,12 +1083,12 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">IR (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">IR (%)</label>
                   <input
                     type="number"
                     value={aliquotaIr}
@@ -1096,12 +1096,12 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">CSLL (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">CSLL (%)</label>
                   <input
                     type="number"
                     value={aliquotaCsll}
@@ -1109,12 +1109,12 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">PIS (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">PIS (%)</label>
                   <input
                     type="number"
                     value={aliquotaPis}
@@ -1122,12 +1122,12 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-[#A78BCC] mb-2">COFINS (%)</label>
+                  <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">COFINS (%)</label>
                   <input
                     type="number"
                     value={aliquotaCofins}
@@ -1135,7 +1135,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                   />
                 </div>
               </div>
@@ -1143,16 +1143,16 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
 
             {/* Configurações */}
             <div>
-              <h4 className="text-sm font-semibold text-[#F5F0FF] mb-3">Configurações</h4>
+              <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Configurações</h4>
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cnaePadrao}
                     onChange={(e) => setCnaePadrao(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">CNAE Padrão</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">CNAE Padrão</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1160,9 +1160,9 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                     type="checkbox"
                     checked={cnaeAtivo}
                     onChange={(e) => setCnaeAtivo(e.target.checked)}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                   />
-                  <span className="text-sm text-[#F5F0FF]">Ativo</span>
+                  <span className="text-sm text-[var(--d2b-text-primary)]">Ativo</span>
                 </label>
               </div>
             </div>
@@ -1174,7 +1174,7 @@ export function TabNfse({ initialEmpresa }: TabNfseProps) {
                   setDialogCnaeOpen(false)
                   limparFormCnae()
                 }}
-                className="px-6 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
+                className="px-6 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] hover:border-[#7C4DFF] text-sm font-semibold transition-colors"
               >
                 Cancelar
               </button>
