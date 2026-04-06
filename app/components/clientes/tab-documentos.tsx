@@ -501,7 +501,7 @@ export function TabDocumentos({
                     <button key={tipo.id} onClick={() => openNovoComTemplate(tipo.template)}
                       className="relative flex flex-col items-center gap-3 border border-gray-200 rounded-xl p-4 hover:border-purple-400 hover:bg-purple-50 transition-colors group">
                       {tipo.badge && (
-                        <span className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Agendart</span>
+                        <span className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">DEV2B</span>
                       )}
                       {tipo.id === 'branco'
                         ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
