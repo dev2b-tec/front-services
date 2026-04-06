@@ -189,7 +189,7 @@ function TabMensagens() {
       <div>
         <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Configurações de WhatsApp</h2>
         <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
-          Gerencie as mensagens e configurações para o envio de WhatsApp automático pelo número do Agendart.
+          Gerencie as mensagens e configurações para o envio de WhatsApp automático pelo número do DEV2B.
         </p>
       </div>
 
