@@ -14,6 +14,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Vars públicas precisam estar disponíveis no momento do build (Next.js as embute no bundle)
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_WHATS_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WHATS_API_URL=$NEXT_PUBLIC_WHATS_API_URL
+
 RUN pnpm build
 
 # ─── Stage 3: runner ─────────────────────────────────────────────────────────
