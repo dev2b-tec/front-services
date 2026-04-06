@@ -61,7 +61,7 @@ function groupByDate(eventos: EventoTimeline[]): GrupoData[] {
 
 function TipoBadge({ tipo }: { tipo: TipoEvento }) {
   const map: Record<TipoEvento, { label: string; bg: string; text: string }> = {
-    EVOLUCAO:   { label: 'Evolução',   bg: 'bg-[rgba(124,77,255,0.15)]',  text: 'text-[#C084FC]' },
+    EVOLUCAO:   { label: 'Evolução',   bg: 'bg-[var(--d2b-hover)]',  text: 'text-[#C084FC]' },
     AGENDAMENTO:{ label: 'Agendamento',bg: 'bg-[rgba(16,185,129,0.15)]',  text: 'text-[#10B981]' },
     ANAMNESE:   { label: 'Anamnese',   bg: 'bg-[rgba(245,158,11,0.15)]',  text: 'text-[#F59E0B]' },
     DOCUMENTO:  { label: 'Documento',  bg: 'bg-[rgba(59,130,246,0.15)]',  text: 'text-[#60A5FA]' },
@@ -106,7 +106,7 @@ function EventoCard({
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
+      <div className="flex-1 bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-xl overflow-hidden">
         {/* Accent bar */}
         <div className="h-0.5 w-full" style={{ background: accentColor }} />
 
@@ -117,24 +117,24 @@ function EventoCard({
               <div className="flex items-center gap-2 mb-1">
                 <TipoBadge tipo={evento.tipo} />
               </div>
-              <p className="text-sm font-bold text-[#F5F0FF] truncate">
+              <p className="text-sm font-bold text-[var(--d2b-text-primary)] truncate">
                 {evento.titulo ?? '(sem título)'}
               </p>
               {evento.hora && (
-                <div className="flex items-center gap-1 text-xs text-[#A78BCC] mt-0.5">
+                <div className="flex items-center gap-1 text-xs text-[var(--d2b-text-secondary)] mt-0.5">
                   <Clock size={10} />
                   {formatHora(evento.hora)}
                 </div>
               )}
               {!evento.hora && (
-                <p className="text-xs text-[#6B4E8A] mt-0.5">
+                <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">
                   {formatDateLabel(evento.data)}
                 </p>
               )}
             </div>
             <button
               onClick={() => setExpandido((v) => !v)}
-              className="flex-shrink-0 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors mt-0.5"
+              className="flex-shrink-0 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors mt-0.5"
             >
               {expandido
                 ? <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9L7 5L11 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
@@ -144,15 +144,15 @@ function EventoCard({
           </div>
 
           {/* Profissional row */}
-          <div className="mt-2 pt-2 border-t border-[rgba(124,77,255,0.10)]">
-            <p className="text-[10px] font-bold tracking-widest text-[#6B4E8A] mb-0.5">PROFISSIONAL</p>
+          <div className="mt-2 pt-2 border-t border-[var(--d2b-border)]">
+            <p className="text-[10px] font-bold tracking-widest text-[var(--d2b-text-muted)] mb-0.5">PROFISSIONAL</p>
             <p className={`text-xs font-semibold ${profColor}`}>{evento.profissional ?? '—'}</p>
           </div>
 
           {/* Expanded: detail preview */}
           {expandido && (
-            <div className="mt-3 pt-2 border-t border-[rgba(124,77,255,0.10)] space-y-1">
-              <p className="text-[10px] text-[#6B4E8A]">
+            <div className="mt-3 pt-2 border-t border-[var(--d2b-border)] space-y-1">
+              <p className="text-[10px] text-[var(--d2b-text-muted)]">
                 {evento.tipo === 'DOCUMENTO'
                   ? 'Documento criado'
                   : evento.tipo === 'ANAMNESE'
@@ -165,7 +165,7 @@ function EventoCard({
           {/* Action buttons */}
           <div className="flex items-center gap-2 mt-3">
             <button
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] px-3 py-1.5 rounded-lg transition-colors"
             >
               <Download size={11} /> Download
             </button>
@@ -280,13 +280,13 @@ export function TabLinhaTempo({ pacienteId, empresaId, onIrParaAnamnese }: { pac
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-[#F5F0FF]">Linha do Tempo</h2>
-          <p className="text-xs text-[#A78BCC] mt-0.5">Histórico de atendimentos e evoluções do paciente.</p>
+          <h2 className="text-base font-semibold text-[var(--d2b-text-primary)]">Linha do Tempo</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Histórico de atendimentos e evoluções do paciente.</p>
         </div>
         <button
           onClick={carregarTimeline}
           disabled={carregando}
-          className="flex items-center gap-1.5 text-xs text-[#A78BCC] hover:text-[#F5F0FF] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
         >
           <RefreshCw size={11} className={carregando ? 'animate-spin' : ''} />
           Atualizar
@@ -295,7 +295,7 @@ export function TabLinhaTempo({ pacienteId, empresaId, onIrParaAnamnese }: { pac
 
       {/* Loading */}
       {carregando && (
-        <div className="flex items-center justify-center py-16 gap-3 text-[#6B4E8A]">
+        <div className="flex items-center justify-center py-16 gap-3 text-[var(--d2b-text-muted)]">
           <RefreshCw size={16} className="animate-spin" />
           <span className="text-sm">Carregando histórico...</span>
         </div>
@@ -304,11 +304,11 @@ export function TabLinhaTempo({ pacienteId, empresaId, onIrParaAnamnese }: { pac
       {/* Empty */}
       {!carregando && grupos.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-          <div className="w-12 h-12 rounded-full bg-[rgba(124,77,255,0.10)] flex items-center justify-center">
-            <AlertCircle size={20} className="text-[#6B4E8A]" />
+          <div className="w-12 h-12 rounded-full bg-[var(--d2b-hover)] flex items-center justify-center">
+            <AlertCircle size={20} className="text-[var(--d2b-text-muted)]" />
           </div>
-          <p className="text-sm font-semibold text-[#A78BCC]">Nenhum registro encontrado</p>
-          <p className="text-xs text-[#6B4E8A]">Os eventos do paciente aparecerão aqui.</p>
+          <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Nenhum registro encontrado</p>
+          <p className="text-xs text-[var(--d2b-text-muted)]">Os eventos do paciente aparecerão aqui.</p>
         </div>
       )}
 
@@ -319,15 +319,15 @@ export function TabLinhaTempo({ pacienteId, empresaId, onIrParaAnamnese }: { pac
             <div key={grupo.data} className={gi > 0 ? 'mt-8' : ''}>
               {/* Date label */}
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px bg-[rgba(124,77,255,0.15)]" />
-                <p className="text-sm font-bold text-[#F5F0FF] whitespace-nowrap">{grupo.dataLabel}</p>
-                <div className="flex-1 h-px bg-[rgba(124,77,255,0.15)]" />
+                <div className="flex-1 h-px bg-[var(--d2b-hover)]" />
+                <p className="text-sm font-bold text-[var(--d2b-text-primary)] whitespace-nowrap">{grupo.dataLabel}</p>
+                <div className="flex-1 h-px bg-[var(--d2b-hover)]" />
               </div>
 
               {/* Events for this date */}
               <div className="relative pl-5">
                 {/* Vertical spine */}
-                <div className="absolute left-[17px] top-4 bottom-4 w-px bg-[rgba(124,77,255,0.20)]" />
+                <div className="absolute left-[17px] top-4 bottom-4 w-px bg-[var(--d2b-hover)]" />
 
                 <div className="space-y-4">
                   {grupo.eventos.map((ev) => (
@@ -347,27 +347,27 @@ export function TabLinhaTempo({ pacienteId, empresaId, onIrParaAnamnese }: { pac
       {/* Buscando evolução overlay */}
       {buscandoEvolucao && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
-          <div className="flex items-center gap-3 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl px-6 py-4">
+          <div className="flex items-center gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-6 py-4">
             <RefreshCw size={16} className="animate-spin text-[#7C4DFF]" />
-            <span className="text-sm text-[#F5F0FF]">Carregando evolução...</span>
+            <span className="text-sm text-[var(--d2b-text-primary)]">Carregando evolução...</span>
           </div>
         </div>
       )}
 
       {buscandoAgendamento && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
-          <div className="flex items-center gap-3 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl px-6 py-4">
+          <div className="flex items-center gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-6 py-4">
             <RefreshCw size={16} className="animate-spin text-[#10B981]" />
-            <span className="text-sm text-[#F5F0FF]">Carregando agendamento...</span>
+            <span className="text-sm text-[var(--d2b-text-primary)]">Carregando agendamento...</span>
           </div>
         </div>
       )}
 
       {buscandoDocumento && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
-          <div className="flex items-center gap-3 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl px-6 py-4">
+          <div className="flex items-center gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-6 py-4">
             <RefreshCw size={16} className="animate-spin text-[#3B82F6]" />
-            <span className="text-sm text-[#F5F0FF]">Carregando documento...</span>
+            <span className="text-sm text-[var(--d2b-text-primary)]">Carregando documento...</span>
           </div>
         </div>
       )}

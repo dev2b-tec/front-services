@@ -171,15 +171,15 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Salas da Clínica</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Salas da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
             Gerencie a lista de salas da sua clínica para que possam ser alocadas no atendimento de seus pacientes.
           </p>
         </div>
       </div>
 
       {/* Toggle Habilitar Gestão de Salas */}
-      <div className="flex items-center gap-3 p-4 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
+      <div className="flex items-center gap-3 p-4 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
         <button
           onClick={() => {
             if (habilitarGestaoSalas && salas.length > 0) {
@@ -191,7 +191,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
             }
           }}
           className={`relative w-11 h-6 rounded-full transition-colors ${
-            habilitarGestaoSalas ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'
+            habilitarGestaoSalas ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'
           }`}
         >
           <span
@@ -201,14 +201,14 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
           />
         </button>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-[#F5F0FF]">Habilitar funcionalidade de gestão de Salas</p>
+          <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Habilitar funcionalidade de gestão de Salas</p>
         </div>
       </div>
 
       {habilitarGestaoSalas && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[#F5F0FF]">Lista de salas</h3>
+            <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Lista de salas</h3>
             <button
               onClick={() => setCriandoNova(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors"
@@ -219,25 +219,25 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+            <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
           ) : (
             <div className="space-y-3">
               {/* Formulário criar nova */}
               {criandoNova && (
-                <div className="p-4 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#120328]">
+                <div className="p-4 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
                   <div className="space-y-3">
                     <input
                       type="text"
                       value={novoNome}
                       onChange={(e) => setNovoNome(e.target.value)}
                       placeholder="Nome da Sala"
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                     />
                     
                     <select
                       value={novaUnidadeId}
                       onChange={(e) => setNovaUnidadeId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                     >
                       <option value="">Selecione uma unidade</option>
                       {unidades.map(u => (
@@ -250,9 +250,9 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                         type="checkbox"
                         checked={novoPermitirOverbooking}
                         onChange={(e) => setNovoPermitirOverbooking(e.target.checked)}
-                        className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                        className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                       />
-                      <span className="text-sm text-[#F5F0FF]">Permitir overbooking nesta sala</span>
+                      <span className="text-sm text-[var(--d2b-text-primary)]">Permitir overbooking nesta sala</span>
                     </label>
                     
                     <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                           setNovaUnidadeId('')
                           setNovoPermitirOverbooking(false)
                         }}
-                        className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold transition-colors"
+                        className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold transition-colors"
                       >
                         Cancelar
                       </button>
@@ -282,7 +282,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
               {salas.map(sala => (
                 <div
                   key={sala.id}
-                  className="p-4 rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] hover:border-[rgba(124,77,255,0.35)] transition-colors"
+                  className="p-4 rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] hover:border-[var(--d2b-border-strong)] transition-colors"
                 >
                   {editingId === sala.id ? (
                     <div className="space-y-3">
@@ -290,13 +290,13 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                         type="text"
                         value={editNome}
                         onChange={(e) => setEditNome(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                        className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                       />
                       
                       <select
                         value={editUnidadeId}
                         onChange={(e) => setEditUnidadeId(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                        className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                       >
                         <option value="">Selecione uma unidade</option>
                         {unidades.map(u => (
@@ -309,9 +309,9 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                           type="checkbox"
                           checked={editPermitirOverbooking}
                           onChange={(e) => setEditPermitirOverbooking(e.target.checked)}
-                          className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-[#7C4DFF]"
+                          className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-[#7C4DFF]"
                         />
-                        <span className="text-sm text-[#F5F0FF]">Permitir overbooking nesta sala</span>
+                        <span className="text-sm text-[var(--d2b-text-primary)]">Permitir overbooking nesta sala</span>
                       </label>
                       
                       <div className="flex items-center gap-2">
@@ -323,7 +323,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                          className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
                         >
                           Cancelar
                         </button>
@@ -334,9 +334,9 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                       <div className="flex items-start gap-3 flex-1">
                         <DoorOpen size={20} className="text-[#7C4DFF] mt-0.5" />
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-[#F5F0FF]">{sala.nome}</h4>
+                          <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">{sala.nome}</h4>
                           {sala.unidadeNome && (
-                            <p className="text-xs text-[#A78BCC] mt-0.5">{sala.unidadeNome}</p>
+                            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">{sala.unidadeNome}</p>
                           )}
                           {sala.permitirOverbooking && (
                             <p className="text-xs text-[#7C4DFF] mt-1">Overbooking permitido</p>
@@ -347,7 +347,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditar(sala)}
-                          className="p-2 rounded-lg hover:bg-[rgba(124,77,255,0.15)] text-[#A78BCC] hover:text-[#7C4DFF] transition-colors"
+                          className="p-2 rounded-lg hover:bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors"
                           title="Editar"
                         >
                           <Pencil size={16} />
@@ -355,7 +355,7 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
                         
                         <button
                           onClick={() => handleDeletar(sala.id)}
-                          className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                          className="p-2 rounded-lg hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                           title="Excluir"
                         >
                           <Trash2 size={16} />
@@ -367,10 +367,10 @@ export function TabSalas({ initialEmpresa }: TabSalasProps) {
               ))}
 
               {salas.length === 0 && !criandoNova && (
-                <div className="p-12 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#0D0520]">
-                  <DoorOpen size={48} className="mx-auto mb-4 text-[#6B4E8A]" />
-                  <p className="text-sm text-[#A78BCC]">Nenhuma sala cadastrada</p>
-                  <p className="text-xs text-[#6B4E8A] mt-1">Clique em "Adicionar sala" para começar</p>
+                <div className="p-12 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)]">
+                  <DoorOpen size={48} className="mx-auto mb-4 text-[var(--d2b-text-muted)]" />
+                  <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhuma sala cadastrada</p>
+                  <p className="text-xs text-[var(--d2b-text-muted)] mt-1">Clique em "Adicionar sala" para começar</p>
                 </div>
               )}
             </div>

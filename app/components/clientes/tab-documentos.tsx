@@ -270,7 +270,7 @@ export function TabDocumentos({
     <div className="flex-1 flex flex-col gap-5 p-6 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#F5F0FF]">Documentos</h2>
+        <h2 className="text-lg font-semibold text-[var(--d2b-text-primary)]">Documentos</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setNovoTitulo(''); setNovoProf(null); setNovoPermProf(true); setNovoPermAssist(true); setNovoErros({}); setNovoOpen(true) }}
@@ -278,51 +278,51 @@ export function TabDocumentos({
           >
             <Plus size={14} /> Novo Documento
           </button>
-          <button onClick={onVoltar} className="px-4 py-1.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          <button onClick={onVoltar} className="px-4 py-1.5 text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Voltar
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
+      <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.18)]">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase w-40">Ações</th>
+            <tr className="border-b border-[var(--d2b-border)]">
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase w-40">Ações</th>
               <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('titulo')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                <button onClick={() => toggleSort('titulo')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                   Título <SortIcon col="titulo" />
                 </button>
               </th>
               <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                <button onClick={() => toggleSort('profissional')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                   Profissional <SortIcon col="profissional" />
                 </button>
               </th>
               <th className="text-left px-5 py-3.5">
-                <button onClick={() => toggleSort('criadoEm')} className="flex items-center gap-1.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase hover:text-[#A78BCC] transition-colors">
+                <button onClick={() => toggleSort('criadoEm')} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase hover:text-[var(--d2b-text-secondary)] transition-colors">
                   Criado Em <SortIcon col="criadoEm" />
                 </button>
               </th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase leading-tight">Assinatura<br/>Prof. / Paci.</th>
+              <th className="text-right px-5 py-3.5 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase leading-tight">Assinatura<br/>Prof. / Paci.</th>
             </tr>
           </thead>
           <tbody>
             {slice.length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-10 text-[#6B4E8A] text-sm">Nenhum documento encontrado</td></tr>
+              <tr><td colSpan={5} className="text-center py-10 text-[var(--d2b-text-muted)] text-sm">Nenhum documento encontrado</td></tr>
             ) : (
               slice.map((doc) => (
-                <tr key={doc.id} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
+                <tr key={doc.id} className="border-t border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => setVisualizarId(doc.id)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Visualizar">
+                      <button onClick={() => setVisualizarId(doc.id)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors" title="Visualizar">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
-                      <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Download">
+                      <button className="w-7 h-7 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors" title="Download">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       </button>
-                      <button onClick={() => openEditar(doc)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors" title="Editar">
+                      <button onClick={() => openEditar(doc)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors" title="Editar">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
                       <button onClick={() => setExcluirId(doc.id)} className="w-7 h-7 flex items-center justify-center rounded-full border border-[rgba(255,100,100,0.30)] text-red-400 hover:bg-[rgba(255,100,100,0.12)] transition-colors" title="Excluir">
@@ -330,10 +330,10 @@ export function TabDocumentos({
                       </button>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.titulo}</td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.profissional}</td>
-                  <td className="px-5 py-3.5 text-[#F5F0FF]">{doc.criadoEm}</td>
-                  <td className="px-5 py-3.5 text-right text-[#6B4E8A]">– | –</td>
+                  <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{doc.titulo}</td>
+                  <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{doc.profissional}</td>
+                  <td className="px-5 py-3.5 text-[var(--d2b-text-primary)]">{doc.criadoEm}</td>
+                  <td className="px-5 py-3.5 text-right text-[var(--d2b-text-muted)]">– | –</td>
                 </tr>
               ))
             )}
@@ -341,25 +341,25 @@ export function TabDocumentos({
         </table>
 
         {/* Pagination */}
-        <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-          <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
+        <div className="flex items-center justify-center gap-2 py-3 border-t border-[var(--d2b-border)]">
+          <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">«</button>
+          <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">‹</button>
           {Array.from({ length: Math.min(totalPags, 5) }, (_, i) => i + 1).map((p) => (
             <button key={p} onClick={() => setPagina(p)}
-              className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${pagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[#6B4E8A] hover:text-[#F5F0FF]'}`}>{p}
+              className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${pagina === p ? 'bg-[#7C4DFF] text-white font-semibold' : 'text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)]'}`}>{p}
             </button>
           ))}
-          <button onClick={() => setPagina((p) => Math.min(totalPags, p + 1))} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-          <button onClick={() => setPagina(totalPags)} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
+          <button onClick={() => setPagina((p) => Math.min(totalPags, p + 1))} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">›</button>
+          <button onClick={() => setPagina(totalPags)} disabled={pagina === totalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">»</button>
           <div className="relative ml-1">
-            <button onClick={() => setPageSizeOpen((v) => !v)} className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-              {pageSize} <ChevronDown size={11} className="text-[#6B4E8A]" />
+            <button onClick={() => setPageSizeOpen((v) => !v)} className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-1 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
+              {pageSize} <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
             </button>
             {pageSizeOpen && (
-              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+              <div className="absolute z-30 bottom-full mb-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                 {[10, 25, 50].map((n) => (
                   <button key={n} onClick={() => { setPageSize(n); setPagina(1); setPageSizeOpen(false) }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${pageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${pageSize === n ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{n}</button>
                 ))}
               </div>
             )}

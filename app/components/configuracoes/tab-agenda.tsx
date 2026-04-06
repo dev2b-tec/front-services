@@ -329,19 +329,19 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
   return (
     <div className="space-y-7">
-      <h2 className="text-base font-bold text-[#F5F0FF]">Configurações da Agenda</h2>
+      <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Configurações da Agenda</h2>
 
       {/* Toggles de Recursos */}
       <div className="grid grid-cols-2 gap-x-10 gap-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#F5F0FF]">Controle de Comissões</span>
-            <HelpCircle size={14} className="text-[#6B4E8A]" />
+            <span className="text-sm text-[var(--d2b-text-primary)]">Controle de Comissões</span>
+            <HelpCircle size={14} className="text-[var(--d2b-text-muted)]" />
           </div>
           <button
             onClick={() => setAgenda(prev => ({ ...prev, recursoDesativadoComissoes: !prev.recursoDesativadoComissoes }))}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              agenda.recursoDesativadoComissoes ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+              agenda.recursoDesativadoComissoes ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
             }`}
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -352,13 +352,13 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#F5F0FF]">Fila de Espera</span>
-            <HelpCircle size={14} className="text-[#6B4E8A]" />
+            <span className="text-sm text-[var(--d2b-text-primary)]">Fila de Espera</span>
+            <HelpCircle size={14} className="text-[var(--d2b-text-muted)]" />
           </div>
           <button
             onClick={() => setAgenda(prev => ({ ...prev, recursoDesativadoFila: !prev.recursoDesativadoFila }))}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              agenda.recursoDesativadoFila ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+              agenda.recursoDesativadoFila ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
             }`}
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -369,13 +369,13 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#F5F0FF]">Overbooking de Profissionais</span>
-            <HelpCircle size={14} className="text-[#6B4E8A]" />
+            <span className="text-sm text-[var(--d2b-text-primary)]">Overbooking de Profissionais</span>
+            <HelpCircle size={14} className="text-[var(--d2b-text-muted)]" />
           </div>
           <button
             onClick={() => setAgenda(prev => ({ ...prev, recursoDesativadoOverbooking: !prev.recursoDesativadoOverbooking }))}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              agenda.recursoDesativadoOverbooking ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+              agenda.recursoDesativadoOverbooking ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
             }`}
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -386,13 +386,13 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[#F5F0FF]">Bloquear Edição de Evolução</span>
-            <HelpCircle size={14} className="text-[#6B4E8A]" />
+            <span className="text-sm text-[var(--d2b-text-primary)]">Bloquear Edição de Evolução</span>
+            <HelpCircle size={14} className="text-[var(--d2b-text-muted)]" />
           </div>
           <button
             onClick={() => setAgenda(prev => ({ ...prev, recursoDesativadoEvolucao: !prev.recursoDesativadoEvolucao }))}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              agenda.recursoDesativadoEvolucao ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+              agenda.recursoDesativadoEvolucao ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
             }`}
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -403,13 +403,13 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
       </div>
 
       {/* Sub-tabs: Clínica e Profissional */}
-      <div className="flex items-center gap-4 border-b border-[rgba(124,77,255,0.18)]">
+      <div className="flex items-center gap-4 border-b border-[var(--d2b-border)]">
         <button
           onClick={() => { setSubTab('clinica'); if (empresaAgendaId) carregarAgenda(empresaAgendaId) }}
           className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
             subTab === 'clinica'
-              ? 'border-[#7C4DFF] text-[#F5F0FF]'
-              : 'border-transparent text-[#A78BCC] hover:text-[#F5F0FF]'
+              ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]'
+              : 'border-transparent text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           <Building2 size={16} />
@@ -420,8 +420,8 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
           onClick={() => { setSubTab('profissional'); if (initialUsuario?.agendaId) carregarAgenda(initialUsuario.agendaId) }}
           className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
             subTab === 'profissional'
-              ? 'border-[#7C4DFF] text-[#F5F0FF]'
-              : 'border-transparent text-[#A78BCC] hover:text-[#F5F0FF]'
+              ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]'
+              : 'border-transparent text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           <User size={16} />
@@ -434,7 +434,7 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
         <div className="space-y-6">
           {/* Horário de Funcionamento */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Horário de Funcionamento</h3>
+            <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Horário de Funcionamento</h3>
             
             <div className="space-y-2">
               {DIAS_SEMANA.map(({ key, label }) => {
@@ -444,38 +444,38 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
                 
                 return (
                   <div key={key} className="grid grid-cols-[60px_1fr_1fr_100px] gap-3 items-center">
-                    <span className="text-sm text-[#A78BCC]">{label}</span>
+                    <span className="text-sm text-[var(--d2b-text-secondary)]">{label}</span>
                     
                     <div className="relative">
-                      <label className="block text-[10px] text-[#6B4E8A] mb-1">Abertura</label>
+                      <label className="block text-[10px] text-[var(--d2b-text-muted)] mb-1">Abertura</label>
                       <input
                         type="time"
                         value={agenda[abertura] as string}
                         onChange={(e) => setAgenda(prev => ({ ...prev, [abertura]: e.target.value }))}
                         disabled={!agenda[aberto]}
-                        className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
+                        className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
                       />
                     </div>
                     
                     <div className="relative">
-                      <label className="block text-[10px] text-[#6B4E8A] mb-1">Fechamento</label>
+                      <label className="block text-[10px] text-[var(--d2b-text-muted)] mb-1">Fechamento</label>
                       <input
                         type="time"
                         value={agenda[fechamento] as string}
                         onChange={(e) => setAgenda(prev => ({ ...prev, [fechamento]: e.target.value }))}
                         disabled={!agenda[aberto]}
-                        className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
+                        className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
                       />
                     </div>
                     
                     <div className="flex items-center justify-end gap-2">
-                      <span className={`text-xs ${agenda[aberto] ? 'text-[#7C4DFF]' : 'text-[#6B4E8A]'}`}>
+                      <span className={`text-xs ${agenda[aberto] ? 'text-[#7C4DFF]' : 'text-[var(--d2b-text-muted)]'}`}>
                         {agenda[aberto] ? 'Aberto' : 'Fechado'}
                       </span>
                       <button
                         onClick={() => setAgenda(prev => ({ ...prev, [aberto]: !prev[aberto] }))}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                          agenda[aberto] ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+                          agenda[aberto] ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
                         }`}
                       >
                         <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -491,39 +491,39 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
           {/* Horário de Almoço */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-[#F5F0FF]">Horário de Almoço</h3>
+            <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Horário de Almoço</h3>
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Início</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Início</label>
                 <input
                   type="time"
                   value={agenda.almocoInicio}
                   onChange={(e) => setAgenda(prev => ({ ...prev, almocoInicio: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
               
               <div>
-                <label className="block text-xs text-[#A78BCC] mb-2">Fim</label>
+                <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Fim</label>
                 <input
                   type="time"
                   value={agenda.almocoFim}
                   onChange={(e) => setAgenda(prev => ({ ...prev, almocoFim: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.18)] bg-[#120328]">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)]">
               <input
                 type="checkbox"
                 id="ativar-almoco"
                 checked={agenda.ativarHorarioAlmoco}
                 onChange={(e) => setAgenda(prev => ({ ...prev, ativarHorarioAlmoco: e.target.checked }))}
-                className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-2 focus:ring-[#7C4DFF] focus:ring-offset-2 focus:ring-offset-[#0D0520]"
+                className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-2 focus:ring-[#7C4DFF] focus:ring-offset-2 focus:ring-offset-[#0D0520]"
               />
-              <label htmlFor="ativar-almoco" className="text-sm text-[#F5F0FF] cursor-pointer">
+              <label htmlFor="ativar-almoco" className="text-sm text-[var(--d2b-text-primary)] cursor-pointer">
                 Ativar Horário de Almoço
               </label>
             </div>
@@ -532,14 +532,14 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
       ) : (
         <div className="space-y-6">
           {/* Toggle Profissional */}
-          <div className="flex items-start gap-3 p-4 rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328]">
+          <div className="flex items-start gap-3 p-4 rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)]">
             <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 rounded-lg bg-[rgba(124,77,255,0.15)] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--d2b-hover)] flex items-center justify-center">
                 <User size={20} className="text-[#7C4DFF]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#F5F0FF]">Configurar horários personalizados de atendimento para este profissional</p>
-                <p className="text-xs text-[#A78BCC] mt-0.5">
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Configurar horários personalizados de atendimento para este profissional</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">
                   Configure os horários de atendimento deste profissional abaixo.
                 </p>
               </div>
@@ -549,7 +549,7 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
               onClick={() => handleToggleProfissional(!profissionalHabilitado)}
               disabled={loading}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#7C4DFF] focus:ring-offset-2 focus:ring-offset-[#0D0520] disabled:opacity-50 ${
-                profissionalHabilitado ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+                profissionalHabilitado ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
               }`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -561,7 +561,7 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
           {profissionalHabilitado && (
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-[#F5F0FF]">Horários de Funcionamento</h3>
+                <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Horários de Funcionamento</h3>
                 
                 <div className="space-y-2">
                   {DIAS_SEMANA.map(({ key, label }) => {
@@ -571,38 +571,38 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
                     
                     return (
                       <div key={key} className="grid grid-cols-[60px_1fr_1fr_100px] gap-3 items-center">
-                        <span className="text-sm text-[#A78BCC]">{label}</span>
+                        <span className="text-sm text-[var(--d2b-text-secondary)]">{label}</span>
                         
                         <div className="relative">
-                          <label className="block text-[10px] text-[#6B4E8A] mb-1">Abertura</label>
+                          <label className="block text-[10px] text-[var(--d2b-text-muted)] mb-1">Abertura</label>
                           <input
                             type="time"
                             value={agenda[abertura] as string}
                             onChange={(e) => setAgenda(prev => ({ ...prev, [abertura]: e.target.value }))}
                             disabled={!agenda[aberto]}
-                            className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
+                            className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
                           />
                         </div>
                         
                         <div className="relative">
-                          <label className="block text-[10px] text-[#6B4E8A] mb-1">Fechamento</label>
+                          <label className="block text-[10px] text-[var(--d2b-text-muted)] mb-1">Fechamento</label>
                           <input
                             type="time"
                             value={agenda[fechamento] as string}
                             onChange={(e) => setAgenda(prev => ({ ...prev, [fechamento]: e.target.value }))}
                             disabled={!agenda[aberto]}
-                            className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
+                            className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF] disabled:opacity-50"
                           />
                         </div>
                         
                         <div className="flex items-center justify-end gap-2">
-                          <span className={`text-xs ${agenda[aberto] ? 'text-[#7C4DFF]' : 'text-[#6B4E8A]'}`}>
+                          <span className={`text-xs ${agenda[aberto] ? 'text-[#7C4DFF]' : 'text-[var(--d2b-text-muted)]'}`}>
                             {agenda[aberto] ? 'Aberto' : 'Fechado'}
                           </span>
                           <button
                             onClick={() => setAgenda(prev => ({ ...prev, [aberto]: !prev[aberto] }))}
                             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              agenda[aberto] ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.25)]'
+                              agenda[aberto] ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
                             }`}
                           >
                             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
@@ -618,39 +618,39 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
 
               {/* Horário de Almoço */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-[#F5F0FF]">Horário de Almoço</h3>
+                <h3 className="text-sm font-bold text-[var(--d2b-text-primary)]">Horário de Almoço</h3>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#A78BCC] mb-2">Início</label>
+                    <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Início</label>
                     <input
                       type="time"
                       value={agenda.almocoInicio}
                       onChange={(e) => setAgenda(prev => ({ ...prev, almocoInicio: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-xs text-[#A78BCC] mb-2">Fim</label>
+                    <label className="block text-xs text-[var(--d2b-text-secondary)] mb-2">Fim</label>
                     <input
                       type="time"
                       value={agenda.almocoFim}
                       onChange={(e) => setAgenda(prev => ({ ...prev, almocoFim: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                      className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.18)] bg-[#120328]">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)]">
                   <input
                     type="checkbox"
                     id="ativar-almoco-prof"
                     checked={agenda.ativarHorarioAlmoco}
                     onChange={(e) => setAgenda(prev => ({ ...prev, ativarHorarioAlmoco: e.target.checked }))}
-                    className="w-4 h-4 rounded border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#7C4DFF] focus:ring-2 focus:ring-[#7C4DFF] focus:ring-offset-2 focus:ring-offset-[#0D0520]"
+                    className="w-4 h-4 rounded border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[#7C4DFF] focus:ring-2 focus:ring-[#7C4DFF] focus:ring-offset-2 focus:ring-offset-[#0D0520]"
                   />
-                  <label htmlFor="ativar-almoco-prof" className="text-sm text-[#F5F0FF] cursor-pointer">
+                  <label htmlFor="ativar-almoco-prof" className="text-sm text-[var(--d2b-text-primary)] cursor-pointer">
                     Ativar Horário de Almoço
                   </label>
                 </div>

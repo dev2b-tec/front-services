@@ -89,20 +89,20 @@ function QrModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm mx-4 rounded-2xl border border-[rgba(124,77,255,0.3)] bg-[#120328] p-6 shadow-2xl"
+        className="relative w-full max-w-sm mx-4 rounded-2xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors"
+          className="absolute right-4 top-4 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors"
         >
           <X size={18} />
         </button>
 
         <div className="flex flex-col items-center gap-5">
           <div className="flex flex-col items-center gap-1">
-            <h3 className="text-base font-bold text-[#F5F0FF]">Escanear QR Code</h3>
-            <p className="text-xs text-[#A78BCC] text-center">
+            <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Escanear QR Code</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] text-center">
               Abra o WhatsApp no celular → Menu → Aparelhos conectados → Conectar
             </p>
           </div>
@@ -113,16 +113,16 @@ function QrModal({
               <img src={qrSrc} alt="QR Code WhatsApp" className="w-52 h-52 object-contain" />
             </div>
           ) : (
-            <div className="w-52 h-52 flex flex-col items-center justify-center gap-3 rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#0D0520]">
+            <div className="w-52 h-52 flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)]">
               {instancia.status === 'CONECTANDO' ? (
                 <>
                   <Loader2 size={28} className="animate-spin text-[#7C4DFF]" />
-                  <span className="text-xs text-[#A78BCC]">Gerando QR Code...</span>
+                  <span className="text-xs text-[var(--d2b-text-secondary)]">Gerando QR Code...</span>
                 </>
               ) : (
                 <>
-                  <QrCode size={28} className="text-[#6B4E8A]" />
-                  <span className="text-xs text-[#A78BCC] text-center px-4">
+                  <QrCode size={28} className="text-[var(--d2b-text-muted)]" />
+                  <span className="text-xs text-[var(--d2b-text-secondary)] text-center px-4">
                     QR Code não disponível
                   </span>
                 </>
@@ -132,7 +132,7 @@ function QrModal({
 
           <div className="flex flex-col items-center gap-2 w-full">
             <StatusBadge status={instancia.status} />
-            <p className="text-[10px] text-[#6B4E8A]">
+            <p className="text-[10px] text-[var(--d2b-text-muted)]">
               {instancia.instanceName}
             </p>
           </div>
@@ -140,7 +140,7 @@ function QrModal({
           <div className="flex gap-2 w-full">
             <button
               onClick={onRefresh}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:border-[#7C4DFF] hover:text-[#F5F0FF] text-sm transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] text-sm transition-colors"
             >
               <RefreshCw size={14} />
               Atualizar
@@ -163,8 +163,8 @@ function InfoRow({ label, value, mono }: { label: string; value?: string | null;
   if (!value) return null
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-medium text-[#6B4E8A] uppercase tracking-wide">{label}</span>
-      <span className={`text-sm text-[#F5F0FF] break-all ${mono ? 'font-mono text-xs' : ''}`}>{value}</span>
+      <span className="text-[10px] font-medium text-[var(--d2b-text-muted)] uppercase tracking-wide">{label}</span>
+      <span className={`text-sm text-[var(--d2b-text-primary)] break-all ${mono ? 'font-mono text-xs' : ''}`}>{value}</span>
     </div>
   )
 }
@@ -295,31 +295,31 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
       <div className="space-y-7 max-w-xl">
         {/* ── Header ── */}
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Instância WhatsApp</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Instância WhatsApp</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
             Cada empresa possui uma única instância WhatsApp para envio e recebimento de mensagens.
           </p>
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 py-12 justify-center text-[#A78BCC]">
+          <div className="flex items-center gap-2 py-12 justify-center text-[var(--d2b-text-secondary)]">
             <Loader2 size={18} className="animate-spin" />
             <span className="text-sm">Carregando...</span>
           </div>
 
         ) : instancia ? (
           /* ── Card da instância existente ── */
-          <div className="rounded-2xl border border-[rgba(124,77,255,0.25)] bg-[#120328] overflow-hidden">
+          <div className="rounded-2xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] overflow-hidden">
 
             {/* Header do card */}
-            <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-[rgba(124,77,255,0.15)]">
+            <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-[var(--d2b-border)]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-[rgba(74,222,128,0.1)] border border-[rgba(74,222,128,0.2)] flex items-center justify-center shrink-0">
                   <Wifi size={16} className="text-[#4ADE80]" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#F5F0FF]">{instancia.nome}</p>
-                  {instancia.numero && <p className="text-xs text-[#A78BCC]">{instancia.numero}</p>}
+                  <p className="text-sm font-bold text-[var(--d2b-text-primary)]">{instancia.nome}</p>
+                  {instancia.numero && <p className="text-xs text-[var(--d2b-text-secondary)]">{instancia.numero}</p>}
                 </div>
               </div>
               <StatusBadge status={instancia.status} />
@@ -334,7 +334,7 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
             </div>
 
             {/* Ações */}
-            <div className="flex items-center gap-2 px-5 py-4 border-t border-[rgba(124,77,255,0.15)] flex-wrap">
+            <div className="flex items-center gap-2 px-5 py-4 border-t border-[var(--d2b-border)] flex-wrap">
               {canQr && (
                 <button
                   onClick={() => setQrOpen(true)}
@@ -347,7 +347,7 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
               <button
                 onClick={handleReconectar}
                 disabled={reconectando || deletando}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:border-[#7C4DFF] hover:text-[#F5F0FF] disabled:opacity-50 text-sm font-medium transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] disabled:opacity-50 text-sm font-medium transition-colors"
               >
                 {reconectando ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                 Reconectar
@@ -365,21 +365,21 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
 
         ) : configurando ? (
           /* ── Formulário de criação ── */
-          <div className="rounded-2xl border border-[rgba(124,77,255,0.3)] bg-[#120328] p-5 space-y-5">
-            <h4 className="text-sm font-bold text-[#F5F0FF]">CONFIGURAR INSTÂNCIA</h4>
+          <div className="rounded-2xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] p-5 space-y-5">
+            <h4 className="text-sm font-bold text-[var(--d2b-text-primary)]">CONFIGURAR INSTÂNCIA</h4>
 
             {/* Identificador automático (informativo) */}
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[rgba(124,77,255,0.15)] bg-[rgba(124,77,255,0.05)]">
-              <Hash size={13} className="text-[#6B4E8A] shrink-0" />
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-[var(--d2b-border)] bg-[var(--d2b-hover)]">
+              <Hash size={13} className="text-[var(--d2b-text-muted)] shrink-0" />
               <div className="min-w-0">
-                <p className="text-[10px] text-[#6B4E8A] font-medium uppercase tracking-wide">Identificador (gerado automaticamente)</p>
-                <p className="text-xs font-mono text-[#A78BCC] truncate">empresa-{initialEmpresa?.id}</p>
+                <p className="text-[10px] text-[var(--d2b-text-muted)] font-medium uppercase tracking-wide">Identificador (gerado automaticamente)</p>
+                <p className="text-xs font-mono text-[var(--d2b-text-secondary)] truncate">empresa-{initialEmpresa?.id}</p>
               </div>
             </div>
 
             {/* Nome */}
             <div className="relative">
-              <label className="absolute -top-2 left-3 z-10 bg-[#120328] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
+              <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-surface)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
                 Nome da instância <span className="text-[#7C4DFF]">*</span>
               </label>
               <input
@@ -389,7 +389,7 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
                 onKeyDown={(e) => e.key === 'Enter' && handleCriar()}
                 placeholder="Ex: WhatsApp Clínica Central"
                 autoFocus
-                className="w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
               />
             </div>
 
@@ -404,7 +404,7 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
               </button>
               <button
                 onClick={() => { setConfigurando(false); setNome('') }}
-                className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] hover:border-[#7C4DFF] hover:text-[#F5F0FF] text-sm font-semibold transition-colors"
+                className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] text-sm font-semibold transition-colors"
               >
                 Cancelar
               </button>
@@ -413,13 +413,13 @@ export function TabWhatsapp({ initialUsuario, initialEmpresa }: TabWhatsappProps
 
         ) : (
           /* ── Estado vazio ── */
-          <div className="flex flex-col items-center justify-center py-14 gap-5 rounded-2xl border border-dashed border-[rgba(124,77,255,0.2)] bg-[rgba(124,77,255,0.03)]">
-            <div className="w-14 h-14 rounded-2xl bg-[rgba(124,77,255,0.1)] border border-[rgba(124,77,255,0.2)] flex items-center justify-center">
-              <WifiOff size={24} className="text-[#6B4E8A]" />
+          <div className="flex flex-col items-center justify-center py-14 gap-5 rounded-2xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-hover)]">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] flex items-center justify-center">
+              <WifiOff size={24} className="text-[var(--d2b-text-muted)]" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-[#F5F0FF]">Nenhuma instância configurada</p>
-              <p className="text-xs text-[#6B4E8A] mt-1">Configure o WhatsApp da sua empresa para enviar e receber mensagens</p>
+              <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Nenhuma instância configurada</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mt-1">Configure o WhatsApp da sua empresa para enviar e receber mensagens</p>
             </div>
             <button
               onClick={() => setConfigurando(true)}

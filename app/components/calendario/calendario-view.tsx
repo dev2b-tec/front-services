@@ -169,8 +169,8 @@ function datetimeLocalToISO(dt: string): string {
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const INP =
-  'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
 
 // ─── FloatingField ────────────────────────────────────────────────────────────
@@ -181,7 +181,7 @@ function FloatingField({
 }) {
   return (
     <div className="relative">
-      <label className="absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
+      <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
         {label}{required && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       {children}
@@ -209,11 +209,11 @@ function FloatingSelect({
           {options.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
         {value && onClear && !disabled && (
-          <button type="button" onClick={onClear} className="absolute right-7 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors z-10">
+          <button type="button" onClick={onClear} className="absolute right-7 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors z-10">
             <X size={12} />
           </button>
         )}
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </FloatingField>
   )
@@ -223,7 +223,7 @@ function FloatingSelect({
 function ReadonlyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="relative">
-      <label className="absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
+      <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
         {label}
       </label>
       <div className={INP + ' opacity-80 select-text'}>{value}</div>
@@ -237,7 +237,7 @@ function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) {
     <button
       type="button"
       onClick={() => set(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
     </button>
@@ -259,11 +259,11 @@ function BuscaAvancadaModal({
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden"
       >
-        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Busca Avançada</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-lg leading-none">✕</button>
+        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Busca Avançada</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-lg leading-none">✕</button>
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-4 overflow-y-auto max-h-[75vh]">
@@ -287,26 +287,26 @@ function BuscaAvancadaModal({
           {/* Mini calendar */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors border border-[rgba(124,77,255,0.25)]">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors border border-[var(--d2b-border-strong)]">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-sm font-semibold text-[#F5F0FF]">Hoje</span>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors border border-[rgba(124,77,255,0.25)]">
+              <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Hoje</span>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors border border-[var(--d2b-border-strong)]">
                 <ChevronRight size={14} />
               </button>
             </div>
-            <div className="rounded-xl overflow-hidden border border-[rgba(124,77,255,0.18)]">
+            <div className="rounded-xl overflow-hidden border border-[var(--d2b-border)]">
               <div className="bg-[#7C4DFF] text-white text-sm font-bold text-center py-2.5">
                 Quarta-Feira 01/04
               </div>
-              <div className="divide-y divide-[rgba(124,77,255,0.10)] max-h-56 overflow-y-auto">
+              <div className="divide-y divide-[var(--d2b-border)] max-h-56 overflow-y-auto">
                 {MOCK_SLOTS.map((slot) => (
-                  <div key={slot} className="flex items-center justify-between px-4 py-2.5 hover:bg-[rgba(124,77,255,0.08)] cursor-pointer transition-colors group">
+                  <div key={slot} className="flex items-center justify-between px-4 py-2.5 hover:bg-[var(--d2b-hover)] cursor-pointer transition-colors group">
                     <div className="flex items-center gap-2.5">
                       <div className="w-2 h-2 rounded-full bg-[#22C55E] shrink-0" />
-                      <span className="text-sm text-[#F5F0FF]">{slot}</span>
+                      <span className="text-sm text-[var(--d2b-text-primary)]">{slot}</span>
                     </div>
-                    <span className="text-xs text-[#6B4E8A] group-hover:text-[#A78BCC] transition-colors">1</span>
+                    <span className="text-xs text-[var(--d2b-text-muted)] group-hover:text-[var(--d2b-text-secondary)] transition-colors">1</span>
                   </div>
                 ))}
               </div>
@@ -542,21 +542,21 @@ export function NovoAgendamentoModal({
       <Dialog open={open && !buscaAvancada} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
         <DialogContent
           showCloseButton={false}
-          className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
+          className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
         >
           {/* ── Header ──────────────────────────────────────────────────── */}
-          <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-            <DialogTitle className="text-base font-bold text-[#F5F0FF]">
+          <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+            <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">
               {isEditing ? 'Detalhes do Agendamento' : 'Novo Agendamento'}
             </DialogTitle>
             <div className="flex items-center gap-2">
               {!isEditing && (
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[rgba(124,77,255,0.15)] text-[#C084FC] border border-[rgba(124,77,255,0.30)] hover:bg-[rgba(124,77,255,0.25)] transition-colors">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <Lock size={12} />
                   Novo Bloqueio de Agenda
                 </button>
               )}
-              <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-lg leading-none">✕</button>
+              <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-lg leading-none">✕</button>
             </div>
           </DialogHeader>
 
@@ -567,10 +567,10 @@ export function NovoAgendamentoModal({
               <div>
                 <p className="text-[10px] font-bold tracking-widest uppercase text-[#7C4DFF] mb-3">Informações do Paciente</p>
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
-                  <h3 className="text-lg font-bold text-[#F5F0FF]">{pacienteInfo.nome}</h3>
+                  <h3 className="text-lg font-bold text-[var(--d2b-text-primary)]">{pacienteInfo.nome}</h3>
                   <button
                     onClick={() => setMensagensOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(124,77,255,0.15)] text-[#C084FC] border border-[rgba(124,77,255,0.30)] hover:bg-[rgba(124,77,255,0.25)] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors"
                   >
                     <MessageCircle size={11} /> Mensagem
                   </button>
@@ -578,12 +578,12 @@ export function NovoAgendamentoModal({
                   <div className="relative" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => setAtalhoOpen((p) => !p)}
-                      className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(124,77,255,0.08)] text-[#A78BCC] border border-[rgba(124,77,255,0.20)] hover:bg-[rgba(124,77,255,0.15)] transition-colors"
+                      className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors"
                     >
                       Atalhos <ChevronDown size={11} />
                     </button>
                     {atalhoOpen && (
-                      <div className="absolute left-0 top-8 z-50 w-52 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl overflow-hidden">
+                      <div className="absolute left-0 top-8 z-50 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
                         {[
                           {
                             label: 'Prontuário',
@@ -623,7 +623,7 @@ export function NovoAgendamentoModal({
                           <button
                             key={label}
                             onClick={action}
-                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] hover:text-[#F5F0FF] transition-colors text-left"
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors text-left"
                           >
                             <span className="text-base leading-none">{icon}</span>
                             {label}
@@ -656,18 +656,18 @@ export function NovoAgendamentoModal({
                           autoComplete="off"
                         />
                         {loadingPaciente && (
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] text-xs animate-pulse">...</span>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] text-xs animate-pulse">...</span>
                         )}
                       </div>
                     </FloatingField>
                     {pacienteQuery.trim().length > 0 && pacienteQuery.trim().length < 3 && (
-                      <p className="mt-1 text-[11px] text-[#6B4E8A]">Digite ao menos 3 caracteres para buscar.</p>
+                      <p className="mt-1 text-[11px] text-[var(--d2b-text-muted)]">Digite ao menos 3 caracteres para buscar.</p>
                     )}
                     {showSugestoes && pacienteSugestoes.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-2xl overflow-hidden">
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-2xl overflow-hidden">
                         {pacienteSugestoes.map((p) => (
                           <button key={p.id} type="button" onClick={() => selectPaciente(p)}
-                            className="w-full text-left px-4 py-2.5 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors border-b border-[rgba(124,77,255,0.08)] last:border-b-0">
+                            className="w-full text-left px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors border-b border-[var(--d2b-border)] last:border-b-0">
                             {p.nome}
                           </button>
                         ))}
@@ -704,7 +704,7 @@ export function NovoAgendamentoModal({
                           value={profissionalNome} onChange={setProfissionalNome} onClear={() => setProfissionalNome('')} />
                       </div>
                       <button onClick={() => setBuscaAvancada(true)}
-                        className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-semibold bg-[rgba(124,77,255,0.15)] text-[#C084FC] border border-[rgba(124,77,255,0.30)] hover:bg-[rgba(124,77,255,0.25)] transition-colors whitespace-nowrap shrink-0">
+                        className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors whitespace-nowrap shrink-0">
                         <Search size={14} /> Busca Avançada
                       </button>
                     </div>
@@ -716,7 +716,7 @@ export function NovoAgendamentoModal({
                         <input type="datetime-local" value={fim} onChange={(e) => setFim(e.target.value)} className={INP} />
                       </FloatingField>
                     </div>
-                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors w-fit">
+                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors w-fit">
                       <CalendarIcon size={14} /> Escolher no Calendário
                     </button>
                   </>
@@ -733,7 +733,7 @@ export function NovoAgendamentoModal({
                 {!isEditing && (
                   <div className="flex items-center gap-3">
                     <Toggle on={recorrente} set={setRecorrente} />
-                    <span className="text-sm text-[#A78BCC]">É um evento recorrente?</span>
+                    <span className="text-sm text-[var(--d2b-text-secondary)]">É um evento recorrente?</span>
                   </div>
                 )}
               </div>
@@ -743,14 +743,14 @@ export function NovoAgendamentoModal({
             <div>
               <p className="text-[10px] font-bold tracking-widest uppercase text-[#7C4DFF] mb-3">Serviços Prestados</p>
               {servicoLines.length > 0 ? (
-                <div className="mb-3 rounded-lg border border-[rgba(124,77,255,0.18)] overflow-hidden">
-                  <div className="grid grid-cols-[1fr_76px_110px_68px] gap-2 px-3 py-2 bg-[rgba(124,77,255,0.08)]">
+                <div className="mb-3 rounded-lg border border-[var(--d2b-border)] overflow-hidden">
+                  <div className="grid grid-cols-[1fr_76px_110px_68px] gap-2 px-3 py-2 bg-[var(--d2b-hover)]">
                     {['Nome', 'Qtd (#)', 'Valor (1x)', 'Ações'].map((h) => (
-                      <span key={h} className="text-[10px] font-semibold uppercase text-[#6B4E8A]">{h}</span>
+                      <span key={h} className="text-[10px] font-semibold uppercase text-[var(--d2b-text-muted)]">{h}</span>
                     ))}
                   </div>
                   {servicoLines.map((line) => (
-                    <div key={line.tempId} className="grid grid-cols-[1fr_76px_110px_68px] gap-2 px-3 py-2.5 border-t border-[rgba(124,77,255,0.10)] items-center">
+                    <div key={line.tempId} className="grid grid-cols-[1fr_76px_110px_68px] gap-2 px-3 py-2.5 border-t border-[var(--d2b-border)] items-center">
                       {line.isEditing ? (
                         <>
                           <div className="relative">
@@ -759,7 +759,7 @@ export function NovoAgendamentoModal({
                               <option value="">Selecione...</option>
                               {servicosApi.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
                             </select>
-                            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                           </div>
                           <input type="number" min={1} value={line.quantidade}
                             onChange={(e) => updateServicoLine(line.tempId, { quantidade: Math.max(1, parseInt(e.target.value) || 1) })}
@@ -780,9 +780,9 @@ export function NovoAgendamentoModal({
                         </>
                       ) : (
                         <>
-                          <span className="text-sm text-[#F5F0FF] truncate">{line.servicoNome || 'Serviço'}</span>
-                          <span className="text-sm text-[#A78BCC] text-center">{line.quantidade}</span>
-                          <span className="text-sm text-[#A78BCC]">{line.valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          <span className="text-sm text-[var(--d2b-text-primary)] truncate">{line.servicoNome || 'Serviço'}</span>
+                          <span className="text-sm text-[var(--d2b-text-secondary)] text-center">{line.quantidade}</span>
+                          <span className="text-sm text-[var(--d2b-text-secondary)]">{line.valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                           <div className="flex gap-1">
                             <button type="button" onClick={() => editServicoLine(line.tempId)}
                               className="w-8 h-8 flex items-center justify-center rounded-md bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors border border-purple-500/20">
@@ -799,10 +799,10 @@ export function NovoAgendamentoModal({
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-[#6B4E8A] mb-3">Nenhum serviço adicionado neste agendamento</p>
+                <p className="text-sm text-[var(--d2b-text-muted)] mb-3">Nenhum serviço adicionado neste agendamento</p>
               )}
               <button type="button" onClick={addServicoLine}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.30)] hover:bg-[rgba(124,77,255,0.10)] transition-colors">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors">
                 <Plus size={13} /> Adicionar Serviço
               </button>
             </div>
@@ -851,7 +851,7 @@ export function NovoAgendamentoModal({
                         />
                       </FloatingField>
                     </div>
-                    <button className="px-3 py-2.5 rounded-md text-xs font-semibold bg-[rgba(124,77,255,0.12)] text-[#C084FC] border border-[rgba(124,77,255,0.25)] hover:bg-[rgba(124,77,255,0.22)] transition-colors whitespace-nowrap shrink-0">
+                    <button className="px-3 py-2.5 rounded-md text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors whitespace-nowrap shrink-0">
                       Recibo
                     </button>
                   </div>
@@ -866,7 +866,7 @@ export function NovoAgendamentoModal({
                 <FloatingField label="Observações">
                   <textarea rows={3} placeholder="Observações" value={observacoes}
                     onChange={(e) => setObservacoes(e.target.value)}
-                    className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] transition-colors resize-none" />
+                    className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors resize-none" />
                 </FloatingField>
               </div>
             </div>
@@ -877,7 +877,7 @@ export function NovoAgendamentoModal({
           </div>
 
           {/* ── Footer ────────────────────────────────────────────────────── */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--d2b-border)]">
             <div className="flex items-center gap-2">
               {isEditing ? (
                 <>
@@ -886,7 +886,7 @@ export function NovoAgendamentoModal({
                     Desmarcar
                   </button>
                   <button onClick={handleIniciarAtendimento} disabled={saving}
-                    className="px-4 py-2 rounded-md text-sm font-bold text-[#C084FC] border border-[rgba(124,77,255,0.30)] hover:bg-[rgba(124,77,255,0.12)] transition-colors disabled:opacity-50">
+                    className="px-4 py-2 rounded-md text-sm font-bold text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors disabled:opacity-50">
                     Iniciar Atendimento
                   </button>
                 </>
@@ -895,7 +895,7 @@ export function NovoAgendamentoModal({
             <div className="flex items-center gap-2">
               {isEditing && (
                 <button onClick={onClose}
-                  className="px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:bg-[rgba(124,77,255,0.08)] transition-colors">
+                  className="px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors">
                   Fechar
                 </button>
               )}
@@ -1100,10 +1100,10 @@ export function CalendarioView({
   const closeAll = () => { setFiltrosOpen(false); setSettingsOpen(false); setProfDropdownOpen(false) }
 
   return (
-    <div className="flex flex-col h-full bg-[#0D0520]" onClick={closeAll}>
+    <div className="flex flex-col h-full" style={{ background: 'var(--d2b-bg-main)', color: 'var(--d2b-text-primary)' }} onClick={closeAll}>
 
       {/* ── Toolbar ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(124,77,255,0.12)] bg-[#0D0520] shrink-0 flex-wrap gap-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0 flex-wrap gap-2" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}>
 
         {/* Left */}
         <div className="flex items-center gap-2">
@@ -1111,11 +1111,11 @@ export function CalendarioView({
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => { setProfDropdownOpen((p) => !p); setFiltrosOpen(false); setSettingsOpen(false) }}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-[#150830] border transition-colors min-w-[160px] justify-between ${
-                profDropdownOpen ? 'border-[#7C4DFF]' : 'border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF]'
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-[var(--d2b-bg-elevated)] border transition-colors min-w-[160px] justify-between ${
+                profDropdownOpen ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)] hover:border-[#7C4DFF]'
               }`}
             >
-              <span className={selectedProfissional ? 'text-[#F5F0FF]' : 'text-[#A78BCC]'}>
+              <span className={selectedProfissional ? 'text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)]'}>
                 {selectedProfissional || 'Todos profissionais'}
               </span>
               <div className="flex items-center gap-1">
@@ -1123,20 +1123,20 @@ export function CalendarioView({
                   <span
                     role="button"
                     onClick={(e) => { e.stopPropagation(); setSelectedProfissional('') }}
-                    className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors"
+                    className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors"
                   >
                     <X size={12} />
                   </span>
                 )}
-                <ChevronDown size={13} className="text-[#6B4E8A] shrink-0" />
+                <ChevronDown size={13} className="text-[var(--d2b-text-muted)] shrink-0" />
               </div>
             </button>
             {profDropdownOpen && (
-              <div className="absolute left-0 top-11 z-50 w-52 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl overflow-hidden">
+              <div className="absolute left-0 top-11 z-50 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
                 <button
                   onClick={() => { setSelectedProfissional(''); setProfDropdownOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[rgba(124,77,255,0.12)] ${
-                    !selectedProfissional ? 'text-[#F5F0FF] font-semibold' : 'text-[#A78BCC]'
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[var(--d2b-hover)] ${
+                    !selectedProfissional ? 'text-[var(--d2b-text-primary)] font-semibold' : 'text-[var(--d2b-text-secondary)]'
                   }`}
                 >
                   Todos profissionais
@@ -1145,8 +1145,8 @@ export function CalendarioView({
                   <button
                     key={p.id}
                     onClick={() => { setSelectedProfissional(p.nome); setProfDropdownOpen(false) }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[rgba(124,77,255,0.12)] ${
-                      selectedProfissional === p.nome ? 'text-[#F5F0FF] font-semibold' : 'text-[#A78BCC]'
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[var(--d2b-hover)] ${
+                      selectedProfissional === p.nome ? 'text-[var(--d2b-text-primary)] font-semibold' : 'text-[var(--d2b-text-secondary)]'
                     }`}
                   >
                     {p.nome}
@@ -1157,7 +1157,7 @@ export function CalendarioView({
           </div>
 
           {/* View mode */}
-          <div className="flex rounded-lg border border-[rgba(124,77,255,0.25)] overflow-hidden">
+          <div className="flex rounded-lg border border-[var(--d2b-border-strong)] overflow-hidden">
             {(['Semana', 'Dia', 'Mês'] as const).map((mode) => (
               <button
                 key={mode}
@@ -1165,7 +1165,7 @@ export function CalendarioView({
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   viewMode === mode
                     ? 'bg-[#7C4DFF] text-white'
-                    : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'
+                    : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'
                 }`}
               >
                 {mode}
@@ -1176,14 +1176,14 @@ export function CalendarioView({
 
         {/* Center: navigation */}
         <div className="flex items-center gap-2">
-          <button onClick={goBack} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] border border-[rgba(124,77,255,0.25)] transition-colors">
+          <button onClick={goBack} className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] transition-colors">
             <ChevronLeft size={15} />
           </button>
-          <span className="text-sm font-semibold text-[#A78BCC] min-w-[150px] text-center select-none">{navLabel}</span>
-          <button onClick={goForward} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] border border-[rgba(124,77,255,0.25)] transition-colors">
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)] min-w-[150px] text-center select-none">{navLabel}</span>
+          <button onClick={goForward} className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] transition-colors">
             <ChevronRight size={15} />
           </button>
-          <button onClick={goToday} className="px-4 py-1.5 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          <button onClick={goToday} className="px-4 py-1.5 rounded-lg text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Hoje
           </button>
         </div>
@@ -1191,7 +1191,7 @@ export function CalendarioView({
         {/* Right: actions */}
         <div className="flex items-center gap-1.5">
           {/* Timezone */}
-          <button className="w-9 h-9 flex items-center justify-center rounded-lg text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+          <button className="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <Globe size={18} />
           </button>
 
@@ -1199,18 +1199,18 @@ export function CalendarioView({
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => { setSettingsOpen((p) => !p); setFiltrosOpen(false) }}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${settingsOpen ? 'bg-[rgba(124,77,255,0.20)] text-[#F5F0FF]' : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'}`}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${settingsOpen ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
             >
               <Settings size={18} />
             </button>
             {settingsOpen && (
-              <div className="absolute right-0 top-11 z-50 w-52 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl overflow-hidden">
+              <div className="absolute right-0 top-11 z-50 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
                 <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold tracking-widest text-[#7C4DFF] uppercase">Configurações</p>
                 {[
                   { label: 'Configuração de Agenda', icon: CalendarIcon },
                   { label: 'Bloqueio de Agenda',     icon: Lock },
                 ].map(({ label, icon: Icon }) => (
-                  <button key={label} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] hover:text-[#F5F0FF] transition-colors text-left">
+                  <button key={label} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors text-left">
                     <Icon size={14} className="text-[#7C4DFF] shrink-0" />
                     {label}
                   </button>
@@ -1224,20 +1224,20 @@ export function CalendarioView({
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => { setFiltrosOpen((p) => !p); setSettingsOpen(false) }}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${filtrosOpen ? 'bg-[rgba(124,77,255,0.20)] text-[#F5F0FF]' : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'}`}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${filtrosOpen ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
             >
               <Filter size={18} />
             </button>
             {filtrosOpen && (
-              <div className="absolute right-0 top-11 z-50 w-64 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-[rgba(124,77,255,0.12)]">
+              <div className="absolute right-0 top-11 z-50 w-64 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-[var(--d2b-border)]">
                   <p className="text-[10px] font-bold tracking-widest text-[#7C4DFF] uppercase">Filtros de Cores</p>
-                  <Lock size={13} className="text-[#6B4E8A]" />
+                  <Lock size={13} className="text-[var(--d2b-text-muted)]" />
                 </div>
                 <div className="py-1">
                   {FILTROS_CORES.map((f) => (
-                    <label key={f} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-[rgba(124,77,255,0.08)] transition-colors">
-                      <span className="text-sm text-[#A78BCC]">{f}</span>
+                    <label key={f} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-[var(--d2b-hover)] transition-colors">
+                      <span className="text-sm text-[var(--d2b-text-secondary)]">{f}</span>
                       <Toggle on={filtros[f] ?? false} set={(v) => setFiltros((p) => ({ ...p, [f]: v }))} />
                     </label>
                   ))}
@@ -1264,14 +1264,14 @@ export function CalendarioView({
 
             {/* Time column */}
             <div className="flex flex-col shrink-0 w-16">
-              <div className="h-12 border-b border-r border-[rgba(124,77,255,0.10)] bg-[#0D0520] shrink-0" />
+              <div className="h-12 border-b border-r shrink-0" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }} />
               {HOURS.map((h) => (
                 <div
                   key={h}
-                  className="relative border-b border-r border-[rgba(124,77,255,0.07)] bg-[#0D0520] shrink-0"
-                  style={{ height: CELL_H }}
+                  className="relative border-b border-r shrink-0"
+                  style={{ height: CELL_H, background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}
                 >
-                  <span className="absolute -top-2.5 right-2 text-[10px] text-[#3D2660] select-none">
+                  <span className="absolute -top-2.5 right-2 text-[10px] text-[var(--d2b-text-muted)] select-none">
                     {String(h).padStart(2, '0')}:00
                   </span>
                 </div>
@@ -1285,16 +1285,19 @@ export function CalendarioView({
                 const dayAppts = visibleAppointments.filter((a) => isSameDay(a.date, day))
 
                 return (
-                  <div key={di} className="flex flex-col flex-1 min-w-0 border-r border-[rgba(124,77,255,0.07)] last:border-r-0">
+                  <div key={di} className="flex flex-col flex-1 min-w-0 border-r last:border-r-0" style={{ borderColor: 'var(--d2b-border)' }}>
 
                     {/* Day header */}
-                    <div className={`h-12 flex items-center justify-center border-b border-[rgba(124,77,255,0.10)] shrink-0 ${isToday ? 'bg-[rgba(124,77,255,0.07)]' : 'bg-[#0D0520]'}`}>
+                    <div
+                      className="h-12 flex items-center justify-center border-b shrink-0"
+                      style={{ background: isToday ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}
+                    >
                       {isToday ? (
                         <span className="px-3 py-1 rounded-full bg-[#7C4DFF] text-white text-xs font-bold">
                           {formatDayLabel(day)}
                         </span>
                       ) : (
-                        <span className="text-xs font-semibold text-[#4B3270]">
+                        <span className="text-xs font-semibold text-[var(--d2b-text-muted)]">
                           {formatDayLabel(day)}
                         </span>
                       )}
@@ -1306,8 +1309,10 @@ export function CalendarioView({
                         <div
                           key={h}
                           onClick={() => openCreateModal(toDatetimeLocal(day, h))}
-                          className={`border-b border-[rgba(124,77,255,0.07)] cursor-pointer hover:bg-[rgba(124,77,255,0.04)] transition-colors ${h === 12 ? 'bg-[rgba(124,77,255,0.03)]' : ''}`}
-                          style={{ height: CELL_H }}
+                          className="border-b cursor-pointer transition-colors"
+                          style={{ height: CELL_H, background: h === 12 ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}
+                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)'}
+                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = h === 12 ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)'}
                         />
                       ))}
 
@@ -1339,8 +1344,8 @@ export function CalendarioView({
                           >
                             <div className="flex items-center gap-1.5 px-2 h-full">
                               <div className={`w-2 h-2 rounded-full shrink-0 ${COR_DOT[appt.cor] ?? COR_DOT.purple}`} />
-                              <span className="text-xs font-medium text-[#F5F0FF] truncate">{appt.pacienteNome}</span>
-                              <span className="text-[10px] text-[#A78BCC] shrink-0 ml-auto">{appt.inicio} - {appt.fim}</span>
+                              <span className="text-xs font-medium text-[var(--d2b-text-primary)] truncate">{appt.pacienteNome}</span>
+                              <span className="text-[10px] text-[var(--d2b-text-secondary)] shrink-0 ml-auto">{appt.inicio} - {appt.fim}</span>
                             </div>
                           </div>
                         )
@@ -1358,16 +1363,16 @@ export function CalendarioView({
       {viewMode === 'Mês' && (
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {/* Day-of-week header */}
-          <div className="grid grid-cols-7 border-b border-[rgba(124,77,255,0.10)] bg-[#0D0520] sticky top-0 z-10">
+          <div className="grid grid-cols-7 border-b sticky top-0 z-10" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}>
             {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d) => (
-              <div key={d} className="h-10 flex items-center justify-center text-[10px] font-bold tracking-widest text-[#6B4E8A] uppercase">
+              <div key={d} className="h-10 flex items-center justify-center text-[10px] font-bold tracking-widest text-[var(--d2b-text-muted)] uppercase">
                 {d}
               </div>
             ))}
           </div>
           {/* Weeks */}
           {getMonthGrid(weekBase).map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7 border-b border-[rgba(124,77,255,0.08)]" style={{ minHeight: 110 }}>
+            <div key={wi} className="grid grid-cols-7 border-b border-[var(--d2b-border)]" style={{ minHeight: 110 }}>
               {week.map((day, di) => {
                 const isCurrentMonth = day.getMonth() === weekBase.getMonth()
                 const isToday = isSameDay(day, today)
@@ -1376,18 +1381,18 @@ export function CalendarioView({
                   <div
                     key={di}
                     onClick={() => { setWeekBase(new Date(day)); setViewMode('Dia') }}
-                    className={`p-1.5 border-r border-[rgba(124,77,255,0.06)] last:border-r-0 cursor-pointer transition-colors overflow-hidden ${
-                      isCurrentMonth ? 'hover:bg-[rgba(124,77,255,0.05)]' : 'opacity-30'
-                    } ${isToday ? 'bg-[rgba(124,77,255,0.07)]' : ''}`}
+                    className={`p-1.5 border-r border-[var(--d2b-border)] last:border-r-0 cursor-pointer transition-colors overflow-hidden ${
+                      isCurrentMonth ? 'hover:bg-[var(--d2b-hover)]' : 'opacity-30'
+                    } ${isToday ? 'bg-[var(--d2b-hover)]' : ''}`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${
-                        isToday ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC]'
+                        isToday ? 'bg-[#7C4DFF] text-white' : 'text-[var(--d2b-text-secondary)]'
                       }`}>
                         {day.getDate()}
                       </span>
                       {dayAppts.length > 3 && (
-                        <span className="text-[9px] text-[#6B4E8A]">+{dayAppts.length - 3}</span>
+                        <span className="text-[9px] text-[var(--d2b-text-muted)]">+{dayAppts.length - 3}</span>
                       )}
                     </div>
                     <div className="space-y-0.5">
@@ -1397,7 +1402,7 @@ export function CalendarioView({
                           <div
                             key={appt.id}
                             onClick={(e) => { e.stopPropagation(); openEditModal(appt) }}
-                            className="w-full rounded px-1 py-0.5 text-[10px] text-[#F5F0FF] truncate"
+                            className="w-full rounded px-1 py-0.5 text-[10px] text-[var(--d2b-text-primary)] truncate"
                             style={{ background: bg, border: `1px solid ${border}` }}
                           >
                             {appt.inicio} {appt.pacienteNome}
@@ -1414,16 +1419,16 @@ export function CalendarioView({
       )}
 
       {/* ── Scroll buttons ───────────────────────────────────────────────── */}
-      <div className="flex justify-center gap-3 py-1.5 border-t border-[rgba(124,77,255,0.10)] bg-[#0D0520] shrink-0">
+      <div className="flex justify-center gap-3 py-1.5 border-t shrink-0" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}>
         <button
           onClick={() => document.querySelector('.flex-1.overflow-y-auto')?.scrollBy({ top: -120, behavior: 'smooth' })}
-          className="w-8 h-6 flex items-center justify-center rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-xs"
+          className="w-8 h-6 flex items-center justify-center rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-xs"
         >
           ∧
         </button>
         <button
           onClick={() => document.querySelector('.flex-1.overflow-y-auto')?.scrollBy({ top: 120, behavior: 'smooth' })}
-          className="w-8 h-6 flex items-center justify-center rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-xs"
+          className="w-8 h-6 flex items-center justify-center rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-xs"
         >
           ∨
         </button>

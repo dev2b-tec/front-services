@@ -57,7 +57,7 @@ function TimeInput({ label, value, onChange, disabled }: {
 }) {
   return (
     <div className="relative flex-1">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}
       </label>
       <input
@@ -91,7 +91,7 @@ function TabAgenda() {
 
   return (
     <div className="space-y-7">
-      <h2 className="text-base font-bold text-[#F5F0FF]">Configurações da Agenda</h2>
+      <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Configurações da Agenda</h2>
 
       {/* ── Toggles de recurso ── */}
       <div className="grid grid-cols-2 gap-x-14 gap-y-5">
@@ -103,12 +103,12 @@ function TabAgenda() {
         ].map(({ label, on, set }) => (
           <div key={label}>
             <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-sm font-medium text-[#F5F0FF]">{label}</span>
-              <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+              <span className="text-sm font-medium text-[var(--d2b-text-primary)]">{label}</span>
+              <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
             </div>
             <div className="flex items-center gap-2">
               <Toggle on={on} set={set} />
-              <span className="text-xs text-[#A78BCC]">
+              <span className="text-xs text-[var(--d2b-text-secondary)]">
                 {on ? 'Recurso Ativado' : 'Recurso Desativado'}
               </span>
             </div>
@@ -117,7 +117,7 @@ function TabAgenda() {
       </div>
 
       {/* ── Sub-tabs Clínica / Profissional ── */}
-      <div className="flex border-b border-[rgba(124,77,255,0.18)]">
+      <div className="flex border-b border-[var(--d2b-border)]">
         {(['clinica', 'profissional'] as const).map((tab) => (
           <button
             key={tab}
@@ -125,7 +125,7 @@ function TabAgenda() {
             className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
               subTab === tab
                 ? 'text-[#7C4DFF] border-[#7C4DFF]'
-                : 'text-[#A78BCC] border-transparent hover:text-[#F5F0FF]'
+                : 'text-[var(--d2b-text-secondary)] border-transparent hover:text-[var(--d2b-text-primary)]'
             }`}
           >
             {tab === 'clinica' ? <Building2 size={14} /> : <User size={14} />}
@@ -136,11 +136,11 @@ function TabAgenda() {
 
       {/* ── Horário de Funcionamento ── */}
       <div>
-        <h3 className="text-sm font-semibold text-[#A78BCC] mb-4">Horário de Funcionamento</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)] mb-4">Horário de Funcionamento</h3>
         <div className="space-y-3">
           {days.map((day, i) => (
             <div key={day.label} className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#A78BCC] w-10 shrink-0">{day.label}</span>
+              <span className="text-sm font-medium text-[var(--d2b-text-secondary)] w-10 shrink-0">{day.label}</span>
               <TimeInput
                 label="Abertura"
                 value={day.abertura}
@@ -161,7 +161,7 @@ function TabAgenda() {
 
       {/* ── Horário de Almoço ── */}
       <div>
-        <h3 className="text-sm font-semibold text-[#A78BCC] mb-4">Horário de Almoço</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)] mb-4">Horário de Almoço</h3>
         <div className="flex gap-3 mb-3">
           <TimeInput label="Início" value={almocoIni} onChange={setAlmocoIni} />
           <TimeInput label="Fim"    value={almocoFim} onChange={setAlmocoFim} />
@@ -187,8 +187,8 @@ function TabMensagens() {
   return (
     <div className="space-y-7">
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF]">Configurações de WhatsApp</h2>
-        <p className="text-xs text-[#A78BCC] mt-1">
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Configurações de WhatsApp</h2>
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
           Gerencie as mensagens e configurações para o envio de WhatsApp automático pelo número do Agendart.
         </p>
       </div>
@@ -196,22 +196,22 @@ function TabMensagens() {
       {/* Número de WhatsApp */}
       <div>
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-sm font-semibold text-[#A78BCC]">Número de WhatsApp da Clínica</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Número de WhatsApp da Clínica</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
         <PhoneInput label="Número de Telefone" req />
       </div>
 
       {/* Permissões */}
       <div>
-        <h3 className="text-base font-bold text-[#F5F0FF] mb-4">Permissões</h3>
+        <h3 className="text-base font-bold text-[var(--d2b-text-primary)] mb-4">Permissões</h3>
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-sm font-semibold text-[#A78BCC]">Configurações de Permissões</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Configurações de Permissões</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
         <div className="flex items-center gap-2">
           <Toggle on={permissao} set={setPermissao} />
-          <span className="text-sm text-[#A78BCC]">
+          <span className="text-sm text-[var(--d2b-text-secondary)]">
             Permitir que profissionais simples visualizem dados de telefone dos pacientes e disparem mensagem
           </span>
         </div>
@@ -219,27 +219,27 @@ function TabMensagens() {
 
       {/* Configurações de SMS */}
       <div>
-        <h3 className="text-base font-bold text-[#F5F0FF] mb-1">Configurações de SMS</h3>
-        <p className="text-xs text-[#A78BCC] mb-5">
+        <h3 className="text-base font-bold text-[var(--d2b-text-primary)] mb-1">Configurações de SMS</h3>
+        <p className="text-xs text-[var(--d2b-text-secondary)] mb-5">
           Personalize a mensagem e/ou desative o envio de SMS no dia da consulta do paciente.
         </p>
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-sm font-semibold text-[#A78BCC]">Envio de SMS Automático</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Envio de SMS Automático</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
         <div className="space-y-2.5 mb-5">
           <div className="flex items-center gap-2">
             <Toggle on={smsAtivo} set={setSmsAtivo} />
-            <span className="text-sm text-[#A78BCC]">Ativar Disparo Automático</span>
+            <span className="text-sm text-[var(--d2b-text-secondary)]">Ativar Disparo Automático</span>
           </div>
           <div className="flex items-center gap-2">
             <Toggle on={smsRisco} set={setSmsRisco} />
-            <span className="text-sm text-[#A78BCC]">Enviar somente com risco de falta?</span>
+            <span className="text-sm text-[var(--d2b-text-secondary)]">Enviar somente com risco de falta?</span>
           </div>
         </div>
 
         <div className="mb-5">
-          <p className="text-sm font-medium text-[#A78BCC] mb-2">Disparar em:</p>
+          <p className="text-sm font-medium text-[var(--d2b-text-secondary)] mb-2">Disparar em:</p>
           <div className="relative">
             <select
               value={dispararEm}
@@ -250,23 +250,23 @@ function TabMensagens() {
                 <option key={o} value={o}>{o}</option>
               ))}
             </select>
-            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
           </div>
         </div>
 
         <div>
-          <p className="text-sm font-medium text-[#A78BCC] mb-2">
+          <p className="text-sm font-medium text-[var(--d2b-text-secondary)] mb-2">
             Mensagem de Lembrete <span className="text-[#7C4DFF]">*</span>
           </p>
-          <div className="rounded-md border border-[rgba(124,77,255,0.25)] bg-[#0D0520] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
+          <div className="rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
             <textarea
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
               rows={3}
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none resize-none"
+              className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none"
             />
           </div>
-          <p className="text-[10px] text-[#6B4E8A] mt-1">
+          <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">
             Adicione variáveis inserindo hastag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento.
           </p>
         </div>
@@ -299,27 +299,27 @@ function TabCreditos() {
   return (
     <div className="space-y-7">
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF]">Compra de Créditos</h2>
-        <p className="text-xs text-[#A78BCC] mt-1">Gerencie as Permissões e compra de créditos.</p>
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Compra de Créditos</h2>
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">Gerencie as Permissões e compra de créditos.</p>
       </div>
 
       {/* Permissões de envio */}
       <div>
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-sm font-semibold text-[#A78BCC]">Permissões de envio de mensagens</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Permissões de envio de mensagens</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
             <Toggle on={envioProf} set={setEnvioProf} />
-            <span className="text-sm text-[#A78BCC]">
+            <span className="text-sm text-[var(--d2b-text-secondary)]">
               Permitir envio de WhatsApp automático por{' '}
               <span className="text-[#7C4DFF] font-medium">profissionais</span> da clínica.
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Toggle on={envioAss} set={setEnvioAss} />
-            <span className="text-sm text-[#A78BCC]">
+            <span className="text-sm text-[var(--d2b-text-secondary)]">
               Permitir envio de WhatsApp automático por{' '}
               <span className="text-[#7C4DFF] font-medium">assistentes</span> da clínica.
             </span>
@@ -330,20 +330,20 @@ function TabCreditos() {
       {/* Permissões de assinatura */}
       <div>
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-sm font-semibold text-[#A78BCC]">Permissões de assinatura eletrônica</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Permissões de assinatura eletrônica</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
             <Toggle on={assinaturaProf} set={setAssinatProf} />
-            <span className="text-sm text-[#A78BCC]">
+            <span className="text-sm text-[var(--d2b-text-secondary)]">
               Permitir assinatura eletrônica por{' '}
               <span className="text-[#7C4DFF] font-medium">profissionais</span> da clínica.
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Toggle on={assinaturaAss} set={setAssinatAss} />
-            <span className="text-sm text-[#A78BCC]">
+            <span className="text-sm text-[var(--d2b-text-secondary)]">
               Permitir assinatura eletrônica por{' '}
               <span className="text-[#7C4DFF] font-medium">assistentes</span> da clínica.
             </span>
@@ -354,10 +354,10 @@ function TabCreditos() {
       {/* Créditos */}
       <div>
         <div className="flex items-center gap-1.5 mb-1">
-          <span className="text-sm font-semibold text-[#A78BCC]">Créditos</span>
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <span className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Créditos</span>
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </div>
-        <p className="text-xs text-[#A78BCC] mb-4">
+        <p className="text-xs text-[var(--d2b-text-secondary)] mb-4">
           Compre créditos para utilizar as funcionalidades de envio de mensagens e assinatura eletrônica.
         </p>
         <button onClick={() => setShowModal(true)} className={BTN_PRIMARY + ' mb-5'}>
@@ -369,41 +369,41 @@ function TabCreditos() {
               key={label}
               className={`rounded-lg border p-4 ${
                 highlight
-                  ? 'border-[#7C4DFF] bg-[rgba(124,77,255,0.08)]'
-                  : 'border-[rgba(124,77,255,0.18)] bg-[#120328]'
+                  ? 'border-[#7C4DFF] bg-[var(--d2b-hover)]'
+                  : 'border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)]'
               }`}
             >
-              <p className={`text-2xl font-bold mb-1 ${highlight ? 'text-[#7C4DFF]' : 'text-[#F5F0FF]'}`}>{value}</p>
-              <p className="text-xs text-[#A78BCC] leading-tight">{label}</p>
+              <p className={`text-2xl font-bold mb-1 ${highlight ? 'text-[#7C4DFF]' : 'text-[var(--d2b-text-primary)]'}`}>{value}</p>
+              <p className="text-xs text-[var(--d2b-text-secondary)] leading-tight">{label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex justify-end pt-5 border-t border-[rgba(124,77,255,0.12)]">
+      <div className="flex justify-end pt-5 border-t border-[var(--d2b-border)]">
         <button type="button" className={BTN_PRIMARY}>Salvar</button>
       </div>
 
       {/* Modal Comprar Créditos */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+          <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-[#F5F0FF]">Comprar Créditos</h3>
-              <button onClick={() => setShowModal(false)} className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors">
+              <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Comprar Créditos</h3>
+              <button onClick={() => setShowModal(false)} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors">
                 <X size={18} />
               </button>
             </div>
-            <p className="text-sm text-[#A78BCC] mb-3">
+            <p className="text-sm text-[var(--d2b-text-secondary)] mb-3">
               Compre créditos para poder programar o disparo de suas mensagens e assinar documentos eletronicamente:
             </p>
-            <ul className="text-sm text-[#A78BCC] list-disc list-inside mb-5 space-y-1">
+            <ul className="text-sm text-[var(--d2b-text-secondary)] list-disc list-inside mb-5 space-y-1">
               <li>1 mensagem: 1 crédito;</li>
               <li>1 documento assinado: 10 créditos;</li>
             </ul>
             <div className="flex items-end gap-4 mb-6">
               <div className="flex-1 relative">
-                <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+                <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
                   Número de Créditos
                 </label>
                 <input
@@ -414,7 +414,7 @@ function TabCreditos() {
                   className={INP}
                 />
               </div>
-              <p className="text-sm font-semibold text-[#F5F0FF] whitespace-nowrap pb-2.5">
+              <p className="text-sm font-semibold text-[var(--d2b-text-primary)] whitespace-nowrap pb-2.5">
                 Valor À Pagar <span className="text-[#7C4DFF]">{total}</span>
               </p>
             </div>
@@ -482,8 +482,8 @@ function TabServicos() {
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Serviços da Clínica</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Serviços da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
             Edite os serviços prestados pelo seu consultório ou clínica. Eles estarão disponíveis para especificar os agendamentos realizados.
           </p>
         </div>
@@ -499,7 +499,7 @@ function TabServicos() {
       {/* Filtros */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -508,7 +508,7 @@ function TabServicos() {
           />
         </div>
         <div className="relative">
-          <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+          <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
             Convênio
           </label>
           <div className="relative">
@@ -519,17 +519,17 @@ function TabServicos() {
             >
               {CONVENIOS.map((c) => <option key={c}>{c}</option>)}
             </select>
-            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
           </div>
         </div>
       </div>
 
       {/* Formulário de adição inline */}
       {showAdd && (
-        <div className="rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] p-4">
+        <div className="rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] p-4">
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="text-[9px] font-semibold uppercase tracking-widest text-[#A78BCC] block mb-1">Atendimento</label>
+              <label className="text-[9px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)] block mb-1">Atendimento</label>
               <input
                 value={novoNome}
                 onChange={(e) => setNovoNome(e.target.value)}
@@ -538,7 +538,7 @@ function TabServicos() {
               />
             </div>
             <div className="w-48">
-              <label className="text-[9px] font-semibold uppercase tracking-widest text-[#A78BCC] block mb-1">Convênio (opcional)</label>
+              <label className="text-[9px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)] block mb-1">Convênio (opcional)</label>
               <div className="relative">
                 <select
                   value={novoConv}
@@ -547,11 +547,11 @@ function TabServicos() {
                 >
                   {CONVENIOS.filter((c) => c !== 'Todos').map((c) => <option key={c}>{c}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
               </div>
             </div>
             <div className="w-36">
-              <label className="text-[9px] font-semibold uppercase tracking-widest text-[#A78BCC] block mb-1">Valor</label>
+              <label className="text-[9px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)] block mb-1">Valor</label>
               <input
                 value={novoValor}
                 onChange={(e) => setNovoValor(e.target.value)}
@@ -564,24 +564,24 @@ function TabServicos() {
         </div>
       )}
 
-      <p className="text-xs text-[#A78BCC]">
+      <p className="text-xs text-[var(--d2b-text-secondary)]">
         Exibindo 1 a {filtered.length} de {filtered.length} serviços
       </p>
 
       {/* Lista */}
-      <div className="rounded-lg border border-[rgba(124,77,255,0.18)] overflow-hidden">
+      <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
         {filtered.map((s, i) => (
           <div
             key={s.id}
             className={`flex items-center px-4 py-3 ${
-              i < filtered.length - 1 ? 'border-b border-[rgba(124,77,255,0.12)]' : ''
+              i < filtered.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''
             }`}
           >
-            <span className="text-sm font-medium text-[#F5F0FF] mr-2">{s.nome}</span>
-            <span className="text-[10px] font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded px-1.5 py-0.5 mr-auto">
+            <span className="text-sm font-medium text-[var(--d2b-text-primary)] mr-2">{s.nome}</span>
+            <span className="text-[10px] font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded px-1.5 py-0.5 mr-auto">
               {s.convenio.toUpperCase()}
             </span>
-            <span className="text-sm font-medium text-[#F5F0FF] mr-3">{fmtBRL(s.valor)}</span>
+            <span className="text-sm font-medium text-[var(--d2b-text-primary)] mr-3">{fmtBRL(s.valor)}</span>
             <div className="w-8 h-8 rounded-md bg-[#00BCD4] flex items-center justify-center text-white text-xs font-bold mr-2">
               AA
             </div>
@@ -601,14 +601,14 @@ function TabServicos() {
       {/* Dialog de exclusão */}
       {deleteId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+          <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-[rgba(239,68,68,0.12)] flex items-center justify-center">
                 <AlertTriangle size={20} className="text-[#EF4444]" />
               </div>
-              <h3 className="text-base font-bold text-[#F5F0FF]">Excluir Serviço</h3>
+              <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Excluir Serviço</h3>
             </div>
-            <p className="text-sm text-[#A78BCC] mb-6">Você tem certeza que deseja excluir este serviço?</p>
+            <p className="text-sm text-[var(--d2b-text-secondary)] mb-6">Você tem certeza que deseja excluir este serviço?</p>
             <div className="flex gap-3">
               <button
                 onClick={() => deleteServico(deleteId)}
@@ -690,35 +690,35 @@ function TabSalas() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF] flex items-center gap-1.5">
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)] flex items-center gap-1.5">
           Salas da Clínica
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </h2>
-        <p className="text-xs text-[#A78BCC] mt-1">
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
           Gerencie a lista de salas da sua clínica para que possam ser alocadas no atendimento de seus pacientes.
         </p>
         <div className="flex items-center gap-2 mt-3">
           <Toggle on={gestaoAtiva} set={setGestaoAtiva} />
-          <span className="text-sm text-[#A78BCC]">Desativar funcionalidade de gestão de Salas</span>
+          <span className="text-sm text-[var(--d2b-text-secondary)]">Desativar funcionalidade de gestão de Salas</span>
         </div>
       </div>
 
       {/* Lista de salas */}
       <div>
-        <h3 className="text-sm font-semibold text-[#F5F0FF] mb-3">Lista de salas</h3>
-        <div className="rounded-lg border border-[rgba(124,77,255,0.18)] overflow-hidden">
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Lista de salas</h3>
+        <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
           {salas.map((s, i) => (
             <div key={s.id}>
               <div
                 className={`flex items-center px-4 py-3 ${
-                  i < salas.length - 1 || editId === s.id ? 'border-b border-[rgba(124,77,255,0.12)]' : ''
+                  i < salas.length - 1 || editId === s.id ? 'border-b border-[var(--d2b-border)]' : ''
                 }`}
               >
-                <span className="text-sm font-medium text-[#F5F0FF] mr-2">{s.nome}</span>
-                <span className="text-[10px] font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded px-1.5 py-0.5 mr-auto">
+                <span className="text-sm font-medium text-[var(--d2b-text-primary)] mr-2">{s.nome}</span>
+                <span className="text-[10px] font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded px-1.5 py-0.5 mr-auto">
                   {s.unidade}
                 </span>
-                <button className="w-8 h-8 rounded-md flex items-center justify-center text-[#6B4E8A] hover:text-[#A78BCC] mr-1 transition-colors">
+                <button className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] mr-1 transition-colors">
                   <Pin size={14} />
                 </button>
                 <button
@@ -735,7 +735,7 @@ function TabSalas() {
                 </button>
               </div>
               {editId === s.id && (
-                <div className="bg-[#0D0520] p-4 space-y-3">
+                <div className="bg-[var(--d2b-bg-main)] p-4 space-y-3">
                   <div className="flex items-center gap-3">
                     <input
                       value={editNome}
@@ -752,15 +752,15 @@ function TabSalas() {
                         <option value="">Selecione uma unidade</option>
                         {UNIDADES.map((u) => <option key={u}>{u}</option>)}
                       </select>
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <Toggle on={editOverbooking} set={setEditOv} />
-                      <span className="text-sm text-[#A78BCC]">Permitir overbooking nesta sala</span>
+                      <span className="text-sm text-[var(--d2b-text-secondary)]">Permitir overbooking nesta sala</span>
                     </div>
-                    <p className="text-[10px] text-[#6B4E8A] mt-1 ml-12">
+                    <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1 ml-12">
                       Ao ativar esta opção, múltiplos agendamentos poderão ser realizados na mesma sala, no mesmo horário.
                     </p>
                   </div>
@@ -774,7 +774,7 @@ function TabSalas() {
 
       {/* Formulário adicionar sala */}
       {showAdd && (
-        <div className="rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] p-4 space-y-3">
+        <div className="rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] p-4 space-y-3">
           <div className="flex items-center gap-3">
             <input
               value={addNome}
@@ -791,15 +791,15 @@ function TabSalas() {
                 <option value="">Selecione uma unidade</option>
                 {UNIDADES.map((u) => <option key={u}>{u}</option>)}
               </select>
-              <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+              <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
             </div>
           </div>
           <div>
             <div className="flex items-center gap-2">
               <Toggle on={addOverbooking} set={setAddOv} />
-              <span className="text-sm text-[#A78BCC]">Permitir overbooking nesta sala</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">Permitir overbooking nesta sala</span>
             </div>
-            <p className="text-[10px] text-[#6B4E8A] mt-1 ml-12">
+            <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1 ml-12">
               Ao ativar esta opção, múltiplos agendamentos poderão ser realizados na mesma sala, no mesmo horário.
             </p>
           </div>
@@ -809,7 +809,7 @@ function TabSalas() {
 
       <button
         onClick={() => { setShowAdd((v) => !v); setEditId(null) }}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] hover:border-[#7C4DFF] hover:bg-[rgba(124,77,255,0.08)] transition-colors"
+        className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[#7C4DFF] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors"
       >
         <Plus size={14} />
         Adicionar sala
@@ -818,14 +818,14 @@ function TabSalas() {
       {/* Dialog de exclusão */}
       {deleteId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+          <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-[rgba(239,68,68,0.12)] flex items-center justify-center">
                 <AlertTriangle size={20} className="text-[#EF4444]" />
               </div>
-              <h3 className="text-base font-bold text-[#F5F0FF]">Excluir Sala</h3>
+              <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Excluir Sala</h3>
             </div>
-            <p className="text-sm text-[#A78BCC] mb-6">Você tem certeza que deseja excluir esta sala?</p>
+            <p className="text-sm text-[var(--d2b-text-secondary)] mb-6">Você tem certeza que deseja excluir esta sala?</p>
             <div className="flex gap-3">
               <button
                 onClick={() => deleteSala(deleteId)}
@@ -851,7 +851,7 @@ function TabSalas() {
             <p className="text-sm font-semibold text-[#22C55E]">Sala Excluída</p>
             <p className="text-xs text-[#86EFAC]">Você acaba de excluir uma sala</p>
           </div>
-          <button onClick={() => setToast(null)} className="text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
+          <button onClick={() => setToast(null)} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors">
             <X size={14} />
           </button>
         </div>
@@ -864,12 +864,12 @@ function TabSalas() {
 function TabPlaceholder({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <div className="w-16 h-16 rounded-2xl bg-[#150830] border border-[rgba(124,77,255,0.20)] flex items-center justify-center text-2xl">
+      <div className="w-16 h-16 rounded-2xl bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] flex items-center justify-center text-2xl">
         🚧
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-[#F5F0FF]">{label}</p>
-        <p className="text-xs text-[#6B4E8A] mt-1">Em construção</p>
+        <p className="text-sm font-medium text-[var(--d2b-text-primary)]">{label}</p>
+        <p className="text-xs text-[var(--d2b-text-muted)] mt-1">Em construção</p>
       </div>
     </div>
   )
@@ -912,11 +912,11 @@ function TabUnidades() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF] flex items-center gap-1.5">
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)] flex items-center gap-1.5">
           Unidades da Clínica
-          <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+          <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
         </h2>
-        <p className="text-xs text-[#A78BCC] mt-1">
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
           Crie e gerencie as unidades da sua clínica e personalize as permissões para cada usuário.
         </p>
       </div>
@@ -925,8 +925,8 @@ function TabUnidades() {
       <div>
         <div className="flex items-start justify-between mb-2">
           <div>
-            <h3 className="text-sm font-semibold text-[#F5F0FF]">Lista de unidades</h3>
-            <p className="text-xs text-[#A78BCC]">Edite o nome e ative/desative unidades. Inativas ficam ocultas em seleções.</p>
+            <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Lista de unidades</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">Edite o nome e ative/desative unidades. Inativas ficam ocultas em seleções.</p>
           </div>
           <button
             onClick={() => { setShowAdd((v) => !v); setEditId(null) }}
@@ -939,8 +939,8 @@ function TabUnidades() {
 
         {/* Form criar unidade */}
         {showAdd && (
-          <div className="rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] p-4 mb-3 space-y-3">
-            <p className="text-xs font-semibold text-[#A78BCC] uppercase tracking-widest">Criar unidade</p>
+          <div className="rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] p-4 mb-3 space-y-3">
+            <p className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-widest">Criar unidade</p>
             <input
               value={addNome}
               onChange={(e) => setAddNome(e.target.value)}
@@ -954,26 +954,26 @@ function TabUnidades() {
           </div>
         )}
 
-        <div className="rounded-lg border border-[rgba(124,77,255,0.18)] overflow-hidden">
+        <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
           {unidades.map((u, i) => (
             <div key={u.id}>
-              <div className={`px-4 py-3 ${i < unidades.length - 1 ? 'border-b border-[rgba(124,77,255,0.12)]' : ''}`}>
+              <div className={`px-4 py-3 ${i < unidades.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}>
                 <div className="flex items-center">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-sm font-medium ${u.ativa ? 'text-[#F5F0FF]' : 'text-[#6B4E8A]'}`}>{u.nome}</span>
+                      <span className={`text-sm font-medium ${u.ativa ? 'text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-muted)]'}`}>{u.nome}</span>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                         u.ativa
                           ? 'bg-[rgba(34,197,94,0.15)] text-[#22C55E] border border-[rgba(34,197,94,0.3)]'
-                          : 'bg-[rgba(124,77,255,0.08)] text-[#6B4E8A] border border-[rgba(124,77,255,0.18)]'
+                          : 'bg-[var(--d2b-hover)] text-[var(--d2b-text-muted)] border border-[var(--d2b-border)]'
                       }`}>
                         {u.ativa ? 'Ativa' : 'Inativo'}
                       </span>
                     </div>
                     {!u.ativa && (
-                      <p className="text-xs text-[#6B4E8A]">Esta unidade está inativa e ficará oculta em filtros e seleções.</p>
+                      <p className="text-xs text-[var(--d2b-text-muted)]">Esta unidade está inativa e ficará oculta em filtros e seleções.</p>
                     )}
-                    <p className="text-xs text-[#6B4E8A]">Criada em: {u.criadaEm}</p>
+                    <p className="text-xs text-[var(--d2b-text-muted)]">Criada em: {u.criadaEm}</p>
                   </div>
                   <div className="flex items-center gap-1 ml-3 shrink-0">
                     <button
@@ -986,7 +986,7 @@ function TabUnidades() {
                       onClick={() => toggleAtiva(u.id)}
                       className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${
                         u.ativa
-                          ? 'bg-[rgba(124,77,255,0.10)] text-[#A78BCC] hover:bg-[rgba(124,77,255,0.25)]'
+                          ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)]'
                           : 'bg-[rgba(34,197,94,0.12)] text-[#22C55E] hover:bg-[rgba(34,197,94,0.25)]'
                       }`}
                     >
@@ -1100,8 +1100,8 @@ function TabAnamneses() {
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Anamneses da Clínica</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">Crie e edite diferentes anamneses para os prontuários da clínica.</p>
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Anamneses da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">Crie e edite diferentes anamneses para os prontuários da clínica.</p>
         </div>
         <button
           onClick={() => setShowNovaMod(true)}
@@ -1122,7 +1122,7 @@ function TabAnamneses() {
           >
             {anamneses.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
           </select>
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
         <button className={BTN_PRIMARY}>Editar</button>
       </div>
@@ -1130,10 +1130,10 @@ function TabAnamneses() {
       {/* Perguntas Ativas */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-[#A78BCC]">Perguntas Ativas</h3>
+          <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Perguntas Ativas</h3>
           <button
             onClick={() => setShowAddPerg((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] hover:border-[#7C4DFF] hover:bg-[rgba(124,77,255,0.08)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors"
           >
             <Plus size={13} />
             Nova Pergunta
@@ -1141,23 +1141,23 @@ function TabAnamneses() {
         </div>
 
         {ativas.length === 0 && (
-          <p className="text-sm text-[#6B4E8A] py-3">Não existem perguntas ativas nesta anamnese.</p>
+          <p className="text-sm text-[var(--d2b-text-muted)] py-3">Não existem perguntas ativas nesta anamnese.</p>
         )}
 
         <div className="space-y-1 mb-3">
           {ativas.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 rounded-md border border-[rgba(124,77,255,0.18)] bg-[#0D0520] px-3 py-2.5">
-              <span className="text-[#6B4E8A] cursor-grab shrink-0"><svg width="12" height="14" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1.2" fill="currentColor"/><circle cx="7" cy="2" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="12" r="1.2" fill="currentColor"/><circle cx="7" cy="12" r="1.2" fill="currentColor"/></svg></span>
-              <span className="text-sm text-[#F5F0FF] flex-1">{p.texto}</span>
+            <div key={p.id} className="flex items-center gap-2 rounded-md border border-[var(--d2b-border)] bg-[var(--d2b-bg-main)] px-3 py-2.5">
+              <span className="text-[var(--d2b-text-muted)] cursor-grab shrink-0"><svg width="12" height="14" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2" r="1.2" fill="currentColor"/><circle cx="7" cy="2" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="12" r="1.2" fill="currentColor"/><circle cx="7" cy="12" r="1.2" fill="currentColor"/></svg></span>
+              <span className="text-sm text-[var(--d2b-text-primary)] flex-1">{p.texto}</span>
               <div className="relative shrink-0 w-28">
                 <select
                   value={p.tipo}
                   onChange={(e) => changeTipoPerg(p.id, e.target.value)}
-                  className="w-full bg-transparent border border-[rgba(124,77,255,0.25)] rounded-md px-2 py-1.5 text-xs text-[#A78BCC] appearance-none cursor-pointer pr-6 focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                  className="w-full bg-transparent border border-[var(--d2b-border-strong)] rounded-md px-2 py-1.5 text-xs text-[var(--d2b-text-secondary)] appearance-none cursor-pointer pr-6 focus:outline-none focus:border-[#7C4DFF] transition-colors"
                 >
                   {TIPOS_PERGUNTA.map((t) => <option key={t}>{t}</option>)}
                 </select>
-                <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
               </div>
               <button
                 onClick={() => togglePergunta(p.id)}
@@ -1171,7 +1171,7 @@ function TabAnamneses() {
 
         {/* Form nova pergunta */}
         {showAddPerg && (
-          <div className="rounded-md border border-[rgba(124,77,255,0.25)] bg-[#120328] p-3 space-y-3 mb-3">
+          <div className="rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] p-3 space-y-3 mb-3">
             <div className="flex items-center gap-2">
               <input
                 value={novaPerg}
@@ -1187,7 +1187,7 @@ function TabAnamneses() {
                 >
                   {TIPOS_PERGUNTA.map((t) => <option key={t}>{t}</option>)}
                 </select>
-                <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
               </div>
             </div>
             <div className="flex justify-end gap-2">
@@ -1200,14 +1200,14 @@ function TabAnamneses() {
 
       {/* Perguntas Inativas */}
       <div>
-        <h3 className="text-sm font-semibold text-[#A78BCC] mb-3">Perguntas Inativas</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)] mb-3">Perguntas Inativas</h3>
         {inativas.length === 0 && (
-          <p className="text-sm text-[#6B4E8A] py-3">Não existem perguntas inativas nesta anamnese.</p>
+          <p className="text-sm text-[var(--d2b-text-muted)] py-3">Não existem perguntas inativas nesta anamnese.</p>
         )}
         <div className="space-y-1">
           {inativas.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 rounded-md border border-[rgba(124,77,255,0.10)] bg-[rgba(13,5,32,0.5)] px-3 py-2.5 opacity-70">
-              <span className="text-sm text-[#6B4E8A] flex-1">{p.texto}</span>
+            <div key={p.id} className="flex items-center gap-2 rounded-md border border-[var(--d2b-border)] bg-[rgba(13,5,32,0.5)] px-3 py-2.5 opacity-70">
+              <span className="text-sm text-[var(--d2b-text-muted)] flex-1">{p.texto}</span>
               <button
                 onClick={() => togglePergunta(p.id)}
                 className="text-xs font-semibold px-3 py-1.5 rounded-md bg-[rgba(34,197,94,0.10)] text-[#22C55E] border border-[rgba(34,197,94,0.2)] hover:bg-[rgba(34,197,94,0.2)] transition-colors shrink-0"
@@ -1222,15 +1222,15 @@ function TabAnamneses() {
       {/* Modal Nova Anamnese */}
       {showNovaMod && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+          <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-bold text-[#F5F0FF]">Nova Anamnese</h3>
-              <button onClick={() => setShowNovaMod(false)} className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors">
+              <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Nova Anamnese</h3>
+              <button onClick={() => setShowNovaMod(false)} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors">
                 <X size={18} />
               </button>
             </div>
             <div className="relative mb-5">
-              <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+              <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
                 Título da Anamnese<span className="text-[#7C4DFF] ml-0.5">*</span>
               </label>
               <input
@@ -1277,13 +1277,13 @@ function StepIndicator({ current, total }: { current: NfseStep; total: number })
                   ? 'bg-[#7C4DFF] border-[#7C4DFF] text-white'
                   : active
                   ? 'bg-transparent border-[#7C4DFF] text-[#7C4DFF]'
-                  : 'bg-transparent border-[rgba(124,77,255,0.25)] text-[#6B4E8A]'
+                  : 'bg-transparent border-[var(--d2b-border-strong)] text-[var(--d2b-text-muted)]'
               }`}
             >
               {done ? <Check size={14} strokeWidth={3} /> : num}
             </div>
             {num < total && (
-              <div className={`flex-1 h-0.5 mx-0 ${done ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.18)]'}`} />
+              <div className={`flex-1 h-0.5 mx-0 ${done ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'}`} />
             )}
           </div>
         )
@@ -1301,12 +1301,12 @@ function TabNfse() {
   if (done) {
     return (
       <div className="space-y-7">
-        <h2 className="text-base font-bold text-[#F5F0FF]">NFS-e</h2>
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">NFS-e</h2>
 
         {/* Seção busca CNPJ */}
         <div>
-          <h3 className="text-sm font-bold text-[#F5F0FF] mb-1">Buscar dados da sua empresa na Receita Federal</h3>
-          <p className="text-xs text-[#A78BCC] mb-4">
+          <h3 className="text-sm font-bold text-[var(--d2b-text-primary)] mb-1">Buscar dados da sua empresa na Receita Federal</h3>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mb-4">
             Para iniciar a configuração da Nota Fiscal de Serviços Eletrônica (NFS-e), precisamos buscar os dados oficiais da sua empresa na Receita Federal.
             Digite o CNPJ da clínica abaixo para preenchermos automaticamente todas as informações necessárias.
           </p>
@@ -1315,7 +1315,7 @@ function TabNfse() {
           </p>
 
           <div className="mb-4">
-            <p className="text-xs font-medium text-[#A78BCC] mb-1.5">CNPJ da Clínica</p>
+            <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-1.5">CNPJ da Clínica</p>
             <div className="flex gap-3">
               <input
                 value={cnpj}
@@ -1340,7 +1340,7 @@ function TabNfse() {
             <div className="w-5 h-5 rounded-full bg-[rgba(56,189,248,0.15)] flex items-center justify-center shrink-0 mt-0.5">
               <HelpCircle size={12} className="text-[#38BDF8]" />
             </div>
-            <p className="text-xs text-[#A78BCC]">
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
               <span className="font-bold text-[#38BDF8]">Processo obrigatório:</span>{' '}
               A busca automática é necessária para preencher os dados oficiais da sua empresa (razão social, endereço e atividades econômicas) de forma precisa e em conformidade com os órgãos fiscais.
               Este processo garante a integração adequada com os sistemas governamentais para emissão de NFS-e.
@@ -1355,21 +1355,21 @@ function TabNfse() {
 
   return (
     <div className="space-y-7">
-      <h2 className="text-base font-bold text-[#F5F0FF]">NFS-e</h2>
+      <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">NFS-e</h2>
 
       {/* Checklist intro */}
       <div>
-        <h3 className="text-lg font-bold text-[#F5F0FF] mb-6">Vamos começar!</h3>
+        <h3 className="text-lg font-bold text-[var(--d2b-text-primary)] mb-6">Vamos começar!</h3>
 
         <StepIndicator current={step} total={5} />
 
         {/* Conteúdo do step */}
-        <div className="rounded-lg border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328] px-8 py-10 flex items-center justify-center mb-6">
+        <div className="rounded-lg border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] px-8 py-10 flex items-center justify-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-full border-2 border-[rgba(124,77,255,0.35)] flex items-center justify-center text-[#A78BCC]">
+            <div className="w-7 h-7 rounded-full border-2 border-[var(--d2b-border-strong)] flex items-center justify-center text-[var(--d2b-text-secondary)]">
               <Check size={14} strokeWidth={2} />
             </div>
-            <p className="text-sm text-[#A78BCC]">{stepData.label}</p>
+            <p className="text-sm text-[var(--d2b-text-secondary)]">{stepData.label}</p>
           </div>
         </div>
 
@@ -1414,13 +1414,13 @@ function TabSenhas() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-1.5">
-        <h2 className="text-base font-bold text-[#F5F0FF]">Ativar Senhas</h2>
-        <HelpCircle size={13} className="text-[#6B4E8A] cursor-help" />
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Ativar Senhas</h2>
+        <HelpCircle size={13} className="text-[var(--d2b-text-muted)] cursor-help" />
       </div>
 
       {/* Senha Financeiro */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[#A78BCC]">Senha Financeiro</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Senha Financeiro</h3>
         <div className="relative">
           <input
             type={showFin ? 'text' : 'password'}
@@ -1432,7 +1432,7 @@ function TabSenhas() {
           <button
             type="button"
             onClick={() => setShowFin((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {showFin
@@ -1449,7 +1449,7 @@ function TabSenhas() {
 
       {/* Senha de Prontuário */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[#A78BCC]">Senha de Prontuário</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Senha de Prontuário</h3>
         <div className="relative">
           <input
             type={showPron ? 'text' : 'password'}
@@ -1461,7 +1461,7 @@ function TabSenhas() {
           <button
             type="button"
             onClick={() => setShowPron((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {showPron
@@ -1513,7 +1513,7 @@ export function ConfiguracoesView({
     <div className="flex h-full min-h-0">
 
       {/* ── Painel lateral de ícones ── */}
-      <aside className="flex flex-col w-[72px] shrink-0 border-r border-[rgba(124,77,255,0.18)] bg-[#120328] py-3 gap-0.5 overflow-y-auto">
+      <aside className="flex flex-col w-[72px] shrink-0 border-r border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] py-3 gap-0.5 overflow-y-auto">
         {TABS.map(({ id, label, Icon, iconColor }) => {
           const isActive = active === id
           const clr = iconColor ?? (isActive ? '#7C4DFF' : '#6B4E8A')
@@ -1524,8 +1524,8 @@ export function ConfiguracoesView({
               title={label}
               className={`flex flex-col items-center gap-1 py-3 mx-2 rounded-xl transition-all ${
                 isActive
-                  ? 'bg-[rgba(124,77,255,0.15)]'
-                  : 'hover:bg-[rgba(124,77,255,0.08)]'
+                  ? 'bg-[var(--d2b-hover)]'
+                  : 'hover:bg-[var(--d2b-hover)]'
               }`}
             >
               <Icon size={20} color={clr} strokeWidth={isActive ? 2.5 : 1.5} />

@@ -88,8 +88,8 @@ function OdontogramaView() {
     <div className="flex-1 flex flex-col">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-[#F5F0FF]">Odontograma</h3>
-          <p className="text-xs text-[#6B4E8A] mt-0.5">Preencha o odontograma adicionando informações a cada dente que desejar.</p>
+          <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Odontograma</h3>
+          <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">Preencha o odontograma adicionando informações a cada dente que desejar.</p>
         </div>
         <button
           onClick={() => setPainelOpen((v) => !v)}
@@ -122,23 +122,23 @@ function OdontogramaView() {
           </svg>
         </div>
         {painelOpen && (
-          <div className="flex-1 flex flex-col justify-center space-y-4 pl-4 border-l border-[rgba(124,77,255,0.18)]">
+          <div className="flex-1 flex flex-col justify-center space-y-4 pl-4 border-l border-[var(--d2b-border)]">
             <p className="text-sm font-semibold text-[#7C4DFF]">Preencha os dados para adicionar ao Odontograma</p>
             <div className="relative">
               <button
                 onClick={() => setDenteDropOpen((v) => !v)}
-                className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+                className="w-full flex items-center justify-between bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
               >
-                <span className={denteAtivo === '' ? 'text-[#3D2A5A]' : 'text-[#F5F0FF]'}>
+                <span className={denteAtivo === '' ? 'text-[#3D2A5A]' : 'text-[var(--d2b-text-primary)]'}>
                   {denteAtivo === '' ? 'Selecionar dente' : `Dente ${denteAtivo}`}
                 </span>
-                <ChevronDown size={13} className="text-[#6B4E8A]" />
+                <ChevronDown size={13} className="text-[var(--d2b-text-muted)]" />
               </button>
               {denteDropOpen && (
-                <div className="absolute z-30 top-full mt-1 left-0 right-0 max-h-48 overflow-y-auto bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl">
+                <div className="absolute z-30 top-full mt-1 left-0 right-0 max-h-48 overflow-y-auto bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl">
                   {ALL_TEETH.map((n) => (
                     <button key={n} onClick={() => { setDenteAtivo(n); setDenteDropOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${denteAtivo === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${denteAtivo === n ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>
                       Dente {n}
                     </button>
                   ))}
@@ -148,13 +148,13 @@ function OdontogramaView() {
             <div>
               <textarea rows={5} placeholder="Descrição" value={descricao}
                 onChange={(e) => setDescricao(e.target.value.slice(0, MAX_CHARS))}
-                className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+                className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
               />
               <p className="text-xs text-[#7C4DFF] mt-1">Máximo de 20000 caracteres.</p>
             </div>
             <div className="flex items-center justify-end gap-3">
               <button onClick={() => { setPainelOpen(false); setDenteAtivo(''); setDescricao('') }}
-                className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
+                className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">
                 Cancelar
               </button>
               <button onClick={() => { setPainelOpen(false); setDenteAtivo(''); setDescricao('') }}
@@ -166,7 +166,7 @@ function OdontogramaView() {
         )}
       </div>
       {selected.size > 0 && (
-        <p className="text-xs text-[#A78BCC] mt-2 text-center">
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-2 text-center">
           Dentes selecionados: {Array.from(selected).sort((a, b) => a - b).join(', ')}
         </p>
       )}
@@ -306,15 +306,15 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-5xl h-[92vh] bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl flex flex-col">
+      <div className="relative w-full max-w-5xl h-[92vh] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] flex-shrink-0">
-          <span className="text-lg font-semibold text-[#F5F0FF]">
+        <div className="flex items-center justify-between px-7 py-5 border-b border-[var(--d2b-border)] flex-shrink-0">
+          <span className="text-lg font-semibold text-[var(--d2b-text-primary)]">
             {isEdit ? 'Editar evolução' : 'Registrar nova evolução'}
           </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#6B4E8A]">{assinado ? 'Assinado' : 'Não Assinado'}</span>
+              <span className="text-xs text-[var(--d2b-text-muted)]">{assinado ? 'Assinado' : 'Não Assinado'}</span>
               <button
                 onClick={() => setAssinado((v) => !v)}
                 className={`relative w-9 h-5 rounded-full transition-colors ${assinado ? 'bg-[#7C4DFF]' : 'bg-[#3D2A5A]'}`}
@@ -322,44 +322,44 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${assinado ? 'translate-x-4' : 'translate-x-0.5'}`} />
               </button>
             </div>
-            <button className="w-6 h-6 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
+            <button className="w-6 h-6 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </button>
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
               <X size={15} />
             </button>
           </div>
         </div>
 
         {/* Top fields */}
-        <div className="flex items-end gap-4 px-7 pt-5 pb-5 border-b border-[rgba(124,77,255,0.14)] flex-shrink-0">
+        <div className="flex items-end gap-4 px-7 pt-5 pb-5 border-b border-[var(--d2b-border)] flex-shrink-0">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Título</label>
+            <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Título</label>
             <input
               type="text"
               placeholder="Ex Consulta, Exame, Sessão"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+              className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
             />
           </div>
           <div className="w-64">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Profissional <span className="text-[#7C4DFF]">*</span></label>
+            <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Profissional <span className="text-[#7C4DFF]">*</span></label>
             <div className="relative">
               <button
                 onClick={() => setProfOpen((v) => !v)}
-                className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+                className="w-full flex items-center justify-between bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
               >
                 <span className="truncate text-left">{profissional}</span>
-                <ChevronDown size={13} className="text-[#6B4E8A] flex-shrink-0" />
+                <ChevronDown size={13} className="text-[var(--d2b-text-muted)] flex-shrink-0" />
               </button>
               {profOpen && (
-                <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+                <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                   {PROFISSIONAIS.map((p) => (
                     <button key={p} onClick={() => { setProfissional(p); setProfOpen(false) }}
-                      className={`w-full text-left px-4 py-3 text-sm transition-colors ${profissional === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors ${profissional === p ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>
                       {p}
                     </button>
                   ))}
@@ -368,12 +368,12 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
             </div>
           </div>
           <div className="w-44">
-            <label className="block text-xs font-medium text-[#6B4E8A] mb-1.5">Data <span className="text-[#7C4DFF]">*</span></label>
+            <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-1.5">Data <span className="text-[#7C4DFF]">*</span></label>
             <input
               type="date"
               value={data}
               onChange={(e) => setData(e.target.value)}
-              className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+              className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
             />
           </div>
         </div>
@@ -381,13 +381,13 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
         {/* Body: left sidebar + content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Left tab sidebar */}
-          <div className="w-52 flex-shrink-0 border-r border-[rgba(124,77,255,0.14)] flex flex-col py-3 overflow-y-auto">
+          <div className="w-52 flex-shrink-0 border-r border-[var(--d2b-border)] flex flex-col py-3 overflow-y-auto">
             {ABAS_EVOLUCAO.map((aba) => (
               <button key={aba} onClick={() => setAbaAtiva(aba)}
                 className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center gap-2.5 ${
                   abaAtiva === aba
-                    ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)] font-semibold border-r-2 border-[#7C4DFF]'
-                    : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.06)]'
+                    ? 'text-[#7C4DFF] bg-[var(--d2b-hover)] font-semibold border-r-2 border-[#7C4DFF]'
+                    : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'
                 }`}
               >
                 {aba === 'Anexos' && <span>📁</span>}
@@ -398,8 +398,8 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
               <button key={aba.id} onClick={() => setAbaAtiva(`custom-${aba.id}`)}
                 className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center gap-2.5 ${
                   abaAtiva === `custom-${aba.id}`
-                    ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)] font-semibold border-r-2 border-[#7C4DFF]'
-                    : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.06)]'
+                    ? 'text-[#7C4DFF] bg-[var(--d2b-hover)] font-semibold border-r-2 border-[#7C4DFF]'
+                    : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'
                 }`}
               >
                 {aba.titulo}
@@ -407,7 +407,7 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
             ))}
             <button
               onClick={() => { setNovaAbaTitulo(''); setNovaAbaErro(false); setNovaAbaOpen(true) }}
-              className="w-full text-left px-5 py-3 text-sm text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.06)] transition-colors flex items-center gap-1.5"
+              className="w-full text-left px-5 py-3 text-sm text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors flex items-center gap-1.5"
             >
               <Plus size={13} /> Nova Aba
             </button>
@@ -424,14 +424,14 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => { setEditarAbaId(id); setEditarAbaTitulo(aba.titulo); setEditarAbaErro(false); setEditarAbaOpen(true) }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
                       title="Editar aba"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button
                       onClick={() => { setAbasCustom((prev) => prev.filter((a) => a.id !== id)); setAbaAtiva('Resumo AI') }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(124,77,255,0.25)] text-[#6B4E8A] hover:text-red-400 hover:border-red-400 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-muted)] hover:text-red-400 hover:border-red-400 transition-colors"
                       title="Apagar aba"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
@@ -441,7 +441,7 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                     placeholder="Descrição da nova aba"
                     value={aba.conteudo}
                     onChange={(e) => setAbasCustom((prev) => prev.map((a) => a.id === id ? { ...a, conteudo: e.target.value } : a))}
-                    className="flex-1 bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-5 py-4 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed min-h-[300px]"
+                    className="flex-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-5 py-4 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed min-h-[300px]"
                   />
                 </div>
               )
@@ -450,50 +450,50 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
             ) : abaAtiva === 'Anexos' ? (
               <div className="flex-1 flex flex-col gap-5">
                 <div>
-                  <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-[rgba(124,77,255,0.25)]">
-                    <label className="flex-shrink-0 cursor-pointer bg-[#1A0A38] hover:bg-[rgba(124,77,255,0.15)] transition-colors px-5 py-3 text-sm font-medium text-[#F5F0FF] border-r border-[rgba(124,77,255,0.25)]">
+                  <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-[var(--d2b-border-strong)]">
+                    <label className="flex-shrink-0 cursor-pointer bg-[var(--d2b-bg-elevated)] hover:bg-[var(--d2b-hover)] transition-colors px-5 py-3 text-sm font-medium text-[var(--d2b-text-primary)] border-r border-[var(--d2b-border-strong)]">
                       Selecione o arquivo
                       <input type="file" className="hidden" onChange={(e) => setAnexoArquivo(e.target.files?.[0]?.name ?? '')} />
                     </label>
-                    <span className="flex-1 px-4 text-sm text-[#6B4E8A] truncate bg-[#150830]">
+                    <span className="flex-1 px-4 text-sm text-[var(--d2b-text-muted)] truncate bg-[var(--d2b-bg-elevated)]">
                       {anexoArquivo || 'nome do arquivo selecionado'}
                     </span>
                   </div>
-                  <p className="text-xs text-[#6B4E8A] mt-1.5">Máximo de 15MB por arquivo.</p>
+                  <p className="text-xs text-[var(--d2b-text-muted)] mt-1.5">Máximo de 15MB por arquivo.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-sm text-[#A78BCC]">
+                  <div className="flex items-center gap-2 text-sm text-[var(--d2b-text-secondary)]">
                     Resultados por página:
                     <div className="relative">
                       <button onClick={() => setAnexoPageSizeOpen((v) => !v)}
-                        className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors min-w-[60px] justify-between">
-                        {anexoPageSize} <ChevronDown size={12} className="text-[#6B4E8A]" />
+                        className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-1.5 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors min-w-[60px] justify-between">
+                        {anexoPageSize} <ChevronDown size={12} className="text-[var(--d2b-text-muted)]" />
                       </button>
                       {anexoPageSizeOpen && (
-                        <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+                        <div className="absolute z-30 top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                           {[5, 10, 25].map((n) => (
                             <button key={n} onClick={() => { setAnexoPageSize(n); setAnexoPagina(1); setAnexoPageSizeOpen(false) }}
-                              className={`w-full text-left px-4 py-2 text-sm transition-colors ${anexoPageSize === n ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{n}</button>
+                              className={`w-full text-left px-4 py-2 text-sm transition-colors ${anexoPageSize === n ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{n}</button>
                           ))}
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-1.5 ml-auto">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6B4E8A]"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <div className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-1.5 ml-auto">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--d2b-text-muted)]"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input value={anexoSearch} onChange={(e) => { setAnexoSearch(e.target.value); setAnexoPagina(1) }}
                       placeholder="Pesquisar"
-                      className="bg-transparent text-sm text-[#F5F0FF] placeholder-[#6B4E8A] focus:outline-none w-40" />
+                      className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder-[#6B4E8A] focus:outline-none w-40" />
                   </div>
                 </div>
-                <div className="flex-1 bg-[#120328] border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden flex flex-col">
+                <div className="flex-1 bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-xl overflow-hidden flex flex-col">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[rgba(124,77,255,0.18)]">
-                        <th className="text-left px-5 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase">Nome do Arquivo</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Visualizar</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Download</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-[#6B4E8A] tracking-widest uppercase text-right">Apagar</th>
+                      <tr className="border-b border-[var(--d2b-border)]">
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase">Nome do Arquivo</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase text-right">Visualizar</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase text-right">Download</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-[var(--d2b-text-muted)] tracking-widest uppercase text-right">Apagar</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -501,20 +501,20 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                         <tr><td colSpan={4} className="text-center py-10 text-[#7C4DFF] text-sm">Nenhum registro encontrado</td></tr>
                       ) : (
                         anexosFiltrados.slice((anexoPagina - 1) * anexoPageSize, anexoPagina * anexoPageSize).map((a, i) => (
-                          <tr key={i} className="border-t border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.05)] transition-colors">
-                            <td className="px-5 py-3 text-[#F5F0FF]">{a.nome}</td>
+                          <tr key={i} className="border-t border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
+                            <td className="px-5 py-3 text-[var(--d2b-text-primary)]">{a.nome}</td>
                             <td className="px-4 py-3 text-right">
-                              <button className="text-[#7C4DFF] hover:text-[#A78BCC] transition-colors">
+                              <button className="text-[#7C4DFF] hover:text-[var(--d2b-text-secondary)] transition-colors">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                               </button>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <button className="text-[#7C4DFF] hover:text-[#A78BCC] transition-colors">
+                              <button className="text-[#7C4DFF] hover:text-[var(--d2b-text-secondary)] transition-colors">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                               </button>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <button className="text-[#6B4E8A] hover:text-red-400 transition-colors">
+                              <button className="text-[var(--d2b-text-muted)] hover:text-red-400 transition-colors">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                               </button>
                             </td>
@@ -523,56 +523,56 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                       )}
                     </tbody>
                   </table>
-                  <div className="flex items-center justify-center gap-2 py-3 border-t border-[rgba(124,77,255,0.18)] mt-auto">
-                    <button onClick={() => setAnexoPagina(1)} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">«</button>
-                    <button onClick={() => setAnexoPagina((p) => Math.max(1, p - 1))} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">‹</button>
-                    <button onClick={() => setAnexoPagina((p) => Math.min(anexosTotalPags, p + 1))} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">›</button>
-                    <button onClick={() => setAnexoPagina(anexosTotalPags)} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors text-xs">»</button>
+                  <div className="flex items-center justify-center gap-2 py-3 border-t border-[var(--d2b-border)] mt-auto">
+                    <button onClick={() => setAnexoPagina(1)} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">«</button>
+                    <button onClick={() => setAnexoPagina((p) => Math.max(1, p - 1))} disabled={anexoPagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">‹</button>
+                    <button onClick={() => setAnexoPagina((p) => Math.min(anexosTotalPags, p + 1))} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">›</button>
+                    <button onClick={() => setAnexoPagina(anexosTotalPags)} disabled={anexoPagina === anexosTotalPags} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors text-xs">»</button>
                   </div>
                 </div>
               </div>
             ) : (
               <>
-                <label className="block text-xs font-medium text-[#6B4E8A] mb-3">{abaAtiva}</label>
+                <label className="block text-xs font-medium text-[var(--d2b-text-muted)] mb-3">{abaAtiva}</label>
                 <textarea
                   placeholder={abaAtiva === 'Resumo AI' ? 'Resumos automáticos' : 'Digite aqui...'}
                   value={getConteudo(abaAtiva)}
                   onChange={(e) => setConteudo(abaAtiva, e.target.value)}
-                  className="flex-1 bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-5 py-4 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed"
+                  className="flex-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-5 py-4 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors leading-relaxed"
                 />
-                <p className="text-xs text-[#6B4E8A] mt-1.5">Máximo de {MAX_CHARS.toLocaleString('pt-BR')} caracteres.</p>
+                <p className="text-xs text-[var(--d2b-text-muted)] mt-1.5">Máximo de {MAX_CHARS.toLocaleString('pt-BR')} caracteres.</p>
                 {abaAtiva === 'Resumo AI' && (
                   <>
-                    <p className="text-xs text-[#6B4E8A] mt-0.5">* Os resumos gerados por IA podem conter erros. Antes de salvá-lo, verifique e edite o conteúdo se necessário</p>
+                    <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">* Os resumos gerados por IA podem conter erros. Antes de salvá-lo, verifique e edite o conteúdo se necessário</p>
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 text-xs text-[#A78BCC]">
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)]">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                         Resumo gravado
                       </div>
                       <div className="relative">
                         <button onClick={() => setModeloOpen((v) => !v)}
-                          className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-2.5 py-1 text-xs text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-                          {modelo} <ChevronDown size={11} className="text-[#6B4E8A]" />
+                          className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-2.5 py-1 text-xs text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
+                          {modelo} <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
                         </button>
                         {modeloOpen && (
-                          <div className="absolute z-30 top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+                          <div className="absolute z-30 top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                             {['Padrão', 'Clínico', 'Resumido'].map((m) => (
                               <button key={m} onClick={() => { setModelo(m); setModeloOpen(false) }}
-                                className={`w-full text-left px-4 py-2 text-xs transition-colors ${modelo === m ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>{m}</button>
+                                className={`w-full text-left px-4 py-2 text-xs transition-colors ${modelo === m ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{m}</button>
                             ))}
                           </div>
                         )}
                       </div>
-                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] bg-[rgba(124,77,255,0.08)] px-3 py-1.5 rounded-lg hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] bg-[var(--d2b-hover)] px-3 py-1.5 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                         Relato
                       </button>
-                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] bg-[rgba(124,77,255,0.08)] px-3 py-1.5 rounded-lg hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] bg-[var(--d2b-hover)] px-3 py-1.5 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                         Atendimento
                       </button>
-                      <div className="ml-auto text-xs text-[#6B4E8A]">
-                        <span className="font-medium text-[#A78BCC]">Créditos:</span> Relatos disponíveis: 5 / 5 &nbsp; Atendimentos disponíveis: 5 / 5
+                      <div className="ml-auto text-xs text-[var(--d2b-text-muted)]">
+                        <span className="font-medium text-[var(--d2b-text-secondary)]">Créditos:</span> Relatos disponíveis: 5 / 5 &nbsp; Atendimentos disponíveis: 5 / 5
                       </div>
                     </div>
                   </>
@@ -583,12 +583,12 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-7 py-5 border-t border-[rgba(124,77,255,0.14)] flex-shrink-0">
-          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[rgba(124,77,255,0.35)] px-3 py-2 rounded-lg hover:bg-[rgba(124,77,255,0.1)] transition-colors">
+        <div className="flex items-center justify-between px-7 py-5 border-t border-[var(--d2b-border)] flex-shrink-0">
+          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-2 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
             ✦ Resumir Histórico
           </button>
           <div className="flex items-center gap-3">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">
               Cancelar
             </button>
             <button
@@ -604,20 +604,20 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
         {/* Modal: Nova Aba */}
         {novaAbaOpen && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-2xl">
-            <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-[480px] p-7">
+            <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-[480px] p-7">
               <div className="flex items-center justify-between mb-6">
-                <span className="text-base font-semibold text-[#F5F0FF]">Adicionar nova aba</span>
-                <button onClick={() => setNovaAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Adicionar nova aba</span>
+                <button onClick={() => setNovaAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <X size={15} />
                 </button>
               </div>
               <input autoFocus type="text" placeholder="Título da nova aba" value={novaAbaTitulo}
                 onChange={(e) => { setNovaAbaTitulo(e.target.value); setNovaAbaErro(false) }}
-                className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${novaAbaErro ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none transition-colors ${novaAbaErro ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
               />
               {novaAbaErro && <p className="text-xs text-red-400 mt-1.5">Deve ter no mínimo 1 caracter</p>}
               <div className="flex items-center justify-end gap-3 mt-6">
-                <button onClick={() => setNovaAbaOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)]">
+                <button onClick={() => setNovaAbaOpen(false)} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors border border-[var(--d2b-border-strong)] rounded-xl hover:border-[var(--d2b-border-strong)]">
                   Cancelar
                 </button>
                 <button
@@ -641,20 +641,20 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
         {/* Modal: Editar Aba */}
         {editarAbaOpen && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 rounded-2xl">
-            <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-2xl shadow-2xl w-[480px] p-7">
+            <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-[480px] p-7">
               <div className="flex items-center justify-between mb-6">
-                <span className="text-base font-semibold text-[#F5F0FF]">Editar aba</span>
-                <button onClick={() => setEditarAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Editar aba</span>
+                <button onClick={() => setEditarAbaOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <X size={15} />
                 </button>
               </div>
               <input autoFocus type="text" placeholder="Título da aba" value={editarAbaTitulo}
                 onChange={(e) => { setEditarAbaTitulo(e.target.value); setEditarAbaErro(false) }}
-                className={`w-full bg-[#150830] border rounded-xl px-4 py-3 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none transition-colors ${editarAbaErro ? 'border-red-500' : 'border-[rgba(124,77,255,0.25)] focus:border-[#7C4DFF]'}`}
+                className={`w-full bg-[var(--d2b-bg-elevated)] border rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none transition-colors ${editarAbaErro ? 'border-red-500' : 'border-[var(--d2b-border-strong)] focus:border-[#7C4DFF]'}`}
               />
               {editarAbaErro && <p className="text-xs text-red-400 mt-1.5">Deve ter no mínimo 1 caracter</p>}
               <div className="flex items-center justify-end gap-3 mt-6">
-                <button onClick={() => setEditarAbaOpen(false)} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors border border-[rgba(124,77,255,0.20)] rounded-xl hover:border-[rgba(124,77,255,0.40)]">
+                <button onClick={() => setEditarAbaOpen(false)} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors border border-[var(--d2b-border-strong)] rounded-xl hover:border-[var(--d2b-border-strong)]">
                   Cancelar
                 </button>
                 <button
@@ -684,11 +684,11 @@ function ConfirmarExclusaoDialog({
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl w-[380px] p-7">
-        <p className="text-base font-semibold text-[#F5F0FF] mb-2">Excluir evolução</p>
-        <p className="text-sm text-[#A78BCC] mb-6">Essa ação não pode ser desfeita. Deseja continuar?</p>
+      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-[380px] p-7">
+        <p className="text-base font-semibold text-[var(--d2b-text-primary)] mb-2">Excluir evolução</p>
+        <p className="text-sm text-[var(--d2b-text-secondary)] mb-6">Essa ação não pode ser desfeita. Deseja continuar?</p>
         <div className="flex justify-end gap-3">
-          <button onClick={onCancel} className="px-4 py-2 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          <button onClick={onCancel} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
           <button onClick={onConfirm} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">
@@ -772,7 +772,7 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
   }
 
   function SortIcon({ col }: { col: string }) {
-    if (sort.col !== col) return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6B4E8A]"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg>
+    if (sort.col !== col) return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--d2b-text-muted)]"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg>
     return sort.dir === 'asc'
       ? <ChevronUp size={11} className="text-[#7C4DFF]" />
       : <ChevronDown size={11} className="text-[#7C4DFF]" />
@@ -825,10 +825,10 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
       />
 
       {/* Sub-header */}
-      <div className="px-6 pt-5 pb-4 border-b border-[rgba(124,77,255,0.14)] flex items-center justify-between gap-4">
-        <h2 className="text-base font-semibold text-[#F5F0FF]">Evoluções</h2>
+      <div className="px-6 pt-5 pb-4 border-b border-[var(--d2b-border)] flex items-center justify-between gap-4">
+        <h2 className="text-base font-semibold text-[var(--d2b-text-primary)]">Evoluções</h2>
         <div className="flex items-center gap-2">
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#150830] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
+          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
             <Printer size={15} />
           </button>
           <button onClick={() => setNovaOpen(true)} className="flex items-center gap-1.5 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
@@ -840,22 +840,22 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
       {/* Filters */}
       <div className="px-6 py-4 flex items-center gap-3 flex-wrap">
         <input type="text" placeholder="Título" value={busca} onChange={(e) => setBusca(e.target.value)}
-          className="flex-1 min-w-[160px] bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+          className="flex-1 min-w-[160px] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors"
         />
         <div className="relative w-52">
           <button onClick={() => setProfOpen((v) => !v)}
-            className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm transition-colors hover:border-[#7C4DFF]">
-            <span className={profFiltro ? 'text-[#F5F0FF]' : 'text-[#3D2A5A]'}>{profFiltro || 'Profissional'}</span>
-            <ChevronDown size={13} className="text-[#6B4E8A]" />
+            className="w-full flex items-center justify-between bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm transition-colors hover:border-[#7C4DFF]">
+            <span className={profFiltro ? 'text-[var(--d2b-text-primary)]' : 'text-[#3D2A5A]'}>{profFiltro || 'Profissional'}</span>
+            <ChevronDown size={13} className="text-[var(--d2b-text-muted)]" />
           </button>
           {profOpen && (
-            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
-              <button onClick={() => { setProfFiltro(''); setProfOpen(false) }} className="w-full text-left px-4 py-2.5 text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.08)] transition-colors">
+            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
+              <button onClick={() => { setProfFiltro(''); setProfOpen(false) }} className="w-full text-left px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] transition-colors">
                 Todos
               </button>
               {PROFISSIONAIS.map((p) => (
                 <button key={p} onClick={() => { setProfFiltro(p); setProfOpen(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${profFiltro === p ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${profFiltro === p ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>
                   {p}
                 </button>
               ))}
@@ -863,10 +863,10 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
           )}
         </div>
         <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)}
-          className="w-44 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+          className="w-44 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
         />
         <button onClick={() => { setBusca(''); setProfFiltro(''); setDataFiltro(''); setPagina(1) }}
-          className="px-4 py-2.5 text-sm text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-xl hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          className="px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-xl hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
           Limpar
         </button>
       </div>
@@ -875,13 +875,13 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
       <div className="px-6">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.14)]">
+            <tr className="border-b border-[var(--d2b-border)]">
               <th className="text-left pb-3 w-20">
-                <span className="text-xs font-bold text-[#6B4E8A] uppercase tracking-wider">Ações</span>
+                <span className="text-xs font-bold text-[var(--d2b-text-muted)] uppercase tracking-wider">Ações</span>
               </th>
               {[{ col: 'titulo', label: 'Título' }, { col: 'profissional', label: 'Profissional' }, { col: 'data', label: 'Data' }].map(({ col, label }) => (
                 <th key={col} className="text-left pb-3">
-                  <button onClick={() => toggleSort(col)} className="flex items-center gap-1 text-xs font-bold text-[#6B4E8A] hover:text-[#A78BCC] uppercase tracking-wider transition-colors">
+                  <button onClick={() => toggleSort(col)} className="flex items-center gap-1 text-xs font-bold text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] uppercase tracking-wider transition-colors">
                     {label} <SortIcon col={col} />
                   </button>
                 </th>
@@ -890,16 +890,16 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="py-10 text-center text-sm text-[#6B4E8A]">Carregando...</td></tr>
+              <tr><td colSpan={4} className="py-10 text-center text-sm text-[var(--d2b-text-muted)]">Carregando...</td></tr>
             ) : paged.length === 0 ? (
-              <tr><td colSpan={4} className="py-10 text-center text-sm text-[#6B4E8A]">Nenhum registro encontrado</td></tr>
+              <tr><td colSpan={4} className="py-10 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum registro encontrado</td></tr>
             ) : (
               paged.map((e, i) => (
-                <tr key={e.id} className={`border-b border-[rgba(124,77,255,0.08)] hover:bg-[rgba(124,77,255,0.05)] transition-colors ${i === paged.length - 1 ? 'border-b-0' : ''}`}>
+                <tr key={e.id} className={`border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors ${i === paged.length - 1 ? 'border-b-0' : ''}`}>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-1.5">
                       <button onClick={() => setEditando(e)}
-                        className="w-7 h-7 rounded-md bg-[rgba(124,77,255,0.12)] hover:bg-[rgba(124,77,255,0.25)] flex items-center justify-center text-[#7C4DFF] transition-colors"
+                        className="w-7 h-7 rounded-md bg-[var(--d2b-hover)] hover:bg-[var(--d2b-hover)] flex items-center justify-center text-[#7C4DFF] transition-colors"
                         title="Editar">
                         <Pencil size={12} />
                       </button>
@@ -910,9 +910,9 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
                       </button>
                     </div>
                   </td>
-                  <td className="py-3 pr-4 text-sm text-[#F5F0FF]">{e.titulo || <span className="text-[#6B4E8A] italic">Sem título</span>}</td>
-                  <td className="py-3 pr-4 text-sm text-[#A78BCC]">{e.profissional}</td>
-                  <td className="py-3 text-sm text-[#A78BCC]">{formatDate(e.data)}</td>
+                  <td className="py-3 pr-4 text-sm text-[var(--d2b-text-primary)]">{e.titulo || <span className="text-[var(--d2b-text-muted)] italic">Sem título</span>}</td>
+                  <td className="py-3 pr-4 text-sm text-[var(--d2b-text-secondary)]">{e.profissional}</td>
+                  <td className="py-3 text-sm text-[var(--d2b-text-secondary)]">{formatDate(e.data)}</td>
                 </tr>
               ))
             )}
@@ -922,29 +922,29 @@ export function TabEvolucoes({ pacienteId }: { pacienteId: string }) {
 
       {/* Pagination */}
       <div className="px-6 py-4 flex items-center justify-center gap-1">
-        <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
+        <button onClick={() => setPagina(1)} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors">
           <ChevronsLeft size={14} />
         </button>
-        <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
+        <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors">
           <ChevronLeft size={14} />
         </button>
         <span className="w-7 h-7 rounded-full bg-[#7C4DFF] text-white text-xs font-bold flex items-center justify-center">{pagina}</span>
-        <button onClick={() => setPagina((p) => Math.min(totalPages, p + 1))} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
+        <button onClick={() => setPagina((p) => Math.min(totalPages, p + 1))} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors">
           <ChevronRight size={14} />
         </button>
-        <button onClick={() => setPagina(totalPages)} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] disabled:opacity-30 transition-colors">
+        <button onClick={() => setPagina(totalPages)} disabled={pagina === totalPages} className="w-7 h-7 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] disabled:opacity-30 transition-colors">
           <ChevronsRight size={14} />
         </button>
         <div className="relative ml-2">
           <button onClick={() => setPageSizeOpen((v) => !v)}
-            className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-2.5 py-1 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors">
-            {pageSize} <ChevronDown size={12} className="text-[#6B4E8A]" />
+            className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-2.5 py-1 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
+            {pageSize} <ChevronDown size={12} className="text-[var(--d2b-text-muted)]" />
           </button>
           {pageSizeOpen && (
-            <div className="absolute z-20 bottom-full mb-1 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+            <div className="absolute z-20 bottom-full mb-1 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
               {PAGE_SIZES.map((s) => (
                 <button key={s} onClick={() => { setPageSize(s); setPagina(1); setPageSizeOpen(false) }}
-                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${s === pageSize ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]' : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'}`}>
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${s === pageSize ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>
                   {s}
                 </button>
               ))}

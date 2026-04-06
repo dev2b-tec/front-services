@@ -5,12 +5,12 @@ import { ChevronDown } from 'lucide-react'
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 export const INP =
-  'w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
-export const LBG = 'bg-[#0D0520]'
+export const LBG = 'bg-[var(--d2b-bg-main)]'
 export const BTN_GHOST =
-  'px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors'
+  'px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors'
 export const BTN_PRIMARY =
   'px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
 
@@ -20,20 +20,20 @@ export function FInput({ label, req, val, placeholder, prefix, type = 'text', hi
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       {prefix ? (
-        <div className="flex bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
-          <span className="flex items-center px-3 text-xs text-[#6B4E8A] border-r border-[rgba(124,77,255,0.18)] shrink-0 whitespace-nowrap">
+        <div className="flex bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
+          <span className="flex items-center px-3 text-xs text-[var(--d2b-text-muted)] border-r border-[var(--d2b-border)] shrink-0 whitespace-nowrap">
             {prefix}
           </span>
-          <input type={type} defaultValue={val} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none" />
+          <input type={type} defaultValue={val} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none" />
         </div>
       ) : (
         <input type={type} defaultValue={val} placeholder={placeholder} className={INP} />
       )}
-      {hint && <p className="text-[10px] text-[#6B4E8A] mt-1">{hint}</p>}
+      {hint && <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">{hint}</p>}
     </div>
   )
 }
@@ -44,14 +44,14 @@ export function FSelect({ label, req, opts, val }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       <div className="relative">
         <select defaultValue={val ?? ''} className={INP + ' appearance-none pr-8 cursor-pointer'}>
           {opts.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </div>
   )
@@ -63,14 +63,14 @@ export function FTextarea({ label, req, placeholder, rows = 4 }: {
 }) {
   return (
     <div className="relative">
-      <label className="text-xs font-medium text-[#A78BCC] block mb-1.5">
+      <label className="text-xs font-medium text-[var(--d2b-text-secondary)] block mb-1.5">
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
-      <div className="rounded-md border border-[rgba(124,77,255,0.25)] bg-[#0D0520] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
+      <div className="rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
         <textarea
           rows={rows}
           placeholder={placeholder}
-          className="w-full bg-transparent px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none resize-none"
+          className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none"
         />
       </div>
     </div>
@@ -83,7 +83,7 @@ export function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) 
     <button
       type="button"
       onClick={() => set(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
     </button>
@@ -107,13 +107,13 @@ export function HorarioTable() {
     <div className="space-y-2.5">
       {days.map((d, i) => (
         <div key={d.label} className="flex items-center gap-3">
-          <span className="text-sm font-medium text-[#A78BCC] w-10 shrink-0">{d.label}</span>
+          <span className="text-sm font-medium text-[var(--d2b-text-secondary)] w-10 shrink-0">{d.label}</span>
           <div className="relative flex-1">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>Abertura</label>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Abertura</label>
             <input type="time" defaultValue={d.aber} disabled={!d.aberto} className={INP + (!d.aberto ? ' opacity-40 cursor-not-allowed' : '')} />
           </div>
           <div className="relative flex-1">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>Fechamento</label>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Fechamento</label>
             <input type="time" defaultValue={d.fec} disabled={!d.aberto} className={INP + (!d.aberto ? ' opacity-40 cursor-not-allowed' : '')} />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -123,7 +123,7 @@ export function HorarioTable() {
               onChange={() => setDays((prev) => prev.map((x, j) => j === i ? { ...x, aberto: !x.aberto } : x))}
               className="accent-[#7C4DFF] w-4 h-4"
             />
-            <span className="text-sm text-[#A78BCC]">Aberto</span>
+            <span className="text-sm text-[var(--d2b-text-secondary)]">Aberto</span>
           </label>
         </div>
       ))}
@@ -199,18 +199,18 @@ export function ColorPickerDropdown({ value, onChange }: { value: string; onChan
 
   return (
     <div className="relative">
-      <label className="block text-[10px] font-medium text-[#A78BCC] mb-1.5">
+      <label className="block text-[10px] font-medium text-[var(--d2b-text-secondary)] mb-1.5">
         Cor Principal<span className="text-[#7C4DFF] ml-0.5">*</span>
       </label>
       <button type="button" onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-2 py-2 rounded-md border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors w-44 bg-[#0D0520]">
+        className="flex items-center gap-2 px-2 py-2 rounded-md border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] transition-colors w-44 bg-[var(--d2b-bg-main)]">
         <span className="w-24 h-5 rounded flex-shrink-0 border border-[rgba(255,255,255,0.1)]" style={{ background: value }} />
-        <span className="text-xs text-[#A78BCC] font-mono flex-1 text-left truncate">{value}</span>
-        <ChevronDown size={12} className="text-[#A78BCC] flex-shrink-0" />
+        <span className="text-xs text-[var(--d2b-text-secondary)] font-mono flex-1 text-left truncate">{value}</span>
+        <ChevronDown size={12} className="text-[var(--d2b-text-secondary)] flex-shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl p-3 w-60 select-none">
+        <div className="absolute z-50 top-full mt-2 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl p-3 w-60 select-none">
           <div
             ref={gradRef}
             className="w-full h-40 rounded-lg mb-3 cursor-crosshair relative overflow-hidden"
@@ -236,17 +236,17 @@ export function ColorPickerDropdown({ value, onChange }: { value: string; onChan
 
           <div className="flex items-center gap-1.5 mb-3">
             <span className="w-7 h-7 rounded flex-shrink-0 border border-[rgba(255,255,255,0.15)]" style={{ background: currentHex }} />
-            <div className="flex items-center gap-0.5 flex-1 bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-1.5 py-1 focus-within:border-[#7C4DFF] transition-colors">
-              <span className="text-xs text-[#6B4E8A]">#</span>
+            <div className="flex items-center gap-0.5 flex-1 bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-1.5 py-1 focus-within:border-[#7C4DFF] transition-colors">
+              <span className="text-xs text-[var(--d2b-text-muted)]">#</span>
               <input type="text" maxLength={6} value={hexInput}
                 onChange={(e) => handleHexInput(e.target.value)}
-                className="bg-transparent flex-1 text-xs text-[#F5F0FF] font-mono focus:outline-none w-14" />
+                className="bg-transparent flex-1 text-xs text-[var(--d2b-text-primary)] font-mono focus:outline-none w-14" />
             </div>
-            <div className="flex items-center bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-1.5 py-1 w-14 focus-within:border-[#7C4DFF] transition-colors">
+            <div className="flex items-center bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-1.5 py-1 w-14 focus-within:border-[#7C4DFF] transition-colors">
               <input type="number" min={0} max={100} value={alpha}
                 onChange={(e) => setAlpha(Math.max(0,Math.min(100,Number(e.target.value))))}
-                className="bg-transparent w-full text-xs text-[#F5F0FF] font-mono focus:outline-none" />
-              <span className="text-[10px] text-[#6B4E8A] ml-0.5">%</span>
+                className="bg-transparent w-full text-xs text-[var(--d2b-text-primary)] font-mono focus:outline-none" />
+              <span className="text-[10px] text-[var(--d2b-text-muted)] ml-0.5">%</span>
             </div>
             <button type="button" onClick={() => setOpen(false)}
               className="px-2 py-1.5 rounded-md bg-[#7C4DFF] text-white text-xs font-semibold hover:bg-[#5B21B6] transition-colors">OK</button>

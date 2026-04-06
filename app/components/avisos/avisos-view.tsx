@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { FileCheck, RefreshCw, Wallet, Heart, Cake } from 'lucide-react'
@@ -110,9 +110,9 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
       .map((ag) => ({
         id: ag.id,
         agendamento: ag,
-        paciente: ag.pacienteNome ?? '—',
+        paciente: ag.pacienteNome ?? '♦',
         telefone: (ag.pacienteId ? phoneMap.get(ag.pacienteId) : undefined) ?? '',
-        profissional: ag.usuarioNome ?? '—',
+        profissional: ag.usuarioNome ?? '♦',
         dataConsulta: formatDT(ag.inicio),
         status: (ag.status ?? 'Agendado') as AvisoRow['status'],
       })),
@@ -129,9 +129,9 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
       .map((ag) => ({
         id: ag.id,
         agendamento: ag,
-        paciente: ag.pacienteNome ?? '—',
+        paciente: ag.pacienteNome ?? '♦',
         telefone: (ag.pacienteId ? phoneMap.get(ag.pacienteId) : undefined) ?? '',
-        profissional: ag.usuarioNome ?? '—',
+        profissional: ag.usuarioNome ?? '♦',
         dataConsulta: formatDT(ag.inicio),
         status: (ag.status ?? 'Agendado') as AvisoRow['status'],
       })),
@@ -181,7 +181,7 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
   }
 
   return (
-    <div className="min-h-full bg-[#0D0520]">
+    <div className="min-h-full bg-[var(--d2b-bg-main)]">
       {agendamentoModal && (
         <NovoAgendamentoModal
           open
@@ -194,7 +194,7 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
       )}
 
       {/* Tabs bar */}
-      <div className="border-b border-[rgba(124,77,255,0.15)] bg-[#0D0520]">
+      <div className="border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-main)]">
         <div className="flex overflow-x-auto">
           {TAB_META.map((t) => {
             const Icon   = t.icon
@@ -207,7 +207,7 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
                 className={`relative flex flex-col items-center gap-1 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
                   active
                     ? 'border-[#7C4DFF] text-[#7C4DFF]'
-                    : 'border-transparent text-[#6B4E8A] hover:text-[#A78BCC]'
+                    : 'border-transparent text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)]'
                 }`}
               >
                 <Icon size={18} />
@@ -226,14 +226,14 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
       {/* Tab content */}
       <div className="px-6 py-5 space-y-5">
         {/* Header card */}
-        <div className="flex items-center justify-between rounded-xl bg-[rgba(124,77,255,0.06)] border border-[rgba(124,77,255,0.15)] px-5 py-4">
+        <div className="flex items-center justify-between rounded-xl bg-[var(--d2b-hover)] border border-[var(--d2b-border)] px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[rgba(124,77,255,0.15)] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-[var(--d2b-hover)] flex items-center justify-center shrink-0">
               <TabIcon size={18} className="text-[#7C4DFF]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#F5F0FF]">{activeTabMeta.title}</p>
-              <p className="text-xs text-[#6B4E8A] mt-0.5">{activeTabMeta.description}</p>
+              <p className="text-sm font-bold text-[var(--d2b-text-primary)]">{activeTabMeta.title}</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">{activeTabMeta.description}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
