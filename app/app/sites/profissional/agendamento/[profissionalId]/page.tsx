@@ -14,6 +14,17 @@ export default async function ProfissionalAgendamentoPage({
   if (!userRes.ok) notFound()
   const usuario = await userRes.json()
 
+  // Fetch a fresh presigned URL server-side so the browser gets the public s3 URL.
+  if (usuario.fotoUrl) {
+    try {
+      const fotoRes = await fetch(`${API}/api/v1/usuarios/${profissionalId}/foto-url`, { cache: 'no-store' })
+      if (fotoRes.ok) {
+        const { fotoUrl } = await fotoRes.json()
+        usuario.fotoUrl = fotoUrl
+      }
+    } catch { /* non-critical */ }
+  }
+
   let empresa = null
   if (usuario.empresaId) {
     try {
