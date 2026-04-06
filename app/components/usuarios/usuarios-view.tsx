@@ -277,7 +277,7 @@ function EditarUsuarioModal({
           {/* Informações da conta */}
           <div>
             <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
-            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do DEV2B.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Email" required>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
@@ -579,7 +579,7 @@ function CadastrarUsuarioModal({
           {/* ── Informações da conta ── */}
           <div>
             <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
-            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do DEV2B.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatInput label="Email" type="email" required value={email} onChange={setEmailCad} />
               <div className="relative">

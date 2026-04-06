@@ -1179,7 +1179,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
   )
 }
 
-// ─── TAB: VENDA MAIS (Buscador Agendart) ─────────────────────────────────────
+// ─── TAB: VENDA MAIS (Buscador DEV2B) ─────────────────────────────────────
 type BuscadorSubTab = 'pessoais' | 'profissionais' | 'endereco' | 'redes'
 
 const BUSCADOR_SUB: { id: BuscadorSubTab; label: string }[] = [
@@ -1274,10 +1274,10 @@ function TabVendaMais() {
             <div className="w-4 h-4 rounded-full bg-[#7C4DFF] flex items-center justify-center shrink-0">
               <Info size={10} className="text-white" />
             </div>
-            <h3 className="text-base font-bold text-[#1E3A5F]">Buscador Agendart</h3>
+            <h3 className="text-base font-bold text-[#1E3A5F]">Buscador DEV2B</h3>
           </div>
           <p className="text-sm text-[#374151]">
-            Preencha as informações profissionais e seja listado no buscador de profissionais do Agendart. Através dele você ganhará mais exposição e pacientes para suas consultas.
+            Preencha as informações profissionais e seja listado no buscador de profissionais do DEV2B. Através dele você ganhará mais exposição e pacientes para suas consultas.
           </p>
         </div>
       </div>
