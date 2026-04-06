@@ -50,8 +50,8 @@ const ROWS_OPTIONS = [10, 25, 50]
 
 // ─── Base classes ─────────────────────────────────────────────────────────────
 const INPUT =
-  'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
 
 // ─── FloatingField ────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function FloatingField({
 }) {
   return (
     <div className="relative">
-      <label className="absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
+      <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
         {label}
         {required && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
@@ -102,7 +102,7 @@ function FloatingSelect({
           <option value="" disabled>{placeholder ?? 'Selecione'}</option>
           {options.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </FloatingField>
   )
@@ -119,7 +119,7 @@ function Avatar({ nome }: { nome: string }) {
     .toUpperCase()
 
   return (
-    <div className="w-9 h-9 rounded-lg bg-[rgba(124,77,255,0.20)] border border-[rgba(124,77,255,0.30)] flex items-center justify-center shrink-0">
+    <div className="w-9 h-9 rounded-lg bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] flex items-center justify-center shrink-0">
       <span className="text-sm font-bold text-[#C084FC]">{initials}</span>
     </div>
   )
@@ -139,7 +139,7 @@ function PageBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-8 h-8 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+      className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
     >
       {children}
     </button>
@@ -180,18 +180,18 @@ function MultiSelectDropdown({
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm text-left transition-colors focus:outline-none focus:border-[#7C4DFF] hover:border-[#7C4DFF]"
+        className="w-full flex items-center justify-between gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 text-sm text-left transition-colors focus:outline-none focus:border-[#7C4DFF] hover:border-[#7C4DFF]"
       >
-        <span className={selected.length ? 'text-[#F5F0FF]' : 'text-[#6B4E8A]'}>{displayLabel}</span>
-        <ChevronDown size={13} className={`text-[#A78BCC] transition-transform shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <span className={selected.length ? 'text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-muted)]'}>{displayLabel}</span>
+        <ChevronDown size={13} className={`text-[var(--d2b-text-secondary)] transition-transform shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-md shadow-xl overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md shadow-xl overflow-hidden">
           {options.map((opt) => (
             <label
               key={opt}
-              className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-[var(--d2b-hover)] transition-colors"
             >
               <input
                 type="checkbox"
@@ -199,7 +199,7 @@ function MultiSelectDropdown({
                 onChange={() => toggle(opt)}
                 className="accent-[#7C4DFF] w-4 h-4 shrink-0"
               />
-              <span className="text-sm text-[#F5F0FF]">{opt}</span>
+              <span className="text-sm text-[var(--d2b-text-primary)]">{opt}</span>
             </label>
           ))}
         </div>
@@ -255,19 +255,19 @@ function EditarUsuarioModal({
     setHorarios((h) => h.map((row, i) => i === idx ? { ...row, [field]: val } : row))
   }
 
-  const LBL = 'absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none'
+  const LBL = 'absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none'
   const SEL = INPUT + ' appearance-none pr-8 cursor-pointer'
 
   return (
     <Dialog open onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
       >
         {/* Header */}
-        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Editar usuário</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Editar usuário</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </DialogHeader>
@@ -276,8 +276,8 @@ function EditarUsuarioModal({
 
           {/* Informações da conta */}
           <div>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações da conta</p>
-            <p className="text-xs text-[#6B4E8A] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Email" required>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
@@ -288,7 +288,7 @@ function EditarUsuarioModal({
                   <input type={showSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenha(e.target.value)}
                     className={INPUT + ' pr-10'} />
                   <button type="button" onClick={() => setShowSenha((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors">
                     {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
@@ -298,8 +298,8 @@ function EditarUsuarioModal({
 
           {/* Informações pessoais */}
           <div>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações pessoais</p>
-            <p className="text-xs text-[#6B4E8A] mb-4">Defina os dados pessoais e o nível de permissão para este usuário.</p>
+            <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações pessoais</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina os dados pessoais e o nível de permissão para este usuário.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Nome" required>
                 <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className={INPUT} />
@@ -308,8 +308,8 @@ function EditarUsuarioModal({
               <div className="relative">
                 <label className={LBL}>Código do País</label>
                 <div className="flex gap-2">
-                  <div className="flex items-center gap-1.5 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] cursor-pointer shrink-0">
-                    🇧🇷 <span className="text-[#A78BCC] text-xs">Brasil</span> <ChevronDown size={11} className="text-[#6B4E8A]" />
+                  <div className="flex items-center gap-1.5 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] cursor-pointer shrink-0">
+                    🇧🇷 <span className="text-[var(--d2b-text-secondary)] text-xs">Brasil</span> <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
                   </div>
                   <div className="relative flex-1">
                     <label className={LBL}>Telefone<span className="text-[#7C4DFF] ml-0.5">*</span></label>
@@ -325,8 +325,8 @@ function EditarUsuarioModal({
 
           {/* Informações profissionais */}
           <div>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações profissionais</p>
-            <p className="text-xs text-[#6B4E8A] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
+            <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações profissionais</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="CEP">
                 <input type="text" value={cep} onChange={(e) => setCep(e.target.value)} className={INPUT} />
@@ -358,7 +358,7 @@ function EditarUsuarioModal({
                     <option value="">Selecione um conselho</option>
                     {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                 </div>
               </div>
               <FloatingField label="Número do conselho">
@@ -369,24 +369,24 @@ function EditarUsuarioModal({
             {/* Horário personalizado toggle */}
             <label className="flex items-center gap-3 mt-5 cursor-pointer select-none">
               <button type="button" onClick={() => setHorarioPersonalizado((v) => !v)}
-                className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${horarioPersonalizado ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.20)]'}`}>
+                className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${horarioPersonalizado ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'}`}>
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${horarioPersonalizado ? 'translate-x-4' : 'translate-x-0.5'}`} />
               </button>
-              <span className="text-sm text-[#A78BCC]">Configurar horários personalizados de atendimento para este profissional?</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">Configurar horários personalizados de atendimento para este profissional?</span>
             </label>
 
             {/* ── Horários expandidos ──────────────────────────────────── */}
             {horarioPersonalizado && (
               <div className="mt-4 space-y-5">
-                <p className="text-xs text-[#6B4E8A]">Configure os horários de atendimento deste profissional abaixo:</p>
+                <p className="text-xs text-[var(--d2b-text-muted)]">Configure os horários de atendimento deste profissional abaixo:</p>
 
                 {/* Horários de Funcionamento */}
                 <div>
-                  <p className="text-sm font-semibold text-[#F5F0FF] mb-3">Horários de Funcionamento</p>
+                  <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Horários de Funcionamento</p>
                   <div className="space-y-3">
                     {horarios.map((row, idx) => (
                       <div key={row.dia} className="flex items-center gap-3">
-                        <span className="w-8 text-sm text-[#A78BCC] flex-shrink-0">{row.dia}:</span>
+                        <span className="w-8 text-sm text-[var(--d2b-text-secondary)] flex-shrink-0">{row.dia}:</span>
                         <div className="relative flex-1">
                           <label className={LBL}>Abertura</label>
                           <input type="time" value={row.abertura} onChange={(e) => setHorarioDia(idx, 'abertura', e.target.value)}
@@ -400,7 +400,7 @@ function EditarUsuarioModal({
                         <label className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
                           <input type="checkbox" checked={row.aberto} onChange={(e) => setHorarioDia(idx, 'aberto', e.target.checked)}
                             className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
-                          <span className="text-sm text-[#A78BCC]">Aberto</span>
+                          <span className="text-sm text-[var(--d2b-text-secondary)]">Aberto</span>
                         </label>
                       </div>
                     ))}
@@ -409,11 +409,11 @@ function EditarUsuarioModal({
 
                 {/* Horário de Almoço */}
                 <div>
-                  <p className="text-sm font-semibold text-[#F5F0FF] mb-3">Horário de Almoço</p>
+                  <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-3">Horário de Almoço</p>
                   <label className="flex items-center gap-2 mb-3 cursor-pointer">
                     <input type="checkbox" checked={almoco} onChange={(e) => setAlmoco(e.target.checked)}
                       className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
-                    <span className="text-sm text-[#A78BCC]">Ativar Horário de Almoço</span>
+                    <span className="text-sm text-[var(--d2b-text-secondary)]">Ativar Horário de Almoço</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
@@ -432,8 +432,8 @@ function EditarUsuarioModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
+        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[var(--d2b-border)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">Cancelar</button>
           <button
             disabled={saving}
             onClick={async () => {
@@ -467,10 +467,10 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
   return (
     <label className="flex items-center gap-3 cursor-pointer select-none">
       <button type="button" onClick={() => onChange(!checked)}
-        className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-[#7C4DFF]' : 'bg-[rgba(124,77,255,0.20)]'}`}>
+        className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'}`}>
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`} />
       </button>
-      <span className="text-sm text-[#A78BCC]">{label}</span>
+      <span className="text-sm text-[var(--d2b-text-secondary)]">{label}</span>
     </label>
   )
 }
@@ -530,8 +530,8 @@ function CadastrarUsuarioModal({
   const isProf    = nivelPermissao === 'Profissional / ADM' || nivelPermissao === 'Profissional Simples'
   const isSimples = nivelPermissao === 'Profissional Simples'
 
-  const FIELD = 'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] transition-colors'
-  const LBL   = 'absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] text-[#A78BCC] leading-none'
+  const FIELD = 'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors'
+  const LBL   = 'absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-secondary)] leading-none'
   const SEL   = FIELD + ' appearance-none pr-8 cursor-pointer'
 
   function FloatInput({ label, type = 'text', placeholder, required, value, onChange }: { label: string; type?: string; placeholder?: string; required?: boolean; value?: string; onChange?: (v: string) => void }) {
@@ -555,7 +555,7 @@ function CadastrarUsuarioModal({
             {placeholder && <option value="" disabled>{placeholder}</option>}
             {options.map((o) => <option key={o} value={o}>{o}</option>)}
           </select>
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
       </div>
     )
@@ -565,11 +565,11 @@ function CadastrarUsuarioModal({
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl"
       >
-        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Cadastrar novo usuário</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+        <DialogHeader className="flex-row items-center justify-between px-7 py-5 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Cadastrar novo usuário</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </DialogHeader>
@@ -578,8 +578,8 @@ function CadastrarUsuarioModal({
 
           {/* ── Informações da conta ── */}
           <div>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações da conta</p>
-            <p className="text-xs text-[#6B4E8A] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
+            <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do Agendart.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatInput label="Email" type="email" required value={email} onChange={setEmailCad} />
               <div className="relative">
@@ -588,7 +588,7 @@ function CadastrarUsuarioModal({
                   <input type={showSenha ? 'text' : 'password'} value={senha} onChange={(e) => setSenhaCad(e.target.value)}
                     className={FIELD + ' pr-10' + (erros['Senha'] ? ' border-red-500' : '')} />
                   <button type="button" onClick={() => setShowSenha((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#A78BCC] transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors">
                     {showSenha ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
@@ -599,7 +599,7 @@ function CadastrarUsuarioModal({
 
           {/* ── Permissões ── */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-[#6B4E8A] uppercase tracking-widest">Permissões deste usuário</p>
+            <p className="text-xs font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest">Permissões deste usuário</p>
             <Toggle checked={toggles.financeiro} onChange={(v) => setToggle('financeiro', v)}
               label="Visualiza e pode editar os dados financeiros de cada atendimento." />
             <Toggle checked={toggles.calendario} onChange={(v) => setToggle('calendario', v)}
@@ -622,16 +622,16 @@ function CadastrarUsuarioModal({
 
           {/* ── Informações pessoais ── */}
           <div>
-            <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações pessoais</p>
-            <p className="text-xs text-[#6B4E8A] mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
+            <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações pessoais</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina os dados pessoais e o nível de permissão para este novo usuário.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatInput label="Nome" required value={nome} onChange={setNomeCad} />
               <FloatSel label="Gênero" required options={GENEROS} value={genero} onChange={setGenero} />
               <div className="relative">
                 <label className={LBL}>Código do País</label>
                 <div className="flex gap-2">
-                  <div className="flex items-center gap-1.5 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] cursor-pointer shrink-0">
-                    🇧🇷 <span className="text-[#A78BCC] text-xs">Brasil</span> <ChevronDown size={11} className="text-[#6B4E8A]" />
+                  <div className="flex items-center gap-1.5 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] cursor-pointer shrink-0">
+                    🇧🇷 <span className="text-[var(--d2b-text-secondary)] text-xs">Brasil</span> <ChevronDown size={11} className="text-[var(--d2b-text-muted)]" />
                   </div>
                   <div className="relative flex-1">
                     <label className={LBL}>Telefone</label>
@@ -647,8 +647,8 @@ function CadastrarUsuarioModal({
           {/* ── Informações profissionais ── */}
           {isProf && (
             <div>
-              <p className="text-sm font-bold text-[#F5F0FF] mb-0.5">Informações profissionais</p>
-              <p className="text-xs text-[#6B4E8A] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
+              <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações profissionais</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Ao registrar um profissional, o mesmo estará disponível para agendamentos no calendário.</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
                   <label className={LBL}>Tipo<span className="text-[#7C4DFF] ml-0.5">*</span></label>
@@ -657,7 +657,7 @@ function CadastrarUsuarioModal({
                       <option value="">Selecione um tipo</option>
                       {TIPOS_PROF.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
-                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                   </div>
                 </div>
                 <FloatInput label="Especialidade" value={especialidade} onChange={setEspCad} />
@@ -668,7 +668,7 @@ function CadastrarUsuarioModal({
                       <option value="">Selecione um conselho</option>
                       {CONSELHOS.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                   </div>
                 </div>
                 <FloatInput label="Número do conselho" value={numeroConselho} onChange={setNumConselhoCad} />
@@ -678,8 +678,8 @@ function CadastrarUsuarioModal({
 
         </div>{/* end scroll area */}
 
-        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
+        <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-[var(--d2b-border)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">Cancelar</button>
           <button
             disabled={saving}
             onClick={async () => {
@@ -799,12 +799,12 @@ export function UsuariosView() {
   }
 
   return (
-    <div className="min-h-full bg-[#0D0520]">
+    <div className="min-h-full bg-[var(--d2b-bg-main)]">
       {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.12)]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)]">
         <div>
-          <h2 className="text-lg font-bold text-[#F5F0FF]">Profissionais da Clínica</h2>
-          <p className="text-xs text-[#6B4E8A] mt-0.5">
+          <h2 className="text-lg font-bold text-[var(--d2b-text-primary)]">Profissionais da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">
             Crie e gerencie os perfis dos profissionais cadastrados dentro da clínica.
           </p>
         </div>
@@ -820,16 +820,16 @@ export function UsuariosView() {
       {/* Filters */}
       <div className="px-6 py-4 flex flex-wrap items-center gap-3">
         {/* Search */}
-        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
-          <Search size={14} className="text-[#6B4E8A] shrink-0" />
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
+          <Search size={14} className="text-[var(--d2b-text-muted)] shrink-0" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Pesquisar por nome ou email"
-            className="bg-transparent text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none w-full"
+            className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none w-full"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors">
+            <button onClick={() => setSearch('')} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors">
               <X size={13} />
             </button>
           )}
@@ -840,7 +840,7 @@ export function UsuariosView() {
           <select
             value={especialidade}
             onChange={(e) => { setEspecialidade(e.target.value); setPage(1) }}
-            className="w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm appearance-none cursor-pointer transition-colors focus:outline-none focus:border-[#7C4DFF] pr-8"
+            className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 text-sm appearance-none cursor-pointer transition-colors focus:outline-none focus:border-[#7C4DFF] pr-8"
             style={{ color: especialidade ? '#F5F0FF' : '#6B4E8A' }}
           >
             <option value="">Especialidade</option>
@@ -851,12 +851,12 @@ export function UsuariosView() {
           {especialidade ? (
             <button
               onClick={() => setEspecialidade('')}
-              className="absolute right-7 top-1/2 -translate-y-1/2 text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors"
+              className="absolute right-7 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors"
             >
               <X size={12} />
             </button>
           ) : null}
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
 
         {/* Nível de Permissão multi-select */}
@@ -871,7 +871,7 @@ export function UsuariosView() {
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
           >
             <Trash2 size={13} />
             Limpar Filtros
@@ -881,13 +881,13 @@ export function UsuariosView() {
 
       {/* Table */}
       <div className="px-6">
-        <div className="rounded-xl border border-[rgba(124,77,255,0.18)] overflow-hidden">
+        <div className="rounded-xl border border-[var(--d2b-border)] overflow-hidden">
           {/* Head */}
-          <div className="grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] gap-0 bg-[rgba(124,77,255,0.06)] border-b border-[rgba(124,77,255,0.18)]">
+          <div className="grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] gap-0 bg-[var(--d2b-hover)] border-b border-[var(--d2b-border)]">
             {['NOME', 'EMAIL', 'TELEFONE', 'TIPO DE ACESSO', 'DELETAR'].map((col, i) => (
               <div
                 key={col}
-                className={`px-4 py-3 text-[10px] font-semibold tracking-wider text-[#6B4E8A] uppercase ${i === 4 ? 'text-center w-28' : ''}`}
+                className={`px-4 py-3 text-[10px] font-semibold tracking-wider text-[var(--d2b-text-muted)] uppercase ${i === 4 ? 'text-center w-28' : ''}`}
               >
                 {col}
               </div>
@@ -896,38 +896,38 @@ export function UsuariosView() {
 
           {/* Rows */}
           {paginated.length === 0 ? (
-            <div className="flex items-center justify-center py-12 text-sm text-[#6B4E8A]">
+            <div className="flex items-center justify-center py-12 text-sm text-[var(--d2b-text-muted)]">
               Nenhum usuário encontrado
             </div>
           ) : (
             paginated.map((u, i) => (
               <div
                 key={u.id}
-                className={`grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] items-center gap-0 border-b border-[rgba(124,77,255,0.10)] transition-colors hover:bg-[rgba(124,77,255,0.05)] cursor-pointer ${i % 2 === 1 ? 'bg-[rgba(124,77,255,0.02)]' : ''}`}
+                className={`grid grid-cols-[2fr_2fr_1.5fr_1.5fr_auto] items-center gap-0 border-b border-[var(--d2b-border)] transition-colors hover:bg-[var(--d2b-hover)] cursor-pointer ${i % 2 === 1 ? 'bg-[var(--d2b-hover)]' : ''}`}
                 onClick={() => setEditarUsuario(u)}
               >
                 {/* Nome */}
                 <div className="px-4 py-3.5 flex items-center gap-3">
                   <Avatar nome={u.nome} />
                   <div>
-                    <p className="text-sm font-semibold text-[#F5F0FF] leading-snug">{u.nome}</p>
+                    <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">{u.nome}</p>
                     <p className="text-xs text-[#7C4DFF]">{u.especialidade}</p>
                   </div>
                 </div>
 
                 {/* Email */}
                 <div className="px-4 py-3.5">
-                  <p className="text-sm text-[#A78BCC] truncate">{u.email}</p>
+                  <p className="text-sm text-[var(--d2b-text-secondary)] truncate">{u.email}</p>
                 </div>
 
                 {/* Telefone */}
                 <div className="px-4 py-3.5">
-                  <p className="text-sm text-[#A78BCC]">{u.telefone}</p>
+                  <p className="text-sm text-[var(--d2b-text-secondary)]">{u.telefone}</p>
                 </div>
 
                 {/* Tipo de acesso */}
                 <div className="px-4 py-3.5">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[rgba(124,77,255,0.20)] text-[#C084FC] border border-[rgba(124,77,255,0.30)]">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)]">
                     {u.tipoAcesso}
                   </span>
                 </div>
@@ -968,7 +968,7 @@ export function UsuariosView() {
             className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
               p === page
                 ? 'bg-[#7C4DFF] text-white'
-                : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'
+                : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'
             }`}
           >
             {p}
@@ -987,13 +987,13 @@ export function UsuariosView() {
           <select
             value={rowsPerPage}
             onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1) }}
-            className="bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[#F5F0FF] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
+            className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[var(--d2b-text-primary)] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
           >
             {ROWS_OPTIONS.map((r) => (
               <option key={r} value={r} style={{ background: '#1A0A38' }}>{r}</option>
             ))}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
       </div>
 

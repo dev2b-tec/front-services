@@ -225,8 +225,8 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Anamneses da Clínica</h2>
-          <p className="text-xs text-[#A78BCC] mt-1">
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Anamneses da Clínica</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-1">
             Crie e edite diferentes anamneses para os prontuários da clínica.
           </p>
         </div>
@@ -241,12 +241,12 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-[#A78BCC]">Carregando...</div>
+        <div className="p-8 text-center text-[var(--d2b-text-secondary)]">Carregando...</div>
       ) : anamneses.length === 0 ? (
-        <div className="p-12 text-center rounded-xl border border-dashed border-[rgba(124,77,255,0.25)] bg-[#120328]">
-          <FileText size={48} className="mx-auto mb-4 text-[#6B4E8A]" />
-          <p className="text-sm text-[#A78BCC]">Nenhuma anamnese cadastrada</p>
-          <p className="text-xs text-[#6B4E8A] mt-1">Clique em "Nova Anamnese" para começar</p>
+        <div className="p-12 text-center rounded-xl border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)]">
+          <FileText size={48} className="mx-auto mb-4 text-[var(--d2b-text-muted)]" />
+          <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhuma anamnese cadastrada</p>
+          <p className="text-xs text-[var(--d2b-text-muted)] mt-1">Clique em "Nova Anamnese" para começar</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -254,19 +254,19 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] hover:border-[#7C4DFF] transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] hover:border-[#7C4DFF] transition-colors"
             >
               <div className="flex items-center gap-3">
                 <FileText size={18} className="text-[#7C4DFF]" />
-                <span className="text-sm font-semibold text-[#F5F0FF]">
+                <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">
                   {anamneseSelecionada?.titulo || 'Selecione uma anamnese'}
                 </span>
               </div>
-              <ChevronDown size={18} className={`text-[#A78BCC] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={18} className={`text-[var(--d2b-text-secondary)] transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute z-10 w-full mt-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] shadow-xl overflow-hidden">
+              <div className="absolute z-10 w-full mt-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] shadow-xl overflow-hidden">
                 {anamneses.map(anamnese => (
                   <button
                     key={anamnese.id}
@@ -274,17 +274,17 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                       setAnamneseSelecionada(anamnese)
                       setDropdownOpen(false)
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-[rgba(124,77,255,0.15)] transition-colors ${
-                      anamneseSelecionada?.id === anamnese.id ? 'bg-[rgba(124,77,255,0.1)]' : ''
+                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--d2b-hover)] transition-colors ${
+                      anamneseSelecionada?.id === anamnese.id ? 'bg-[var(--d2b-hover)]' : ''
                     }`}
                   >
-                    <span className="text-sm text-[#F5F0FF]">{anamnese.titulo}</span>
+                    <span className="text-sm text-[var(--d2b-text-primary)]">{anamnese.titulo}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         handleDeletarAnamnese(anamnese.id)
                       }}
-                      className="p-1.5 rounded hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                      className="p-1.5 rounded hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                       title="Excluir anamnese"
                     >
                       <Trash2 size={14} />
@@ -300,7 +300,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
               {/* Seção de Perguntas Ativas */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#F5F0FF]">Perguntas Ativas</h3>
+                  <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Perguntas Ativas</h3>
                   <button
                     onClick={() => setDialogPerguntaOpen(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold transition-colors"
@@ -315,9 +315,9 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                     {anamneseSelecionada.perguntas.map((pergunta, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.18)] bg-[#120328] hover:border-[rgba(124,77,255,0.35)] transition-colors"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] hover:border-[var(--d2b-border-strong)] transition-colors"
                       >
-                        <GripVertical size={16} className="text-[#6B4E8A] shrink-0" />
+                        <GripVertical size={16} className="text-[var(--d2b-text-muted)] shrink-0" />
                         
                         {editingPerguntaIndex === index ? (
                           <div className="flex-1 flex items-center gap-3">
@@ -325,12 +325,12 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                               type="text"
                               value={editPerguntaTexto}
                               onChange={(e) => setEditPerguntaTexto(e.target.value)}
-                              className="flex-1 px-3 py-1.5 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                              className="flex-1 px-3 py-1.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                             />
                             <select
                               value={editPerguntaTipo}
                               onChange={(e) => setEditPerguntaTipo(e.target.value)}
-                              className="px-3 py-1.5 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                              className="px-3 py-1.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                             >
                               <option value="AMBOS">Ambos</option>
                               <option value="SIM_NAO">Sim/Não</option>
@@ -344,7 +344,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                             </button>
                             <button
                               onClick={() => setEditingPerguntaIndex(null)}
-                              className="px-3 py-1.5 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-xs font-semibold"
+                              className="px-3 py-1.5 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-xs font-semibold"
                             >
                               Cancelar
                             </button>
@@ -352,7 +352,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                         ) : (
                           <>
                             <div className="flex-1">
-                              <p className="text-sm text-[#F5F0FF]">{pergunta.texto}</p>
+                              <p className="text-sm text-[var(--d2b-text-primary)]">{pergunta.texto}</p>
                             </div>
 
                             <select
@@ -371,7 +371,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                                   carregarAnamneses()
                                 }
                               }}
-                              className="px-3 py-1.5 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#0D0520] text-[#A78BCC] text-xs focus:outline-none focus:border-[#7C4DFF] cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-[var(--d2b-text-secondary)] text-xs focus:outline-none focus:border-[#7C4DFF] cursor-pointer"
                             >
                               <option value="AMBOS">Ambos</option>
                               <option value="SIM_NAO">Sim/Não</option>
@@ -384,7 +384,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                                 setEditPerguntaTexto(pergunta.texto)
                                 setEditPerguntaTipo(pergunta.tipoResposta)
                               }}
-                              className="p-1.5 rounded hover:bg-[rgba(124,77,255,0.15)] text-[#A78BCC] hover:text-[#7C4DFF] transition-colors"
+                              className="p-1.5 rounded hover:bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors"
                               title="Editar"
                             >
                               <Pencil size={14} />
@@ -392,7 +392,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
 
                             <button
                               onClick={() => handleRemoverPergunta(index)}
-                              className="p-1.5 rounded hover:bg-[rgba(239,68,68,0.15)] text-[#A78BCC] hover:text-[#EF4444] transition-colors"
+                              className="p-1.5 rounded hover:bg-[rgba(239,68,68,0.15)] text-[var(--d2b-text-secondary)] hover:text-[#EF4444] transition-colors"
                               title="Remover"
                             >
                               <Trash2 size={14} />
@@ -403,9 +403,9 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center rounded-lg border border-dashed border-[rgba(124,77,255,0.25)] bg-[#0D0520]">
-                    <p className="text-sm text-[#A78BCC]">Nenhuma pergunta cadastrada</p>
-                    <p className="text-xs text-[#6B4E8A] mt-1">Clique em "Nova Pergunta" para adicionar</p>
+                  <div className="p-8 text-center rounded-lg border border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)]">
+                    <p className="text-sm text-[var(--d2b-text-secondary)]">Nenhuma pergunta cadastrada</p>
+                    <p className="text-xs text-[var(--d2b-text-muted)] mt-1">Clique em "Nova Pergunta" para adicionar</p>
                   </div>
                 )}
               </div>
@@ -416,25 +416,25 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
 
       {/* Dialog Nova Anamnese */}
       <Dialog open={dialogNovaOpen} onOpenChange={setDialogNovaOpen}>
-        <DialogContent className="max-w-md bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+        <DialogContent className="max-w-md bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#F5F0FF]">Nova Anamnese</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">Nova Anamnese</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="block text-sm font-medium text-[#F5F0FF] mb-2">Título da Anamnese</label>
+              <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">Título da Anamnese</label>
               <input
                 type="text"
                 value={novoTitulo}
                 onChange={(e) => setNovoTitulo(e.target.value)}
                 placeholder="Ex: Anamnese Padrão"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
               />
             </div>
             <div className="flex items-center justify-end gap-3">
               <button
                 onClick={() => setDialogNovaOpen(false)}
-                className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
               >
                 Cancelar
               </button>
@@ -451,27 +451,27 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
 
       {/* Dialog Nova Pergunta */}
       <Dialog open={dialogPerguntaOpen} onOpenChange={setDialogPerguntaOpen}>
-        <DialogContent className="max-w-md bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+        <DialogContent className="max-w-md bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#F5F0FF]">Nova Pergunta</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">Nova Pergunta</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="block text-sm font-medium text-[#F5F0FF] mb-2">Digite a pergunta</label>
+              <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">Digite a pergunta</label>
               <textarea
                 value={novaPergunta}
                 onChange={(e) => setNovaPergunta(e.target.value)}
                 placeholder="Ex: Possui contato de emergência?"
                 rows={3}
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#F5F0FF] mb-2">Tipo de Resposta</label>
+              <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">Tipo de Resposta</label>
               <select
                 value={novoTipoResposta}
                 onChange={(e) => setNovoTipoResposta(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
               >
                 <option value="AMBOS">Ambos</option>
                 <option value="SIM_NAO">Sim/Não</option>
@@ -481,7 +481,7 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
             <div className="flex items-center justify-end gap-3">
               <button
                 onClick={() => setDialogPerguntaOpen(false)}
-                className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] text-[#A78BCC] text-sm font-semibold"
+                className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold"
               >
                 Cancelar
               </button>

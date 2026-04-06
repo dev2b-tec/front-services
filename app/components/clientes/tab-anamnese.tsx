@@ -69,10 +69,10 @@ function EditarMensagemModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-[560px] bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(124,77,255,0.18)]">
-          <span className="text-base font-semibold text-[#F5F0FF]">Editar Mensagem</span>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+      <div className="w-[560px] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl flex flex-col">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--d2b-border)]">
+          <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Editar Mensagem</span>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -82,19 +82,19 @@ function EditarMensagemModal({ onClose }: { onClose: () => void }) {
               rows={6}
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
-              className="relative z-10 w-full bg-transparent border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-3 text-sm text-transparent caret-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+              className="relative z-10 w-full bg-transparent border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-transparent caret-[#F5F0FF] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
               spellCheck={false}
             />
-            <div aria-hidden className="pointer-events-none absolute inset-0 px-4 py-3 text-sm text-[#F5F0FF] whitespace-pre-wrap break-words rounded-xl z-0 leading-[1.5rem]">
+            <div aria-hidden className="pointer-events-none absolute inset-0 px-4 py-3 text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap break-words rounded-xl z-0 leading-[1.5rem]">
               <MensagemComVariaveis texto={mensagem} />
             </div>
           </div>
-          <p className="text-xs text-[#6B4E8A] leading-relaxed">
+          <p className="text-xs text-[var(--d2b-text-muted)] leading-relaxed">
             Adicione variáveis inserindo hastag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento.
           </p>
         </div>
-        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[rgba(124,77,255,0.14)]">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">Cancelar</button>
+        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[var(--d2b-border)]">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">Cancelar</button>
           <button onClick={onClose} className="px-5 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-lg transition-colors">Salvar</button>
         </div>
       </div>
@@ -220,7 +220,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
   // ── Render ─────────────────────────────────────────────────────────────────
   if (carregando) {
     return (
-      <div className="flex-1 flex items-center justify-center gap-3 text-[#6B4E8A]">
+      <div className="flex-1 flex items-center justify-center gap-3 text-[var(--d2b-text-muted)]">
         <RefreshCw size={16} className="animate-spin" />
         <span className="text-sm">Carregando...</span>
       </div>
@@ -230,11 +230,11 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
   if (!empresaId || modelos.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-20">
-        <div className="w-12 h-12 rounded-full bg-[rgba(124,77,255,0.10)] flex items-center justify-center">
-          <AlertCircle size={20} className="text-[#6B4E8A]" />
+        <div className="w-12 h-12 rounded-full bg-[var(--d2b-hover)] flex items-center justify-center">
+          <AlertCircle size={20} className="text-[var(--d2b-text-muted)]" />
         </div>
-        <p className="text-sm font-semibold text-[#A78BCC]">Nenhum modelo de anamnese cadastrado</p>
-        <p className="text-xs text-[#6B4E8A]">Crie modelos em Configurações → Anamneses.</p>
+        <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">Nenhum modelo de anamnese cadastrado</p>
+        <p className="text-xs text-[var(--d2b-text-muted)]">Crie modelos em Configurações → Anamneses.</p>
       </div>
     )
   }
@@ -244,10 +244,10 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Sub-header */}
-      <div className="px-6 pt-5 pb-4 border-b border-[rgba(124,77,255,0.14)] flex items-start justify-between gap-4">
+      <div className="px-6 pt-5 pb-4 border-b border-[var(--d2b-border)] flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-[#F5F0FF]">Anamnese</h2>
-          <p className="text-xs text-[#A78BCC] mt-0.5">Selecione e edite uma anamnese para este paciente.</p>
+          <h2 className="text-base font-semibold text-[var(--d2b-text-primary)]">Anamnese</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Selecione e edite uma anamnese para este paciente.</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <div className="relative">
@@ -258,18 +258,18 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
               <Settings size={12} /> Ações <ChevronDown size={12} />
             </button>
             {acoesOpen && (
-              <div className="absolute z-30 right-0 mt-1 w-48 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+              <div className="absolute z-30 right-0 mt-1 w-48 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                 <button
                   onClick={() => setAcoesOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.10)] transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-left"
                 >
-                  <Pencil size={13} className="text-[#A78BCC]" /> Editar Questionário
+                  <Pencil size={13} className="text-[var(--d2b-text-secondary)]" /> Editar Questionário
                 </button>
                 <button
                   onClick={() => { setAcoesOpen(false); setEditarMensagemOpen(true) }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.10)] transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-left"
                 >
-                  <FileText size={13} className="text-[#A78BCC]" /> Editar Mensagem
+                  <FileText size={13} className="text-[var(--d2b-text-secondary)]" /> Editar Mensagem
                 </button>
               </div>
             )}
@@ -285,21 +285,21 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
           <div className="relative flex-1">
             <button
               onClick={() => setModeloDropOpen((v) => !v)}
-              className="w-full flex items-center justify-between bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+              className="w-full flex items-center justify-between bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
             >
               <span>{modeloSelecionado?.titulo ?? 'Selecione...'}</span>
-              <ChevronDown size={14} className="text-[#6B4E8A]" />
+              <ChevronDown size={14} className="text-[var(--d2b-text-muted)]" />
             </button>
             {modeloDropOpen && (
-              <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-xl overflow-hidden">
+              <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                 {modelos.map((m) => (
                   <button
                     key={m.id}
                     onClick={() => { setModeloSelecionado(m); setModeloDropOpen(false) }}
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                       m.id === modeloSelecionado?.id
-                        ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.12)]'
-                        : 'text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.08)]'
+                        ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]'
+                        : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'
                     }`}
                   >
                     {m.titulo}
@@ -308,7 +308,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
               </div>
             )}
           </div>
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[rgba(124,77,255,0.25)] bg-[#150830] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
+          <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
             <Printer size={15} />
           </button>
           <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#0D9488] hover:bg-[#0F766E] transition-colors" title="Enviar">
@@ -318,7 +318,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
 
         {/* Questions */}
         {perguntas.length === 0 ? (
-          <p className="text-sm text-[#6B4E8A] text-center py-8">Este modelo não possui perguntas ativas.</p>
+          <p className="text-sm text-[var(--d2b-text-muted)] text-center py-8">Este modelo não possui perguntas ativas.</p>
         ) : (
           perguntas.map((pergunta, i) => {
             const resp = respostas[pergunta.id] ?? { opcao: 'NENHUM', texto: '' }
@@ -327,7 +327,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
 
             return (
               <div key={pergunta.id} className="space-y-2">
-                <p className="text-sm font-semibold text-[#F5F0FF]">
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">
                   {i + 1}. {pergunta.texto}
                 </p>
                 {showSim && (
@@ -336,7 +336,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
                       <button
                         key={op}
                         onClick={() => setOpcao(pergunta.id, op)}
-                        className="flex items-center gap-1.5 text-sm text-[#A78BCC] hover:text-[#F5F0FF] transition-colors"
+                        className="flex items-center gap-1.5 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors"
                       >
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
                           resp.opcao === op ? 'border-[#7C4DFF] bg-[#7C4DFF]' : 'border-[#6B4E8A]'
@@ -354,7 +354,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
                     value={resp.texto}
                     onChange={(e) => setTexto(pergunta.id, e.target.value)}
                     placeholder="Digite aqui"
-                    className="w-full bg-[#150830] border border-[rgba(124,77,255,0.20)] rounded-xl px-4 py-2.5 text-sm text-[#F5F0FF] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-y min-h-[72px] transition-colors"
+                    className="w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] resize-y min-h-[72px] transition-colors"
                   />
                 )}
               </div>

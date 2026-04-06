@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-// ─── Types ─────────────────────────────────────────────────────────────────
+// --- Types -----------------------------------------------------------------
 type Cliente = {
   id: string
   nome: string
@@ -49,18 +49,18 @@ type Agendamento = {
   pagamento: string
 }
 
-// ─── Mock data ──────────────────────────────────────────────────────────────
+// --- Mock data --------------------------------------------------------------
 const MOCK_CLIENTES: Cliente[] = [
-  { id: '1', nome: 'Monique Franca',   telefone: '+55 81 99634 9077', sessoes: 0, grupo: '—', statusPagamento: 'Em Aberto' },
-  { id: '2', nome: 'Paciente Exemplo', telefone: '+55 000000000',     sessoes: 1, grupo: '—', statusPagamento: 'Quitado', convenio: 'PARTICULAR' },
+  { id: '1', nome: 'Monique Franca',   telefone: '+55 81 99634 9077', sessoes: 0, grupo: '�', statusPagamento: 'Em Aberto' },
+  { id: '2', nome: 'Paciente Exemplo', telefone: '+55 000000000',     sessoes: 1, grupo: '�', statusPagamento: 'Quitado', convenio: 'PARTICULAR' },
 ]
 
 const MOCK_AGENDAMENTOS: Agendamento[] = [
   { id: 'a1', data: '2026-04-01', dataLabel: 'Abril 1, 2026',    profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Faltou',   pagamento: 'Valores a definir' },
-  { id: 'a2', data: '2026-03-30', dataLabel: 'Março 30, 2026', profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Atendido', pagamento: 'Valores a definir' },
+  { id: 'a2', data: '2026-03-30', dataLabel: 'Mar�o 30, 2026', profissional: 'JESSE DOS SANTOS BEZERRA', inicio: '09:00', fim: '10:00', status: 'Atendido', pagamento: 'Valores a definir' },
 ]
 
-// ─── API Types ───────────────────────────────────────────────────────────────
+// --- API Types ---------------------------------------------------------------
 export type PacienteApi = {
   id: string
   empresaId?: string
@@ -105,7 +105,7 @@ function pacienteParaCliente(p: PacienteApi): Cliente {
     nome: p.nome,
     telefone: p.telefone ?? '',
     sessoes: p.sessoes ?? 0,
-    grupo: p.grupo ?? '—',
+    grupo: p.grupo ?? '�',
     statusPagamento: statusLabel(p.statusPagamento),
     genero: p.genero ?? undefined,
     convenio: p.plano ?? undefined,
@@ -113,23 +113,23 @@ function pacienteParaCliente(p: PacienteApi): Cliente {
   }
 }
 
-// ─── Shared styles ──────────────────────────────────────────────────────────
+// --- Shared styles ----------------------------------------------------------
 const INPUT = [
-  'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md',
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A]',
+  'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md',
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)]',
   'focus:outline-none focus:border-[#7C4DFF] transition-colors',
 ].join(' ')
 
 const SELECT = INPUT + ' appearance-none cursor-pointer'
 
-const BTN_GHOST = 'px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors'
+const BTN_GHOST = 'px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors'
 const BTN_PRIMARY = 'px-4 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// --- Helpers -----------------------------------------------------------------
 function FloatingField({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
   return (
     <div className="relative">
-      <label className="absolute -top-2 left-3 z-10 bg-[#1A0A38] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
+      <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
         {label}{required && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       {children}
@@ -154,7 +154,7 @@ function FieldSelect({ label, required, options, placeholder, value, onChange }:
             {options.map((o) => <option key={o}>{o}</option>)}
           </select>
         )}
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </FloatingField>
   )
@@ -164,9 +164,9 @@ function PhoneField({ label, required, value, onChange }: { label: string; requi
   return (
     <FloatingField label={label} required={required}>
       <div className="flex gap-2">
-        <div className="flex items-center gap-1 shrink-0 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-2.5 text-sm text-[#F5F0FF] cursor-pointer h-10">
-          🇧🇷 <span className="text-[#A78BCC] text-xs ml-1">+55</span>
-          <ChevronDown size={11} className="text-[#6B4E8A] ml-0.5" />
+        <div className="flex items-center gap-1 shrink-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-2.5 text-sm text-[var(--d2b-text-primary)] cursor-pointer h-10">
+          ???? <span className="text-[var(--d2b-text-secondary)] text-xs ml-1">+55</span>
+          <ChevronDown size={11} className="text-[var(--d2b-text-muted)] ml-0.5" />
         </div>
         {onChange !== undefined
           ? <input className={INPUT} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
@@ -185,7 +185,7 @@ function DateField({ label, value, onChange }: { label: string; value?: string; 
           ? <input type="date" value={value ?? ''} onChange={(e) => onChange(e.target.value)} className={INPUT + ' pr-9'} />
           : <input type="date" className={INPUT + ' pr-9'} />
         }
-        <CalendarIcon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <CalendarIcon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </FloatingField>
   )
@@ -193,7 +193,7 @@ function DateField({ label, value, onChange }: { label: string; value?: string; 
 
 function Section({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children: ReactNode }) {
   return (
-    <div className="border-t border-[rgba(124,77,255,0.18)]">
+    <div className="border-t border-[var(--d2b-border)]">
       <button type="button" onClick={onToggle}
         className="w-full flex items-center justify-between py-3 text-sm font-bold text-[#7C4DFF] hover:text-[#C084FC] transition-colors">
         {title}
@@ -219,7 +219,7 @@ function StatusBadge({ status }: { status: string }) {
 function PageBtn({ onClick, disabled, children }: { onClick: () => void; disabled: boolean; children: ReactNode }) {
   return (
     <button onClick={onClick} disabled={disabled}
-      className="w-8 h-8 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] disabled:opacity-30 disabled:pointer-events-none transition-colors">
+      className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] disabled:opacity-30 disabled:pointer-events-none transition-colors">
       {children}
     </button>
   )
@@ -241,7 +241,7 @@ function StatusEventBadge({ status }: { status: string }) {
   )
 }
 
-// ─── Modal: Detalhes do Agendamento ──────────────────────────────────────────
+// --- Modal: Detalhes do Agendamento ------------------------------------------
 function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onClose: () => void; ag: Agendamento | null; empresaId?: string | null }) {
   const [mensagensOpen, setMensagensOpen] = useState(false)
   if (!ag) return null
@@ -256,12 +256,12 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
     <>
       <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
         <DialogContent showCloseButton={false}
-          className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden">
-          <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-            <DialogTitle className="flex items-center gap-2 text-sm font-bold text-[#F5F0FF]">
-              Detalhes do Agendamento <Search size={13} className="text-[#6B4E8A]" />
+          className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden">
+          <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+            <DialogTitle className="flex items-center gap-2 text-sm font-bold text-[var(--d2b-text-primary)]">
+              Detalhes do Agendamento <Search size={13} className="text-[var(--d2b-text-muted)]" />
             </DialogTitle>
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
               <X size={15} />
             </button>
           </DialogHeader>
@@ -270,21 +270,21 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
 
             {/* Informacoes do Paciente */}
             <div>
-              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMAÇÕES DO PACIENTE</p>
+              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMA��ES DO PACIENTE</p>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-base font-bold text-[#F5F0FF]">Paciente Exemplo</span>
+                <span className="text-base font-bold text-[var(--d2b-text-primary)]">Paciente Exemplo</span>
                 <button onClick={() => setMensagensOpen(true)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-[#F5F0FF] bg-[rgba(124,77,255,0.15)] border border-[rgba(124,77,255,0.25)] px-3 py-1.5 rounded-md hover:bg-[rgba(124,77,255,0.25)] transition-colors">
+                  className="flex items-center gap-1.5 text-xs font-medium text-[var(--d2b-text-primary)] bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] px-3 py-1.5 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
                   <MessageCircle size={11} /> Mensagem
                 </button>
-                <button className="flex items-center gap-1.5 text-xs font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+                <button className="flex items-center gap-1.5 text-xs font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
                   <Zap size={11} /> Atalhos <ChevronDown size={11} />
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <FloatingField label="Telefone"><input readOnly className={INPUT} defaultValue="+550000000000" /></FloatingField>
-                <FloatingField label="Convênio"><input readOnly className={INPUT} defaultValue="PARTICULAR" /></FloatingField>
-                <FloatingField label="Número da Carteirinha"><input readOnly className={INPUT} defaultValue="-" /></FloatingField>
+                <FloatingField label="Conv�nio"><input readOnly className={INPUT} defaultValue="PARTICULAR" /></FloatingField>
+                <FloatingField label="N�mero da Carteirinha"><input readOnly className={INPUT} defaultValue="-" /></FloatingField>
               </div>
             </div>
 
@@ -294,13 +294,13 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
               <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-3">
                   <FloatingField label="Profissional" required>
-                    <div className="flex items-center gap-1 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 h-10">
-                      <span className="flex-1 text-sm text-[#F5F0FF] truncate">{ag.profissional}</span>
-                      <X size={12} className="text-[#6B4E8A] cursor-pointer hover:text-[#EF4444]" />
-                      <ChevronDown size={12} className="text-[#A78BCC] cursor-pointer" />
+                    <div className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 h-10">
+                      <span className="flex-1 text-sm text-[var(--d2b-text-primary)] truncate">{ag.profissional}</span>
+                      <X size={12} className="text-[var(--d2b-text-muted)] cursor-pointer hover:text-[#EF4444]" />
+                      <ChevronDown size={12} className="text-[var(--d2b-text-secondary)] cursor-pointer" />
                     </div>
                   </FloatingField>
-                  <FloatingField label="Início Evento" required>
+                  <FloatingField label="In�cio Evento" required>
                     <input className={INPUT} defaultValue={`${dataFmt} ${ag.inicio}`} />
                   </FloatingField>
                   <FloatingField label="Fim Evento" required>
@@ -314,13 +314,13 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
                         <option style={{ color: sc }}>{ag.status}</option>
                       </select>
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none" style={{ background: sc }} />
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                     </div>
                   </FloatingField>
                   <FloatingField label="Sala">
                     <div className="relative">
                       <select className={SELECT}><option value="">Selecione uma sala</option></select>
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                     </div>
                   </FloatingField>
                 </div>
@@ -329,10 +329,10 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
 
             {/* Servicos */}
             <div>
-              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">SERVIÇOS PRESTADOS</p>
-              <p className="text-xs text-[#6B4E8A] mb-2">Nenhum serviço adicionado neste agendamento</p>
-              <button className="text-xs text-[#7C4DFF] border border-[rgba(124,77,255,0.25)] px-3 py-1.5 rounded-md hover:bg-[rgba(124,77,255,0.1)] transition-colors">
-                + Adicionar Serviço
+              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">SERVI�OS PRESTADOS</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mb-2">Nenhum servi�o adicionado neste agendamento</p>
+              <button className="text-xs text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1.5 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
+                + Adicionar Servi�o
               </button>
             </div>
 
@@ -345,7 +345,7 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
                   <FloatingField label="Valor Recebido">
                     <div className="flex gap-2">
                       <input className={INPUT} defaultValue="R$ 0,00" />
-                      <button className="shrink-0 flex items-center gap-1.5 text-xs text-[#A78BCC] border border-[rgba(124,77,255,0.25)] px-3 rounded-md hover:border-[#7C4DFF] transition-colors whitespace-nowrap">
+                      <button className="shrink-0 flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] px-3 rounded-md hover:border-[#7C4DFF] transition-colors whitespace-nowrap">
                         <FileText size={11} /> Recibo
                       </button>
                     </div>
@@ -355,25 +355,25 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
                   <FloatingField label="Data Pagamento">
                     <input className={INPUT} placeholder="dd/mm/aaaa" />
                   </FloatingField>
-                  <FloatingField label="Método Pagamento">
+                  <FloatingField label="M�todo Pagamento">
                     <div className="relative">
                       <select className={SELECT}><option value="">Selecione...</option></select>
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
                     </div>
                   </FloatingField>
                 </div>
-                <FloatingField label="Observações">
-                  <textarea rows={3} placeholder="Observações" className={INPUT + ' resize-none'} />
+                <FloatingField label="Observa��es">
+                  <textarea rows={3} placeholder="Observa��es" className={INPUT + ' resize-none'} />
                 </FloatingField>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--d2b-border)]">
             <div className="flex gap-2">
               <button className="px-4 py-2 rounded-md text-sm font-medium text-[#EF4444] border border-[rgba(239,68,68,0.25)] hover:bg-[rgba(239,68,68,0.1)] transition-colors">Desmarcar</button>
-              <button className="px-4 py-2 rounded-md text-sm font-medium text-[#7C4DFF] border border-[rgba(124,77,255,0.25)] hover:bg-[rgba(124,77,255,0.1)] transition-colors">Iniciar Atendimento</button>
+              <button className="px-4 py-2 rounded-md text-sm font-medium text-[#7C4DFF] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors">Iniciar Atendimento</button>
             </div>
             <div className="flex gap-2">
               <button onClick={onClose} className={BTN_GHOST}>Fechar</button>
@@ -391,7 +391,7 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
   )
 }
 
-// ─── Detalhe: aba Dados ───────────────────────────────────────────────────────
+// --- Detalhe: aba Dados -------------------------------------------------------
 function TabDados({ paciente }: { paciente: PacienteApi }) {
   const { toast } = useToast()
   const [saving, setSaving] = useState(false)
@@ -460,7 +460,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
       setChanged(false)
       toast({ title: 'Paciente atualizado com sucesso!' })
     } catch {
-      toast({ title: 'Erro ao salvar alterações', variant: 'destructive' })
+      toast({ title: 'Erro ao salvar altera��es', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -472,10 +472,10 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-[#F5F0FF]">Editar Paciente</h3>
-            <p className="text-xs text-[#A78BCC] mt-0.5">Edite as informações associadas a este paciente.</p>
+            <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Paciente</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Edite as informa��es associadas a este paciente.</p>
           </div>
-          <button className="text-xs text-[#A78BCC] border border-[rgba(124,77,255,0.18)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          <button className="text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Voltar
           </button>
         </div>
@@ -483,7 +483,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         {/* Aviso de alteracoes */}
         {changed && (
           <p className="text-xs text-[#EF4444]">
-            Você realizou alterações que ainda não foram salvas. Clique em &apos;Salvar alterações&apos; para armazená-las.
+            Voc� realizou altera��es que ainda n�o foram salvas. Clique em &apos;Salvar altera��es&apos; para armazen�-las.
           </p>
         )}
 
@@ -499,17 +499,17 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="Número de Telefone" required value={telefone} onChange={mark(setTelefone)} />
+            <PhoneField label="N�mero de Telefone" required value={telefone} onChange={mark(setTelefone)} />
             <DateField label="Data de nascimento" value={dataNascimento} onChange={mark(setDataNascimento)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={mark(setGenero)} />
-            <FieldSelect label="Convênio" placeholder="Selecione um plano" value={plano} options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} onChange={mark(setPlano)} />
+            <FieldSelect label="G�nero" placeholder="Selecione um g�nero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro n�o informar']} value={genero} onChange={mark(setGenero)} />
+            <FieldSelect label="Conv�nio" placeholder="Selecione um plano" value={plano} options={['PARTICULAR', 'Unimed', 'Bradesco Sa�de', 'Amil']} onChange={mark(setPlano)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Número da Carteirinha"><input className={INPUT} value={numeroCarteirinha} onChange={(e) => { setNumeroCarteirinha(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="N�mero da Carteirinha"><input className={INPUT} value={numeroCarteirinha} onChange={(e) => { setNumeroCarteirinha(e.target.value); setChanged(true) }} /></FloatingField>
             <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={mark(setGrupo)} />
           </div>
 
@@ -525,7 +525,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
           <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
             <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => { setLogradouro(e.target.value); setChanged(true) }} /></FloatingField>
-            <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => { setNumero(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="N�mero"><input className={INPUT} value={numero} onChange={(e) => { setNumero(e.target.value); setChanged(true) }} /></FloatingField>
             <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => { setComplemento(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
@@ -534,19 +534,19 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
             <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => { setCidade(e.target.value); setChanged(true) }} /></FloatingField>
           </div>
 
-          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={mark(setComoConheceu)} />
+          <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indica��o', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={mark(setComoConheceu)} />
 
-          <FloatingField label="Outras Informações">
+          <FloatingField label="Outras Informa��es">
             <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => { setOutrasInformacoes(e.target.value); setChanged(true) }} />
           </FloatingField>
         </div>
 
         {/* Toggle menor de idade */}
         <div>
-          <label className="flex items-center gap-2 text-sm text-[#A78BCC] cursor-pointer select-none w-fit">
+          <label className="flex items-center gap-2 text-sm text-[var(--d2b-text-secondary)] cursor-pointer select-none w-fit">
             <button type="button" role="switch" aria-checked={menorIdade}
               onClick={() => setMenorIdade((v) => !v)}
-              className={`relative w-9 h-5 rounded-full transition-colors ${menorIdade ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}>
+              className={`relative w-9 h-5 rounded-full transition-colors ${menorIdade ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}>
               <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${menorIdade ? 'translate-x-4' : 'translate-x-0.5'}`} />
             </button>
             Visualizar dados de menor de idade
@@ -555,22 +555,22 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
           {menorIdade && (
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="Nome do responsável"><input className={INPUT} value={nomeResponsavel} onChange={(e) => { setNomeResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <FloatingField label="Nome do respons�vel"><input className={INPUT} value={nomeResponsavel} onChange={(e) => { setNomeResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
                 <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={mark(setDataNascimentoResp)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="CPF do responsável"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
-                <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
+                <FloatingField label="CPF do respons�vel"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <PhoneField label="Telefone do respons�vel" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
               </div>
             </div>
           )}
         </div>
 
         {/* Footer actions */}
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-[rgba(124,77,255,0.12)]">
+        <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--d2b-border)]">
           <button type="button" onClick={() => setChanged(false)} className={BTN_GHOST} disabled={saving}>Cancelar</button>
           <button type="button" onClick={handleSave} className={BTN_PRIMARY} disabled={saving}>
-            {saving ? 'Salvando...' : 'Salvar Alterações'}
+            {saving ? 'Salvando...' : 'Salvar Altera��es'}
           </button>
         </div>
       </div>
@@ -580,41 +580,41 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
 
 
-// ─── Detalhe: aba placeholder ─────────────────────────────────────────────────
+// --- Detalhe: aba placeholder -------------------------------------------------
 function TabEmConstrucao({ label }: { label: string }) {
   return (
     <div className="flex-1 flex items-center justify-center">
       <div className="text-center space-y-2">
-        <p className="text-sm font-semibold text-[#A78BCC]">{label}</p>
-        <p className="text-xs text-[#6B4E8A]">Em desenvolvimento</p>
+        <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">{label}</p>
+        <p className="text-xs text-[var(--d2b-text-muted)]">Em desenvolvimento</p>
       </div>
     </div>
   )
 }
 
-// ─── Notas Compartilhadas (painel lateral direito) ──────────────────────────
+// --- Notas Compartilhadas (painel lateral direito) --------------------------
 type Nota = { id: number; texto: string; autor: string; data: string }
 
-const FORMATO_OPCOES = ['Parágrafo', 'Título 1', 'Título 2', 'Título 3']
+const FORMATO_OPCOES = ['Par�grafo', 'T�tulo 1', 'T�tulo 2', 'T�tulo 3']
 
 function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
   const [notas] = useState<Nota[]>([])
   const [texto, setTexto] = useState('')
-  const [formato, setFormato] = useState('Parágrafo')
+  const [formato, setFormato] = useState('Par�grafo')
 
   return (
-    <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[rgba(124,77,255,0.18)] bg-[#120328] h-full">
+    <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(124,77,255,0.18)] flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--d2b-border)] flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[#F5F0FF]">Notas Compartilhadas</span>
-          <button className="text-[#6B4E8A] hover:text-[#A78BCC] transition-colors" title="Atualizar">
+          <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Notas Compartilhadas</span>
+          <button className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors" title="Atualizar">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
             </svg>
           </button>
         </div>
-        <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+        <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
           <X size={14} />
         </button>
       </div>
@@ -622,15 +622,15 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
       {/* Notas list */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {notas.length === 0 ? (
-          <p className="text-xs text-[#6B4E8A] text-center mt-8">
-            Não existem notas compartilhadas para este paciente...
+          <p className="text-xs text-[var(--d2b-text-muted)] text-center mt-8">
+            N�o existem notas compartilhadas para este paciente...
           </p>
         ) : (
           <div className="space-y-3">
             {notas.map((n) => (
-              <div key={n.id} className="bg-[#150830] border border-[rgba(124,77,255,0.12)] rounded-lg px-3 py-2.5">
-                <p className="text-sm text-[#F5F0FF] whitespace-pre-wrap">{n.texto}</p>
-                <p className="text-[10px] text-[#6B4E8A] mt-1.5">{n.autor} · {n.data}</p>
+              <div key={n.id} className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 py-2.5">
+                <p className="text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap">{n.texto}</p>
+                <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1.5">{n.autor} � {n.data}</p>
               </div>
             ))}
           </div>
@@ -638,37 +638,37 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Editor */}
-      <div className="border-t border-[rgba(124,77,255,0.18)] flex-shrink-0">
+      <div className="border-t border-[var(--d2b-border)] flex-shrink-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-1 px-3 py-2 border-b border-[rgba(124,77,255,0.10)] flex-wrap">
+        <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--d2b-border)] flex-wrap">
           <div className="relative">
             <select
               value={formato}
               onChange={(e) => setFormato(e.target.value)}
-              className="appearance-none h-7 pl-2 pr-6 rounded text-xs bg-[#150830] border border-[rgba(124,77,255,0.18)] text-[#A78BCC] focus:outline-none cursor-pointer"
+              className="appearance-none h-7 pl-2 pr-6 rounded text-xs bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-[var(--d2b-text-secondary)] focus:outline-none cursor-pointer"
             >
               {FORMATO_OPCOES.map((o) => <option key={o}>{o}</option>)}
             </select>
-            <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+            <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
           </div>
           {[['B','font-bold'],['I','italic'],['U','underline']].map(([l, cls]) => (
-            <button key={l} className={`w-6 h-6 rounded text-xs ${cls} text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors flex items-center justify-center`}>{l}</button>
+            <button key={l} className={`w-6 h-6 rounded text-xs ${cls} text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center`}>{l}</button>
           ))}
-          <div className="w-px h-4 bg-[rgba(124,77,255,0.18)] mx-0.5" />
+          <div className="w-px h-4 bg-[var(--d2b-hover)] mx-0.5" />
           {/* Align */}
-          <button className="w-6 h-6 rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors flex items-center justify-center">
+          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
           </button>
           {/* Ordered list */}
-          <button className="w-6 h-6 rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors flex items-center justify-center">
+          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><path d="M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
           </button>
           {/* Unordered list */}
-          <button className="w-6 h-6 rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors flex items-center justify-center">
+          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
           </button>
           {/* Table */}
-          <button className="w-6 h-6 rounded text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors flex items-center justify-center">
+          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
           </button>
         </div>
@@ -679,7 +679,7 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
           onChange={(e) => setTexto(e.target.value)}
           placeholder="Escreva uma nota..."
           rows={4}
-          className="w-full bg-transparent px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] outline-none resize-none"
+          className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none resize-none"
         />
 
         {/* Send */}
@@ -696,14 +696,14 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ─── Detalhe do Cliente ───────────────────────────────────────────────────────
+// --- Detalhe do Cliente -------------------------------------------------------
 type Tab = 'dados' | 'timeline' | 'anamnese' | 'evolucoes' | 'financeiro' | 'documentos'
 
 const TABS: { id: Tab; label: string; icon: ReactNode; badge?: ReactNode }[] = [
   { id: 'dados',       label: 'Dados',         icon: <User size={18} /> },
   { id: 'timeline',    label: 'Linha do Tempo', icon: <LayoutGrid size={18} />, badge: <span className="text-[9px] font-bold bg-[#10B981] text-white px-1.5 py-0.5 rounded">Novo</span> },
   { id: 'anamnese',    label: 'Anamnese',       icon: <ClipboardList size={18} /> },
-  { id: 'evolucoes',   label: 'Evoluções',   icon: <Activity size={18} /> },
+  { id: 'evolucoes',   label: 'Evolu��es',   icon: <Activity size={18} /> },
   { id: 'financeiro',  label: 'Financeiro',     icon: <DollarSign size={18} /> },
   { id: 'documentos',  label: 'Documentos',     icon: <FileText size={18} /> },
 ]
@@ -716,20 +716,20 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
   return (
     <div className="flex flex-col h-full">
       {/* Sub-topbar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(124,77,255,0.18)] bg-[#120328] flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] flex-shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="flex items-center gap-1.5 text-xs text-[#A78BCC] hover:text-[#F5F0FF] transition-colors">
+          <button onClick={onBack} className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">
             <ArrowLeft size={14} /> Pacientes
           </button>
           <span className="text-[#2D1B4E]">|</span>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-[#F5F0FF]">
+          <div className="flex items-center gap-1.5 text-sm font-medium text-[var(--d2b-text-primary)]">
             <User size={13} className="text-[#7C4DFF]" />
             Detalhes do Paciente
-            <span className="text-[#A78BCC]">-</span>
+            <span className="text-[var(--d2b-text-secondary)]">-</span>
             <span className="text-[#C084FC]">{cliente.nome}</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[rgba(124,77,255,0.25)] px-3 py-1 rounded-md hover:bg-[rgba(124,77,255,0.1)] transition-colors">
-            ✦ Resumir Paciente
+          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
+            ? Resumir Paciente
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -737,7 +737,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             onClick={() => { setNotasOpen((v) => !v); if (!notasOpen) setCompartilharOpen(false) }}
             className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
               notasOpen
-                ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.15)] border border-[rgba(124,77,255,0.4)]'
+                ? 'text-[#7C4DFF] bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)]'
                 : 'text-white bg-[#7C4DFF] hover:bg-[#5B21B6]'
             }`}
           >
@@ -747,8 +747,8 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             onClick={() => { setCompartilharOpen((v) => !v); if (!compartilharOpen) setNotasOpen(false) }}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors border ${
               compartilharOpen
-                ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.15)] border-[rgba(124,77,255,0.4)]'
-                : 'text-[#A78BCC] border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF]'
+                ? 'text-[#7C4DFF] bg-[var(--d2b-hover)] border-[var(--d2b-border-strong)]'
+                : 'text-[var(--d2b-text-secondary)] border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)]'
             }`}
           >
             Compartilhar Acesso
@@ -760,14 +760,14 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
       <div className="flex flex-1 overflow-hidden">
 
         {/* Mini sidebar */}
-        <div className="w-[88px] flex-shrink-0 border-r border-[rgba(124,77,255,0.14)] bg-[#0D0520] flex flex-col items-center pt-5 gap-1">
+        <div className="w-[88px] flex-shrink-0 border-r border-[var(--d2b-border)] bg-[var(--d2b-bg-main)] flex flex-col items-center pt-5 gap-1">
           {TABS.map((t) => {
             const active = tab === t.id
             return (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`w-full flex flex-col items-center gap-1 py-3 px-1 transition-colors text-center ${active ? 'text-[#7C4DFF] bg-[rgba(124,77,255,0.10)]' : 'text-[#6B4E8A] hover:text-[#A78BCC] hover:bg-[rgba(124,77,255,0.05)]'}`}
+                className={`w-full flex flex-col items-center gap-1 py-3 px-1 transition-colors text-center ${active ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)]'}`}
               >
                 {t.icon}
                 <span className="text-[10px] font-medium leading-tight">{t.label}</span>
@@ -795,7 +795,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
   )
 }
 
-// ─── Compartilhar Acesso (painel lateral direito) ────────────────────────────
+// --- Compartilhar Acesso (painel lateral direito) ----------------------------
 type ProfAcesso = { id: number; label: string; descricao: string }
 
 const PROFS_ACESSO_PADRAO: ProfAcesso[] = [
@@ -824,13 +824,13 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-[420px] bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-2xl shadow-2xl flex flex-col">
+      <div className="w-[420px] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(124,77,255,0.18)]">
-          <span className="text-base font-semibold text-[#F5F0FF]">Adicionar Profissional</span>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--d2b-border)]">
+          <span className="text-base font-semibold text-[var(--d2b-text-primary)]">Adicionar Profissional</span>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.15)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors"
           >
             <X size={15} />
           </button>
@@ -838,7 +838,7 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
 
         {/* Body */}
         <div className="px-5 py-5 space-y-4">
-          <p className="text-sm text-[#A78BCC]">
+          <p className="text-sm text-[var(--d2b-text-secondary)]">
             Selecione o(s) profissional(is) para conceder acesso ao paciente:
           </p>
 
@@ -847,14 +847,14 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
             <select
               value={selecionado}
               onChange={(e) => setSelecionado(e.target.value)}
-              className="w-full appearance-none bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-xl px-4 py-2.5 text-sm text-[#A78BCC] focus:outline-none focus:border-[#7C4DFF] cursor-pointer"
+              className="w-full appearance-none bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] cursor-pointer"
             >
               <option value="" disabled>Adicionar pessoas</option>
               {opcoes.map((o) => (
                 <option key={o} value={o}>{o}</option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B4E8A] pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
           </div>
 
           {/* Conceder Acesso button */}
@@ -882,12 +882,12 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
   return (
     <>
     <AdicionarProfissionalModal open={adicionarOpen} onClose={() => setAdicionarOpen(false)} />
-    <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[rgba(124,77,255,0.18)] bg-[#120328] h-full">
+    <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(124,77,255,0.18)] flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--d2b-border)] flex-shrink-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold text-[#F5F0FF]">Compartilhar Paciente</span>
-          <button className="text-[#6B4E8A] hover:text-[#A78BCC] transition-colors" title="Ajuda">
+          <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Compartilhar Paciente</span>
+          <button className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors" title="Ajuda">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -897,7 +897,7 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
         </div>
         <button
           onClick={onClose}
-          className="w-6 h-6 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors"
+          className="w-6 h-6 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors"
         >
           <X size={14} />
         </button>
@@ -906,7 +906,7 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-[#F5F0FF]">Profissionais com acesso</p>
+          <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Profissionais com acesso</p>
           <button
             onClick={() => setAdicionarOpen(true)}
             className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] px-3 py-1.5 rounded-md transition-colors"
@@ -917,12 +917,12 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
 
         <div className="space-y-2">
           {profs.length === 0 ? (
-            <p className="text-xs text-[#6B4E8A] text-center py-6">Nenhum profissional com acesso.</p>
+            <p className="text-xs text-[var(--d2b-text-muted)] text-center py-6">Nenhum profissional com acesso.</p>
           ) : (
             profs.map((p) => (
               <div
                 key={p.id}
-                className="flex items-start gap-3 bg-[#150830] border border-[rgba(124,77,255,0.12)] rounded-xl px-3 py-3 group"
+                className="flex items-start gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-xl px-3 py-3 group"
               >
                 {/* Checkmark icon */}
                 <div className="w-7 h-7 rounded-full bg-[rgba(16,185,129,0.15)] border border-[rgba(16,185,129,0.3)] flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -931,21 +931,21 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-[#F5F0FF]">
+                  <span className="text-sm text-[var(--d2b-text-primary)]">
                     {p.label !== 'Todos' && <span className="font-semibold">{p.label} </span>}
                     {p.label === 'Todos' ? (
                       <span>
                         Todos{' '}
-                        <span className="text-[#A78BCC]">{p.descricao}</span>
+                        <span className="text-[var(--d2b-text-secondary)]">{p.descricao}</span>
                       </span>
                     ) : (
-                      <span className="text-[#A78BCC]">{p.descricao}</span>
+                      <span className="text-[var(--d2b-text-secondary)]">{p.descricao}</span>
                     )}
                   </span>
                 </div>
                 <button
                   onClick={() => remover(p.id)}
-                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-[#6B4E8A] hover:text-[#EF4444] transition-all flex-shrink-0 mt-0.5"
+                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[#EF4444] transition-all flex-shrink-0 mt-0.5"
                 >
                   <X size={12} />
                 </button>
@@ -959,7 +959,7 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ─── Modal Criar Cliente ──────────────────────────────────────────────────────
+// --- Modal Criar Cliente ------------------------------------------------------
 function CriarClienteModal({
   open,
   onClose,
@@ -1015,9 +1015,9 @@ function CriarClienteModal({
   }
 
   async function handleSubmit() {
-    if (!nome.trim()) { toast({ title: 'Nome é obrigatório', variant: 'destructive' }); return }
-    if (!telefone.trim()) { toast({ title: 'Telefone é obrigatório', variant: 'destructive' }); return }
-    if (!empresaId) { toast({ title: 'Empresa não identificada. Contate o suporte.', variant: 'destructive' }); return }
+    if (!nome.trim()) { toast({ title: 'Nome � obrigat�rio', variant: 'destructive' }); return }
+    if (!telefone.trim()) { toast({ title: 'Telefone � obrigat�rio', variant: 'destructive' }); return }
+    if (!empresaId) { toast({ title: 'Empresa n�o identificada. Contate o suporte.', variant: 'destructive' }); return }
     setSaving(true)
     try {
       const body: Record<string, unknown> = {
@@ -1066,10 +1066,10 @@ function CriarClienteModal({
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
       <DialogContent showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-3xl p-0 gap-0 overflow-hidden">
-        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Criar Cliente</DialogTitle>
-          <button onClick={handleClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-3xl p-0 gap-0 overflow-hidden">
+        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Criar Cliente</DialogTitle>
+          <button onClick={handleClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
             <X size={15} />
           </button>
         </DialogHeader>
@@ -1081,23 +1081,23 @@ function CriarClienteModal({
             <FloatingField label="Nome Social"><input className={INPUT} /></FloatingField>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <PhoneField label="Número de Telefone" required value={telefone} onChange={setTelefone} />
+            <PhoneField label="N�mero de Telefone" required value={telefone} onChange={setTelefone} />
             <DateField label="Data de nascimento" value={dataNascimento} onChange={setDataNascimento} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Gênero" placeholder="Selecione um gênero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro não informar']} value={genero} onChange={setGenero} />
-            <FieldSelect label="Convênio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Saúde', 'Amil']} value={plano} onChange={setPlano} />
+            <FieldSelect label="G�nero" placeholder="Selecione um g�nero" options={['Masculino', 'Feminino', 'Outro', 'Prefiro n�o informar']} value={genero} onChange={setGenero} />
+            <FieldSelect label="Conv�nio" placeholder="Selecione um plano" options={['PARTICULAR', 'Unimed', 'Bradesco Sa�de', 'Amil']} value={plano} onChange={setPlano} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FloatingField label="Número da Carteirinha">
+            <FloatingField label="N�mero da Carteirinha">
               <input className={INPUT} value={numeroCarteirinha} onChange={(e) => setNumeroCarteirinha(e.target.value)} />
             </FloatingField>
             <FieldSelect label="Grupo" placeholder="Selecione um grupo" options={['Grupo A', 'Grupo B', 'Grupo C']} value={grupo} onChange={setGrupo} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indicação', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={setComoConheceu} />
+            <FieldSelect label="Como conheceu?" placeholder="Selecione" options={['Instagram', 'Indica��o', 'Google', 'Facebook', 'Outros']} value={comoConheceu} onChange={setComoConheceu} />
           </div>
-          <Section title="Informações Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
+          <Section title="Informa��es Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => setRg(e.target.value)} /></FloatingField>
               <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => setCpf(e.target.value)} /></FloatingField>
@@ -1108,33 +1108,33 @@ function CriarClienteModal({
             </div>
             <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
               <FloatingField label="Logradouro"><input className={INPUT} value={logradouro} onChange={(e) => setLogradouro(e.target.value)} /></FloatingField>
-              <FloatingField label="Número"><input className={INPUT} value={numero} onChange={(e) => setNumero(e.target.value)} /></FloatingField>
+              <FloatingField label="N�mero"><input className={INPUT} value={numero} onChange={(e) => setNumero(e.target.value)} /></FloatingField>
               <FloatingField label="Complemento"><input className={INPUT} value={complemento} onChange={(e) => setComplemento(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Bairro"><input className={INPUT} value={bairro} onChange={(e) => setBairro(e.target.value)} /></FloatingField>
               <FloatingField label="Cidade"><input className={INPUT} value={cidade} onChange={(e) => setCidade(e.target.value)} /></FloatingField>
             </div>
-            <FloatingField label="Outras Informações">
+            <FloatingField label="Outras Informa��es">
               <textarea rows={3} className={INPUT + ' resize-y'} value={outrasInformacoes} onChange={(e) => setOutrasInformacoes(e.target.value)} />
             </FloatingField>
           </Section>
           <Section title="Menor de idade" open={menorIdade} onToggle={() => setMenorIdade((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="Nome do responsável">
+              <FloatingField label="Nome do respons�vel">
                 <input className={INPUT} value={nomeResponsavel} onChange={(e) => setNomeResponsavel(e.target.value)} />
               </FloatingField>
               <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={setDataNascimentoResp} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="CPF do responsável">
+              <FloatingField label="CPF do respons�vel">
                 <input className={INPUT} value={cpfResponsavel} onChange={(e) => setCpfResponsavel(e.target.value)} />
               </FloatingField>
-              <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
+              <PhoneField label="Telefone do respons�vel" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
             </div>
           </Section>
         </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--d2b-border)]">
           <button type="button" onClick={handleClose} className={BTN_GHOST}>Cancelar</button>
           <button type="button" onClick={handleSubmit} disabled={saving} className={BTN_PRIMARY + ' disabled:opacity-50'}>
             {saving ? 'Cadastrando...' : 'Cadastrar'}
@@ -1145,7 +1145,7 @@ function CriarClienteModal({
   )
 }
 
-// ─── Main View ────────────────────────────────────────────────────────────────
+// --- Main View ----------------------------------------------------------------
 export function ClientesView({ initialPacientes, empresaId }: { initialPacientes: PacienteApi[]; empresaId: string | null }) {
   const searchParams = useSearchParams()
   const pacienteIdParam = searchParams.get('pacienteId')
@@ -1172,8 +1172,8 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
     <div className="p-6 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-bold text-[#F5F0FF]">Pacientes da Clínica</h2>
-          <p className="text-sm text-[#A78BCC] mt-0.5">Crie e gerencie pacientes atendidos pela clínica.</p>
+          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Pacientes da Cl�nica</h2>
+          <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie pacientes atendidos pela cl�nica.</p>
         </div>
         <button onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors">
@@ -1183,58 +1183,58 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.18)] rounded-lg px-3 h-9 focus-within:border-[#7C4DFF] transition-colors">
-          <Search size={14} className="text-[#A78BCC] shrink-0" />
+        <div className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 h-9 focus-within:border-[#7C4DFF] transition-colors">
+          <Search size={14} className="text-[var(--d2b-text-secondary)] shrink-0" />
           <input type="text" placeholder="Pesquisar" value={search} onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] outline-none w-44" />
+            className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none w-44" />
         </div>
         <div className="relative">
-          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[#150830] border border-[rgba(124,77,255,0.18)] text-sm text-[#A78BCC] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
+          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
             <option value="">Selecione um status de pagamen...</option>
             <option>Em Aberto</option>
             <option>Quitado</option>
           </select>
-          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
         <div className="relative">
-          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[#150830] border border-[rgba(124,77,255,0.18)] text-sm text-[#A78BCC] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
+          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
             <option value="">Todos profissionais</option>
           </select>
-          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
         <div
           role="switch"
           aria-checked={mostrarArquivados}
           onClick={() => setMostrarArquivados((v) => !v)}
-          className="flex items-center gap-2 text-sm text-[#A78BCC] cursor-pointer select-none"
+          className="flex items-center gap-2 text-sm text-[var(--d2b-text-secondary)] cursor-pointer select-none"
         >
           Mostrar arquivados
-          <div className={`relative w-9 h-5 rounded-full transition-colors ${mostrarArquivados ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}>
+          <div className={`relative w-9 h-5 rounded-full transition-colors ${mostrarArquivados ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}>
             <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${mostrarArquivados ? 'translate-x-4' : 'translate-x-0.5'}`} />
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
-        <div className="grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3 border-b border-[rgba(124,77,255,0.12)]">
-          {[{ label: 'AÇÕES' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESSÕES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }].map((col) => (
+      <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
+        <div className="grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3 border-b border-[var(--d2b-border)]">
+          {[{ label: 'A��ES' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESS�ES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }].map((col) => (
             <div key={col.label} className="flex items-center gap-1">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-[#A78BCC]">{col.label}</span>
-              {col.sortable && <ChevronsUpDown size={11} className="text-[#6B4E8A]" />}
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)]">{col.label}</span>
+              {col.sortable && <ChevronsUpDown size={11} className="text-[var(--d2b-text-muted)]" />}
             </div>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-[#6B4E8A]">Nenhum registro encontrado</div>
+          <div className="py-10 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum registro encontrado</div>
         ) : (
           filtered.map((c, i) => (
             <div key={c.id}
-              className={`grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3.5 items-center hover:bg-[rgba(124,77,255,0.05)] transition-colors ${i < filtered.length - 1 ? 'border-b border-[rgba(124,77,255,0.08)]' : ''}`}>
+              className={`grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3.5 items-center hover:bg-[var(--d2b-hover)] transition-colors ${i < filtered.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}>
               <div className="flex items-center gap-1.5">
                 <button onClick={() => setSelectedCliente(c)}
-                  className="w-7 h-7 rounded-md bg-[rgba(124,77,255,0.12)] hover:bg-[rgba(124,77,255,0.25)] flex items-center justify-center text-[#7C4DFF] transition-colors">
+                  className="w-7 h-7 rounded-md bg-[var(--d2b-hover)] hover:bg-[var(--d2b-hover)] flex items-center justify-center text-[#7C4DFF] transition-colors">
                   <Pencil size={13} />
                 </button>
                 <button className="w-7 h-7 rounded-md bg-[rgba(239,68,68,0.10)] hover:bg-[rgba(239,68,68,0.22)] flex items-center justify-center text-[#EF4444] transition-colors">
@@ -1243,18 +1243,18 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
               </div>
               <button
                 onClick={() => setSelectedCliente(c)}
-                className="text-sm font-semibold text-[#F5F0FF] truncate text-left hover:text-[#C084FC] transition-colors">
+                className="text-sm font-semibold text-[var(--d2b-text-primary)] truncate text-left hover:text-[#C084FC] transition-colors">
                 {c.nome}
               </button>
-              <span className="text-sm text-[#A78BCC]">{c.telefone ?? ''}</span>
-              <span className="text-sm text-[#A78BCC]">{c.sessoes}</span>
-              <span className="text-sm text-[#A78BCC]">{c.grupo ?? '—'}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.telefone ?? ''}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.sessoes}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.grupo ?? '�'}</span>
               <StatusBadge status={c.statusPagamento} />
             </div>
           ))
         )}
 
-        <div className="flex items-center justify-center gap-1 px-4 py-3 border-t border-[rgba(124,77,255,0.12)]">
+        <div className="flex items-center justify-center gap-1 px-4 py-3 border-t border-[var(--d2b-border)]">
           <PageBtn onClick={() => setPage(1)} disabled={page === 1}><ChevronsLeft size={14} /></PageBtn>
           <PageBtn onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft size={14} /></PageBtn>
           <span className="w-8 h-8 rounded-full bg-[#7C4DFF] text-white text-xs font-bold flex items-center justify-center">{page}</span>
@@ -1262,10 +1262,10 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
           <PageBtn onClick={() => setPage(totalPages)} disabled={page === totalPages}><ChevronsRight size={14} /></PageBtn>
           <div className="ml-3 relative">
             <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1) }}
-              className="appearance-none h-8 pl-3 pr-7 rounded-lg bg-[#150830] border border-[rgba(124,77,255,0.25)] text-sm text-[#F5F0FF] focus:outline-none cursor-pointer">
+              className="appearance-none h-8 pl-3 pr-7 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-sm text-[var(--d2b-text-primary)] focus:outline-none cursor-pointer">
               {[5, 10, 20, 50].map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
           </div>
         </div>
       </div>

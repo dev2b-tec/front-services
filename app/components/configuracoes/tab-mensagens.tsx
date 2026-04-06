@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { MessageSquare, Settings, Loader2 } from 'lucide-react'
@@ -7,7 +7,7 @@ import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/pag
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type TipoMensagem =
   | 'CONFIRMAR_AGENDAMENTO'
@@ -38,37 +38,37 @@ interface TabMensagensProps {
   initialEmpresa?: EmpresaData | null
 }
 
-// ─── Metadata ─────────────────────────────────────────────────────────────────
+// --- Metadata -----------------------------------------------------------------
 
 const TIPOS: { tipo: TipoMensagem; label: string; desc: string }[] = [
   {
     tipo: 'CONFIRMAR_AGENDAMENTO',
-    label: 'Confirmação de Agendamento',
-    desc: 'Enviada para lembrar e confirmar a presença do paciente.',
+    label: 'Confirma��o de Agendamento',
+    desc: 'Enviada para lembrar e confirmar a presen�a do paciente.',
   },
   {
     tipo: 'REMARCACAO',
-    label: 'Remarcação',
-    desc: 'Enviada para reagendar pacientes que faltaram à consulta.',
+    label: 'Remarca��o',
+    desc: 'Enviada para reagendar pacientes que faltaram � consulta.',
   },
   {
     tipo: 'AGRADECIMENTO',
     label: 'Agradecimento',
-    desc: 'Enviada após a consulta para agradecer a presença do paciente.',
+    desc: 'Enviada ap�s a consulta para agradecer a presen�a do paciente.',
   },
   {
     tipo: 'COBRANCA',
-    label: 'Cobrança',
+    label: 'Cobran�a',
     desc: 'Enviada para lembrar pacientes sobre pagamentos pendentes.',
   },
   {
     tipo: 'ANIVERSARIO',
-    label: 'Aniversário',
-    desc: 'Enviada no dia do aniversário do paciente.',
+    label: 'Anivers�rio',
+    desc: 'Enviada no dia do anivers�rio do paciente.',
   },
 ]
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// --- Component ----------------------------------------------------------------
 
 export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensProps) {
   const { toast } = useToast()
@@ -77,7 +77,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   type SubTab = 'configuracoes' | 'mensagens'
   const [subTab, setSubTab] = useState<SubTab>('configuracoes')
 
-  // ── Config state ────────────────────────────────────────────────────────────
+  // -- Config state ------------------------------------------------------------
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [savingConfig, setSavingConfig] = useState(false)
   const [numeroWhatsapp, setNumeroWhatsapp] = useState('')
@@ -86,7 +86,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   const [riscoFalta, setRiscoFalta] = useState(false)
   const [horario, setHorario] = useState('TODO_DIA_7AM')
 
-  // ── Mensagens state ─────────────────────────────────────────────────────────
+  // -- Mensagens state ---------------------------------------------------------
   const [loadingMsgs, setLoadingMsgs] = useState(true)
   const [savingMsg, setSavingMsg] = useState(false)
   const [mensagens, setMensagens] = useState<Record<TipoMensagem, string>>({
@@ -99,7 +99,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoMensagem>('CONFIRMAR_AGENDAMENTO')
   const [draftText, setDraftText] = useState('')
 
-  // ── Load config ──────────────────────────────────────────────────────────────
+  // -- Load config --------------------------------------------------------------
   const carregarConfig = useCallback(async () => {
     if (!initialUsuario?.id) { setLoadingConfig(false); return }
     setLoadingConfig(true)
@@ -121,7 +121,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
     }
   }, [initialUsuario?.id])
 
-  // ── Load mensagens ───────────────────────────────────────────────────────────
+  // -- Load mensagens -----------------------------------------------------------
   const carregarMensagens = useCallback(async () => {
     if (!initialEmpresa?.id) { setLoadingMsgs(false); return }
     setLoadingMsgs(true)
@@ -148,7 +148,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   useEffect(() => { carregarConfig() }, [carregarConfig])
   useEffect(() => { carregarMensagens() }, [carregarMensagens])
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // -- Handlers ----------------------------------------------------------------
   const handleTipoChange = (tipo: TipoMensagem) => {
     setTipoSelecionado(tipo)
     setDraftText(mensagens[tipo])
@@ -173,12 +173,12 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
         }
       )
       if (res.ok) {
-        toast({ title: 'Configurações salvas com sucesso!' })
+        toast({ title: 'Configura��es salvas com sucesso!' })
       } else {
-        toast({ title: 'Erro ao salvar configurações', variant: 'destructive' })
+        toast({ title: 'Erro ao salvar configura��es', variant: 'destructive' })
       }
     } catch {
-      toast({ title: 'Erro ao salvar configurações', variant: 'destructive' })
+      toast({ title: 'Erro ao salvar configura��es', variant: 'destructive' })
     } finally {
       setSavingConfig(false)
     }
@@ -211,7 +211,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
 
   if (loadingConfig) {
     return (
-      <div className="flex items-center justify-center py-16 gap-2 text-[#A78BCC]">
+      <div className="flex items-center justify-center py-16 gap-2 text-[var(--d2b-text-secondary)]">
         <Loader2 size={16} className="animate-spin" />
         <span className="text-sm">Carregando...</span>
       </div>
@@ -222,56 +222,56 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
 
   return (
     <div>
-      {/* ── Sub-tab bar ─────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 border-b border-[rgba(124,77,255,0.2)] mb-6">
+      {/* -- Sub-tab bar ------------------------------------------------------- */}
+      <div className="flex gap-1 border-b border-[var(--d2b-border-strong)] mb-6">
         <button
           onClick={() => setSubTab('configuracoes')}
           className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
             subTab === 'configuracoes'
-              ? 'border-[#7C4DFF] text-[#F5F0FF]'
-              : 'border-transparent text-[#A78BCC] hover:text-[#F5F0FF]'
+              ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]'
+              : 'border-transparent text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           <Settings size={14} />
-          Configurações
+          Configura��es
         </button>
         <button
           onClick={() => setSubTab('mensagens')}
           className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
             subTab === 'mensagens'
-              ? 'border-[#7C4DFF] text-[#F5F0FF]'
-              : 'border-transparent text-[#A78BCC] hover:text-[#F5F0FF]'
+              ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]'
+              : 'border-transparent text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'
           }`}
         >
           <MessageSquare size={14} />
-          Mensagens Padrão
+          Mensagens Padr�o
         </button>
       </div>
 
-      {/* ── Configurações ───────────────────────────────────────────────────── */}
+      {/* -- Configura��es ----------------------------------------------------- */}
       {subTab === 'configuracoes' && (
         <div className="space-y-5 max-w-xl">
-          {/* Número */}
+          {/* N�mero */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[#A78BCC] uppercase tracking-wide">
-              Número de WhatsApp da Clínica
+            <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
+              N�mero de WhatsApp da Cl�nica
             </label>
             <div className="flex items-center gap-3">
-              <select className="px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]">
-                <option value="+55">🇧🇷 +55</option>
+              <select className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]">
+                <option value="+55">???? +55</option>
               </select>
               <input
                 type="text"
                 value={numeroWhatsapp}
                 onChange={(e) => setNumeroWhatsapp(e.target.value)}
                 placeholder="(00) 00000-0000"
-                className="flex-1 px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                className="flex-1 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
               />
             </div>
           </div>
 
-          {/* Permissões */}
-          <label className="flex items-start gap-3 p-3 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          {/* Permiss�es */}
+          <label className="flex items-start gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
             <div className="relative flex items-center shrink-0 mt-0.5">
               <input
                 type="checkbox"
@@ -279,18 +279,18 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
                 onChange={(e) => setPermitirProf(e.target.checked)}
                 className="peer sr-only"
               />
-              <div className="w-10 h-5 bg-[#2D1B4E] rounded-full peer-checked:bg-[#7C4DFF] transition-colors" />
+              <div className="w-10 h-5 bg-[var(--d2b-bg-elevated)] rounded-full peer-checked:bg-[#7C4DFF] transition-colors" />
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${permitirProf ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </div>
-            <span className="text-sm text-[#F5F0FF]">
+            <span className="text-sm text-[var(--d2b-text-primary)]">
               Permitir que profissionais visualizem telefone dos pacientes e disparem mensagens
             </span>
           </label>
 
-          {/* Disparo automático */}
+          {/* Disparo autom�tico */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[#A78BCC] uppercase tracking-wide">
-              Envio de SMS Automático
+            <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
+              Envio de SMS Autom�tico
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -300,7 +300,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
                 onChange={() => { setEnvioAuto(true); setRiscoFalta(false) }}
                 className="w-4 h-4 accent-[#7C4DFF]"
               />
-              <span className="text-sm text-[#F5F0FF]">Ativar Disparo Automático</span>
+              <span className="text-sm text-[var(--d2b-text-primary)]">Ativar Disparo Autom�tico</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -310,24 +310,24 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
                 onChange={() => { setEnvioAuto(false); setRiscoFalta(true) }}
                 className="w-4 h-4 accent-[#7C4DFF]"
               />
-              <span className="text-sm text-[#F5F0FF]">Enviar somente com risco de falta</span>
+              <span className="text-sm text-[var(--d2b-text-primary)]">Enviar somente com risco de falta</span>
             </label>
           </div>
 
-          {/* Horário */}
+          {/* Hor�rio */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[#A78BCC] uppercase tracking-wide">
+            <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
               Disparar em:
             </label>
             <select
               value={horario}
               onChange={(e) => setHorario(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
             >
-              <option value="TODO_DIA_7AM">Todo dia — 7h</option>
-              <option value="TODO_DIA_8AM">Todo dia — 8h</option>
-              <option value="TODO_DIA_9AM">Todo dia — 9h</option>
-              <option value="TODO_DIA_10AM">Todo dia — 10h</option>
+              <option value="TODO_DIA_7AM">Todo dia � 7h</option>
+              <option value="TODO_DIA_8AM">Todo dia � 8h</option>
+              <option value="TODO_DIA_9AM">Todo dia � 9h</option>
+              <option value="TODO_DIA_10AM">Todo dia � 10h</option>
             </select>
           </div>
 
@@ -338,18 +338,18 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 text-white text-sm font-semibold transition-colors"
             >
               {savingConfig && <Loader2 size={13} className="animate-spin" />}
-              Salvar Configurações
+              Salvar Configura��es
             </button>
           </div>
         </div>
       )}
 
-      {/* ── Mensagens Padrão ────────────────────────────────────────────────── */}
+      {/* -- Mensagens Padr�o -------------------------------------------------- */}
       {subTab === 'mensagens' && (
         <div className="space-y-5 max-w-xl">
           <div>
-            <p className="text-xs text-[#A78BCC]">
-              Configure os textos dos avisos automáticos. Use variáveis como{' '}
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
+              Configure os textos dos avisos autom�ticos. Use vari�veis como{' '}
               <span className="text-[#EF4444]">#nome_paciente#</span>,{' '}
               <span className="text-[#EF4444]">#nome_profissional#</span>,{' '}
               <span className="text-[#EF4444]">#data_e_hora_agendamento#</span>.
@@ -358,10 +358,10 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
 
           {!initialEmpresa?.id ? (
             <div className="px-4 py-3 rounded-lg border border-[rgba(250,204,21,0.2)] bg-[rgba(250,204,21,0.06)] text-xs text-[#FACC15]">
-              Empresa não identificada. Faça login novamente para editar as mensagens.
+              Empresa n�o identificada. Fa�a login novamente para editar as mensagens.
             </div>
           ) : loadingMsgs ? (
-            <div className="flex items-center gap-2 py-4 text-[#A78BCC]">
+            <div className="flex items-center gap-2 py-4 text-[var(--d2b-text-secondary)]">
               <Loader2 size={14} className="animate-spin" />
               <span className="text-xs">Carregando mensagens...</span>
             </div>
@@ -369,24 +369,24 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
             <div className="space-y-4">
               {/* Select tipo */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#A78BCC] uppercase tracking-wide">
+                <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
                   Tipo de Mensagem
                 </label>
                 <select
                   value={tipoSelecionado}
                   onChange={(e) => handleTipoChange(e.target.value as TipoMensagem)}
-                  className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm focus:outline-none focus:border-[#7C4DFF]"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm focus:outline-none focus:border-[#7C4DFF]"
                 >
                   {TIPOS.map(({ tipo, label }) => (
                     <option key={tipo} value={tipo}>{label}</option>
                   ))}
                 </select>
-                <p className="text-xs text-[#6B4E8A]">{tipoInfo.desc}</p>
+                <p className="text-xs text-[var(--d2b-text-muted)]">{tipoInfo.desc}</p>
               </div>
 
               {/* Textarea */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#A78BCC] uppercase tracking-wide">
+                <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
                   Texto da Mensagem
                 </label>
                 <textarea
@@ -394,7 +394,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
                   onChange={(e) => setDraftText(e.target.value)}
                   rows={7}
                   placeholder="Digite o texto da mensagem..."
-                  className="w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-lg px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+                  className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
                 />
               </div>
 

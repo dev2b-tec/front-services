@@ -46,16 +46,16 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#0D0520] border border-[rgba(124,77,255,0.25)]">
+      <DialogContent className="max-w-md bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-[#F5F0FF]">
+          <DialogTitle className="text-lg font-bold text-[var(--d2b-text-primary)]">
             {editData ? 'Editar senha' : 'Cadastrar nova senha'}
           </DialogTitle>
           <button
             onClick={() => onOpenChange(false)}
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
           >
-            <X className="h-4 w-4 text-[#A78BCC]" />
+            <X className="h-4 w-4 text-[var(--d2b-text-secondary)]" />
             <span className="sr-only">Close</span>
           </button>
         </DialogHeader>
@@ -63,7 +63,7 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {!tipoFixo && (
             <div>
-              <label className="block text-sm font-medium text-[#F5F0FF] mb-2">
+              <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">
                 Tipo
               </label>
               <input
@@ -71,14 +71,14 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value)}
                 placeholder="Ex: Senha Financeiro"
-                className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF]"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
                 required
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-[#F5F0FF] mb-2">
+            <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">
               Descrição (opcional)
             </label>
             <textarea
@@ -86,12 +86,12 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Defina uma nova senha"
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#F5F0FF] mb-2">
+            <label className="block text-sm font-medium text-[var(--d2b-text-primary)] mb-2">
               Senha
             </label>
             <input
@@ -99,7 +99,7 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
               value={valor}
               onChange={(e) => setValor(e.target.value)}
               placeholder="Digite a senha"
-              className="w-full px-3 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] bg-[#120328] text-[#F5F0FF] text-sm placeholder:text-[#6B4E8A] focus:outline-none focus:border-[#7C4DFF] font-mono"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] font-mono"
               required
             />
           </div>
@@ -108,7 +108,7 @@ export function SenhaFormDialog({ open, onOpenChange, onSave, editData, tipoFixo
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-4 py-2 rounded-lg border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] text-[#A78BCC] hover:text-[#F5F0FF] text-sm font-semibold transition-colors"
+              className="px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] text-sm font-semibold transition-colors"
             >
               Cancelar
             </button>

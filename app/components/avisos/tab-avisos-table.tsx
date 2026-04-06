@@ -43,8 +43,8 @@ const PROFISSIONAIS = ['Todos os profissionais', 'JESSE DOS SANTOS BEZERRA']
 const ROWS_OPTIONS  = [10, 25, 50]
 
 const INP =
-  'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
 
 // ─── MessagePreview ───────────────────────────────────────────────────────────
@@ -115,28 +115,28 @@ export function EditarMensagemModal({
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-2xl p-0 gap-0 overflow-hidden"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-2xl p-0 gap-0 overflow-hidden"
       >
-        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Editar Mensagem</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-lg leading-none">✕</button>
+        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Mensagem</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-lg leading-none">✕</button>
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-3">
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-xs text-[#A78BCC]">Carregando...</div>
+            <div className="flex items-center justify-center py-8 text-xs text-[var(--d2b-text-secondary)]">Carregando...</div>
           ) : (
-          <div className="relative rounded-md border border-[rgba(124,77,255,0.25)] bg-[#150830] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
+          <div className="relative rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
             <textarea
               rows={6}
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-transparent caret-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none resize-none relative z-10"
+              className="w-full bg-transparent px-3 py-2.5 text-sm text-transparent caret-[#F5F0FF] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none relative z-10"
               spellCheck={false}
             />
             <div
               aria-hidden
-              className="absolute inset-0 px-3 py-2.5 text-sm text-[#F5F0FF] whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
+              className="absolute inset-0 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
               style={{ lineHeight: '1.5rem' }}
             >
               <MessagePreview text={msg} />
@@ -144,7 +144,7 @@ export function EditarMensagemModal({
           </div>
           )}
 
-          <p className="text-xs text-[#6B4E8A]">
+          <p className="text-xs text-[var(--d2b-text-muted)]">
             Adicione variáveis inserindo hastag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento:
           </p>
 
@@ -156,8 +156,8 @@ export function EditarMensagemModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--d2b-border)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
           <button onClick={handleSalvar} disabled={saving || loading} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 transition-colors">
@@ -177,26 +177,26 @@ export function ProgramarDisparosModal({ open, onClose }: { open: boolean; onClo
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] text-[#F5F0FF] !max-w-sm p-0 gap-0 overflow-hidden"
+        className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] !max-w-sm p-0 gap-0 overflow-hidden"
       >
-        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[rgba(124,77,255,0.18)] space-y-0">
-          <DialogTitle className="text-base font-bold text-[#F5F0FF]">Programar Disparos</DialogTitle>
-          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-lg leading-none">✕</button>
+        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)] space-y-0">
+          <DialogTitle className="text-base font-bold text-[var(--d2b-text-primary)]">Programar Disparos</DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-lg leading-none">✕</button>
         </DialogHeader>
 
         <div className="px-6 py-5 flex items-center justify-between">
-          <span className="text-sm text-[#A78BCC]">Ativar Disparo Automático</span>
+          <span className="text-sm text-[var(--d2b-text-secondary)]">Ativar Disparo Automático</span>
           <button
             type="button"
             onClick={() => setAtivo((p) => !p)}
-            className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${ativo ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}
+            className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${ativo ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
           >
             <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${ativo ? 'translate-x-5' : 'translate-x-0.5'}`} />
           </button>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[rgba(124,77,255,0.18)]">
-          <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--d2b-border)]">
+          <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
           <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">
@@ -211,7 +211,7 @@ export function ProgramarDisparosModal({ open, onClose }: { open: boolean; onClo
 // ─── StatusBadge ─────────────────────────────────────────────────────────────
 export function StatusBadge({ status }: { status: AvisoRow['status'] }) {
   const map: Record<string, { bg: string; text: string; dot: string }> = {
-    Agendado:   { bg: 'bg-[rgba(124,77,255,0.15)]', text: 'text-[#A78BCC]', dot: 'bg-[#A78BCC]' },
+    Agendado:   { bg: 'bg-[var(--d2b-hover)]', text: 'text-[var(--d2b-text-secondary)]', dot: 'bg-[#A78BCC]' },
     Aguardando: { bg: 'bg-[rgba(234,179,8,0.15)]',  text: 'text-[#EAB308]', dot: 'bg-[#EAB308]' },
     Confirmado: { bg: 'bg-[rgba(20,184,166,0.15)]', text: 'text-[#14B8A6]', dot: 'bg-[#14B8A6]' },
     Atendido:   { bg: 'bg-[rgba(34,197,94,0.15)]',  text: 'text-[#22C55E]', dot: 'bg-[#22C55E]' },
@@ -234,7 +234,7 @@ function PageBtn({ onClick, disabled, children }: { onClick: () => void; disable
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-8 h-8 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+      className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
     >
       {children}
     </button>
@@ -289,7 +289,7 @@ export function AvisosTable({
 
         <button
           onClick={() => setEditarOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
         >
           <Pencil size={13} />
           Editar Mensagem
@@ -298,16 +298,16 @@ export function AvisosTable({
 
       {/* Filters */}
       <div className="flex gap-3">
-        <div className="flex-1 flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
-          <Search size={14} className="text-[#6B4E8A] shrink-0" />
+        <div className="flex-1 flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
+          <Search size={14} className="text-[var(--d2b-text-muted)] shrink-0" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Pesquisar"
-            className="bg-transparent text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none w-full"
+            className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none w-full"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors">
+            <button onClick={() => setSearch('')} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors">
               <X size={13} />
             </button>
           )}
@@ -323,22 +323,22 @@ export function AvisosTable({
               <option key={p} value={p} style={{ background: '#1A0A38' }}>{p}</option>
             ))}
           </select>
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[rgba(124,77,255,0.18)] overflow-hidden">
-        <div className="grid grid-cols-[auto_2fr_2fr_2fr_1.5fr] bg-[rgba(124,77,255,0.06)] border-b border-[rgba(124,77,255,0.18)]">
+      <div className="rounded-xl border border-[var(--d2b-border)] overflow-hidden">
+        <div className="grid grid-cols-[auto_2fr_2fr_2fr_1.5fr] bg-[var(--d2b-hover)] border-b border-[var(--d2b-border)]">
           {['', 'PACIENTE', 'PROFISSIONAL', 'DATA DA CONSULTA', 'STATUS'].map((col) => (
-            <div key={col} className="px-4 py-3 text-[10px] font-semibold tracking-wider text-[#6B4E8A] uppercase">
+            <div key={col} className="px-4 py-3 text-[10px] font-semibold tracking-wider text-[var(--d2b-text-muted)] uppercase">
               {col}
             </div>
           ))}
         </div>
 
         {paginated.length === 0 ? (
-          <div className="flex items-center justify-center py-12 text-sm text-[#6B4E8A]">
+          <div className="flex items-center justify-center py-12 text-sm text-[var(--d2b-text-muted)]">
             Nenhum registro encontrado
           </div>
         ) : (
@@ -346,7 +346,7 @@ export function AvisosTable({
             <div
               key={row.id}
               onClick={() => onRowClick?.(row.agendamento)}
-              className={`grid grid-cols-[auto_2fr_2fr_2fr_1.5fr] items-center border-b border-[rgba(124,77,255,0.10)] transition-colors ${onRowClick ? 'cursor-pointer hover:bg-[rgba(124,77,255,0.08)]' : 'hover:bg-[rgba(124,77,255,0.05)]'} ${i % 2 === 1 ? 'bg-[rgba(124,77,255,0.02)]' : ''}`}
+              className={`grid grid-cols-[auto_2fr_2fr_2fr_1.5fr] items-center border-b border-[var(--d2b-border)] transition-colors ${onRowClick ? 'cursor-pointer hover:bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'} ${i % 2 === 1 ? 'bg-[var(--d2b-hover)]' : ''}`}
             >
               <div className="px-4 py-3">
                 <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-[rgba(20,184,166,0.15)] text-[#14B8A6] border border-[rgba(20,184,166,0.30)] hover:bg-[rgba(20,184,166,0.25)] transition-colors whitespace-nowrap">
@@ -354,18 +354,18 @@ export function AvisosTable({
                 </button>
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm font-semibold text-[#F5F0FF] leading-snug">{row.paciente}</p>
-                <p className="text-xs text-[#6B4E8A]">{row.telefone}</p>
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">{row.paciente}</p>
+                <p className="text-xs text-[var(--d2b-text-muted)]">{row.telefone}</p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm text-[#A78BCC]">{row.profissional}</p>
+                <p className="text-sm text-[var(--d2b-text-secondary)]">{row.profissional}</p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm text-[#A78BCC]">{row.dataConsulta}</p>
+                <p className="text-sm text-[var(--d2b-text-secondary)]">{row.dataConsulta}</p>
               </div>
               <div className="px-4 py-3 flex items-center gap-2">
                 <StatusBadge status={row.status} />
-                <button className="w-7 h-7 flex items-center justify-center rounded-md text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors">
+                <button className="w-7 h-7 flex items-center justify-center rounded-md text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
                   <Pencil size={13} />
                 </button>
               </div>
@@ -382,7 +382,7 @@ export function AvisosTable({
           <button
             key={p}
             onClick={() => setPage(p)}
-            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${p === page ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'}`}
+            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${p === page ? 'bg-[#7C4DFF] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
           >{p}</button>
         ))}
         <PageBtn onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}><ChevronRight size={14} /></PageBtn>
@@ -391,11 +391,11 @@ export function AvisosTable({
           <select
             value={rowsPerPage}
             onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1) }}
-            className="bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[#F5F0FF] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
+            className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[var(--d2b-text-primary)] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
           >
             {ROWS_OPTIONS.map((r) => <option key={r} value={r} style={{ background: '#1A0A38' }}>{r}</option>)}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
       </div>
 

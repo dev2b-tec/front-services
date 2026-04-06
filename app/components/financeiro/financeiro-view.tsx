@@ -16,12 +16,12 @@ import { NovoAgendamentoModal, ApiAgendamento, Profissional } from '@/components
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const INP =
-  'w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
-const LBG = 'bg-[#0D0520]'
+const LBG = 'bg-[var(--d2b-bg-main)]'
 const BTN_GHOST =
-  'px-5 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors'
+  'px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors'
 const BTN_PRIMARY =
   'px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
 
@@ -71,7 +71,7 @@ function AgendaStatusBadge({ status }: { status: StatusAgenda }) {
     Confirmado:'bg-[rgba(20,184,166,0.15)] text-[#14B8A6] border border-[rgba(20,184,166,0.3)]',
     Aguardando:'bg-[rgba(234,179,8,0.15)] text-[#EAB308] border border-[rgba(234,179,8,0.3)]',
     Faltou:    'bg-[rgba(239,68,68,0.15)] text-[#EF4444] border border-[rgba(239,68,68,0.3)]',
-    Cancelado: 'bg-[rgba(107,78,138,0.20)] text-[#A78BCC] border border-[rgba(124,77,255,0.25)]',
+    Cancelado: 'bg-[rgba(107,78,138,0.20)] text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)]',
   }
   return (
     <span className={`text-xs font-semibold px-3 py-1 rounded-md ${map[status]}`}>{status}</span>
@@ -466,9 +466,9 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
     <>
     {buscandoAgendamento && (
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
-        <div className="flex items-center gap-3 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl px-6 py-4">
+        <div className="flex items-center gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-6 py-4">
           <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C4DFF" strokeWidth="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".3"/><path d="M21 12a9 9 0 00-9-9"/></svg>
-          <span className="text-sm text-[#F5F0FF]">Carregando agendamento...</span>
+          <span className="text-sm text-[var(--d2b-text-primary)]">Carregando agendamento...</span>
         </div>
       </div>
     )}
@@ -509,24 +509,24 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
     {modalRecibo && (
       <ModalEmitirRecibo row={modalRecibo} onClose={() => setModalRecibo(null)} />
     )}
-    <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
+    <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
       {/* ── Header ── */}
-      <div className="px-6 pt-6 pb-4 border-b border-[rgba(124,77,255,0.12)]">
-        <h2 className="text-base font-bold text-[#F5F0FF]">Contas a receber</h2>
-        <p className="text-xs text-[#A78BCC] mt-0.5">Controle o recebimento do pagamento de seus agendamentos e de outras contas que achar necessário.</p>
+      <div className="px-6 pt-6 pb-4 border-b border-[var(--d2b-border)]">
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Contas a receber</h2>
+        <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Controle o recebimento do pagamento de seus agendamentos e de outras contas que achar necessário.</p>
 
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
-          <span className="text-sm font-medium text-[#7C4DFF] underline cursor-pointer hover:text-[#A78BCC] transition-colors">
+          <span className="text-sm font-medium text-[#7C4DFF] underline cursor-pointer hover:text-[var(--d2b-text-secondary)] transition-colors">
             Lista de agendamentos
           </span>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
               <input type="text" placeholder="Pesquisar" value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1) }}
                 className={INP + ' pl-8 w-44'} />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-lg hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
               <Filter size={13} /> Filtrar dados
             </button>
           </div>
@@ -537,7 +537,7 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.12)] bg-[#0D0520]">
+            <tr className="border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-main)]">
               <th className="w-10 px-4 py-3">
                 <input type="checkbox" checked={allSelected} onChange={toggleAll}
                   className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
@@ -553,10 +553,10 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
                       </span>
                     </button>
                     {acoesOpen && (
-                      <div className="absolute top-full mt-1 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-xl z-30 min-w-[200px] py-1">
-                        <p className="px-4 py-1.5 text-[10px] font-bold text-[#6B4E8A] uppercase tracking-widest">Ações Massivas</p>
+                      <div className="absolute top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl z-30 min-w-[200px] py-1">
+                        <p className="px-4 py-1.5 text-[10px] font-bold text-[var(--d2b-text-muted)] uppercase tracking-widest">Ações Massivas</p>
                         <button onClick={() => { setModalAlterarOpen(true); setAcoesOpen(false) }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] transition-colors text-left">
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-left">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                           Alterar Status &amp; Pagamento
                         </button>
@@ -568,15 +568,15 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
                     )}
                   </div>
                 ) : (
-                  <button className="flex items-center gap-1 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest hover:text-[#A78BCC] transition-colors">
+                  <button className="flex items-center gap-1 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest hover:text-[var(--d2b-text-secondary)] transition-colors">
                     PACIENTE <ChevronDown size={10} />
                   </button>
                 )}
               </th>
               {[['DATA'],['PROFISSIONAL'],['SERVIÇOS & STATUS'],['PAGAMENTO']].map(([h], i) => (
-                <th key={h} className={`px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest ${i === 3 ? 'text-right' : 'text-left'}`}>
+                <th key={h} className={`px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest ${i === 3 ? 'text-right' : 'text-left'}`}>
                   {i < 2 ? (
-                    <button className="flex items-center gap-1 hover:text-[#A78BCC] transition-colors">
+                    <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors">
                       {h} <ChevronDown size={10} />
                     </button>
                   ) : h}
@@ -587,12 +587,12 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
           <tbody>
             {pageRows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[#6B4E8A]">Nenhum agendamento encontrado.</td>
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum agendamento encontrado.</td>
               </tr>
             ) : pageRows.map((r) => (
               <tr key={r.id}
                 onClick={() => handleRowClick(r)}
-                className={`border-b border-[rgba(124,77,255,0.08)] transition-colors ${r.referenciaId ? 'cursor-pointer hover:bg-[rgba(124,77,255,0.06)]' : 'hover:bg-[rgba(124,77,255,0.04)]'}`}>
+                className={`border-b border-[var(--d2b-border)] transition-colors ${r.referenciaId ? 'cursor-pointer hover:bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'}`}>
                 <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                   <input type="checkbox" checked={selected.includes(r.id)} onChange={() => toggleOne(r.id)}
                     className="w-4 h-4 rounded accent-[#7C4DFF] cursor-pointer" />
@@ -615,19 +615,19 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
                       </button>
                     </div>
                     <div>
-                      <p className="font-semibold text-[#F5F0FF]">{r.paciente}</p>
-                      <p className="text-xs text-[#6B4E8A]">{r.telefone}</p>
-                      <span className="text-[10px] font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded px-1.5 py-0.5 mt-0.5 inline-block">
+                      <p className="font-semibold text-[var(--d2b-text-primary)]">{r.paciente}</p>
+                      <p className="text-xs text-[var(--d2b-text-muted)]">{r.telefone}</p>
+                      <span className="text-[10px] font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded px-1.5 py-0.5 mt-0.5 inline-block">
                         {r.convenio}
                       </span>
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-4 text-[#A78BCC] whitespace-nowrap">{r.data}</td>
-                <td className="px-4 py-4 text-[#A78BCC] whitespace-nowrap">{r.profissional}</td>
+                <td className="px-4 py-4 text-[var(--d2b-text-secondary)] whitespace-nowrap">{r.data}</td>
+                <td className="px-4 py-4 text-[var(--d2b-text-secondary)] whitespace-nowrap">{r.profissional}</td>
                 <td className="px-4 py-4"><AgendaStatusBadge status={r.status} /></td>
                 <td className="px-4 py-4 text-right">
-                  <p className="text-sm font-medium text-[#F5F0FF]">
+                  <p className="text-sm font-medium text-[var(--d2b-text-primary)]">
                     R$ {r.recebido.toFixed(2).replace('.', ',')} de R$ {r.total.toFixed(2).replace('.', ',')}
                   </p>
                   <p className="text-xs text-[#F59E0B] flex items-center gap-1 justify-end mt-0.5">
@@ -644,18 +644,18 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-6 py-4 border-t border-[rgba(124,77,255,0.12)] flex items-center justify-between flex-wrap gap-3">
+      <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
         <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
           <Upload size={13} /> Exportar Dados
         </button>
 
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-xs text-[#A78BCC]">
-              Total Recebido: <span className="font-semibold text-[#F5F0FF]">R$ {totalRecebido.toFixed(2).replace('.', ',')}</span>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
+              Total Recebido: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {totalRecebido.toFixed(2).replace('.', ',')}</span>
             </p>
-            <p className="text-xs text-[#A78BCC]">
-              Total: <span className="font-semibold text-[#F5F0FF]">R$ {total.toFixed(2).replace('.', ',')}</span>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
+              Total: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {total.toFixed(2).replace('.', ',')}</span>
             </p>
           </div>
 
@@ -665,7 +665,7 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
               const acts = [() => setPage(1), () => setPage((p) => Math.max(1, p - 1)), () => setPage((p) => Math.min(totalPages, p + 1)), () => setPage(totalPages)]
               return (
                 <button key={sym} onClick={acts[i]}
-                  className="w-7 h-7 flex items-center justify-center rounded text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] hover:text-[#F5F0FF] transition-colors">
+                  className="w-7 h-7 flex items-center justify-center rounded text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors">
                   {sym}
                 </button>
               )
@@ -673,14 +673,14 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
             <span className="w-7 h-7 flex items-center justify-center rounded bg-[#7C4DFF] text-white text-xs font-semibold">{page}</span>
             <div className="relative ml-1">
               <button onClick={() => setPageSizeOpen((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 border border-[rgba(124,77,255,0.25)] rounded text-xs text-[#A78BCC] hover:border-[#7C4DFF] transition-colors">
+                className="flex items-center gap-1 px-2 py-1.5 border border-[var(--d2b-border-strong)] rounded text-xs text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">
                 {pageSize} <ChevronDown size={11} />
               </button>
               {pageSizeOpen && (
-                <div className="absolute bottom-full mb-1 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-xl overflow-hidden z-20">
+                <div className="absolute bottom-full mb-1 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl overflow-hidden z-20">
                   {[5, 10, 20, 50].map((n) => (
                     <button key={n} onClick={() => { setPageSize(n); setPage(1); setPageSizeOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[rgba(124,77,255,0.12)] transition-colors ${pageSize === n ? 'text-[#7C4DFF] font-semibold' : 'text-[#F5F0FF]'}`}>
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--d2b-hover)] transition-colors ${pageSize === n ? 'text-[#7C4DFF] font-semibold' : 'text-[var(--d2b-text-primary)]'}`}>
                       {n}
                     </button>
                   ))}
@@ -699,7 +699,7 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
 function StatusBadge({ status }: { status: Lancamento['status'] }) {
   const map = {
     pago:     { label: 'Pago',     cls: 'bg-[rgba(34,197,94,0.12)] text-[#22C55E] border border-[rgba(34,197,94,0.25)]' },
-    aberto:   { label: 'Em aberto', cls: 'bg-[rgba(124,77,255,0.10)] text-[#A78BCC] border border-[rgba(124,77,255,0.25)]' },
+    aberto:   { label: 'Em aberto', cls: 'bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)]' },
     atrasado: { label: 'Atrasado', cls: 'bg-[rgba(239,68,68,0.12)] text-[#EF4444] border border-[rgba(239,68,68,0.25)]' },
   }
   const { label, cls } = map[status]
@@ -712,7 +712,7 @@ function FSelect({ label, opts, value, onChange }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}
       </label>
       <div className="relative">
@@ -723,7 +723,7 @@ function FSelect({ label, opts, value, onChange }: {
         >
           {opts.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </div>
   )
@@ -740,31 +740,31 @@ function ModalLancamento({ tipo, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#120328] border border-[rgba(124,77,255,0.25)] rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+      <div className="bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-[#F5F0FF]">
+          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">
             {tipo === 'entrada' ? 'Novo Recebimento' : 'Nova Despesa'}
           </h3>
-          <button onClick={onClose} className="text-[#6B4E8A] hover:text-[#F5F0FF] transition-colors">
+          <button onClick={onClose} className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] transition-colors">
             <X size={18} />
           </button>
         </div>
 
         <div className="space-y-4">
           <div className="relative">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
               Descrição<span className="text-[#7C4DFF] ml-0.5">*</span>
             </label>
             <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className={INP} />
           </div>
           <div className="relative">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
               Valor (R$)<span className="text-[#7C4DFF] ml-0.5">*</span>
             </label>
             <input placeholder="0,00" value={valor} onChange={(e) => setValor(e.target.value)} className={INP} />
           </div>
           <div className="relative">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
               Vencimento<span className="text-[#7C4DFF] ml-0.5">*</span>
             </label>
             <input type="date" value={venc} onChange={(e) => setVenc(e.target.value)} className={INP} />
@@ -813,7 +813,7 @@ function TabelaLancamentos({ data, tipo }: { data: Lancamento[]; tipo: 'entrada'
       {/* Filtros */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -847,12 +847,12 @@ function TabelaLancamentos({ data, tipo }: { data: Lancamento[]; tipo: 'entrada'
           { label: tipo === 'entrada' ? 'A Receber (Em aberto)' : 'A Pagar (Em aberto)', value: totalAberto, color: '#A78BCC' },
           { label: tipo === 'entrada' ? 'Total a Receber' : 'Total a Pagar', value: totalGeral,  color: tipo === 'entrada' ? '#7C4DFF' : '#EF4444' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="flex items-center gap-3 rounded-lg border border-[rgba(124,77,255,0.18)] bg-[#120328] px-4 py-3">
+          <div key={label} className="flex items-center gap-3 rounded-lg border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] px-4 py-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
               <DollarSign size={16} style={{ color }} />
             </div>
             <div>
-              <p className="text-xs text-[#A78BCC]">{label}</p>
+              <p className="text-xs text-[var(--d2b-text-secondary)]">{label}</p>
               <p className="text-sm font-bold" style={{ color }}>{fmtBRL(value)}</p>
             </div>
           </div>
@@ -860,28 +860,28 @@ function TabelaLancamentos({ data, tipo }: { data: Lancamento[]; tipo: 'entrada'
       </div>
 
       {/* Tabela */}
-      <div className="rounded-lg border border-[rgba(124,77,255,0.18)] overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-0 bg-[#120328] border-b border-[rgba(124,77,255,0.12)]">
-          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[#6B4E8A]">Descrição</div>
-          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[#6B4E8A]">Vencimento</div>
-          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[#6B4E8A]">Valor</div>
-          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[#6B4E8A]">Status</div>
+      <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-0 bg-[var(--d2b-bg-surface)] border-b border-[var(--d2b-border)]">
+          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-muted)]">Descrição</div>
+          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-muted)]">Vencimento</div>
+          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-muted)]">Valor</div>
+          <div className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-muted)]">Status</div>
         </div>
         {filtered.length === 0 && (
-          <div className="px-4 py-8 text-center text-sm text-[#6B4E8A]">Nenhum lançamento encontrado.</div>
+          <div className="px-4 py-8 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum lançamento encontrado.</div>
         )}
         {filtered.map((l, i) => (
           <div
             key={l.id}
             className={`grid grid-cols-[1fr_auto_auto_auto] gap-0 px-0 items-center ${
-              i < filtered.length - 1 ? 'border-b border-[rgba(124,77,255,0.08)]' : ''
-            } hover:bg-[rgba(124,77,255,0.04)] transition-colors`}
+              i < filtered.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''
+            } hover:bg-[var(--d2b-hover)] transition-colors`}
           >
             <div className="px-4 py-3">
-              <p className="text-sm font-medium text-[#F5F0FF]">{l.descricao}</p>
-              {l.paciente && <p className="text-xs text-[#6B4E8A]">{l.categoria}</p>}
+              <p className="text-sm font-medium text-[var(--d2b-text-primary)]">{l.descricao}</p>
+              {l.paciente && <p className="text-xs text-[var(--d2b-text-muted)]">{l.categoria}</p>}
             </div>
-            <div className="px-4 py-3 text-sm text-[#A78BCC] whitespace-nowrap">{l.vencimento}</div>
+            <div className="px-4 py-3 text-sm text-[var(--d2b-text-secondary)] whitespace-nowrap">{l.vencimento}</div>
             <div className="px-4 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: tipo === 'entrada' ? '#22C55E' : '#EF4444' }}>
               {fmtBRL(l.valor)}
             </div>
@@ -974,8 +974,8 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-bold text-[#F5F0FF]">Dashboard</h2>
-          <p className="text-xs text-[#A78BCC] mt-0.5">Faça análises e crie relatórios gerenciais facilmente</p>
+          <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Dashboard</h2>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Faça análises e crie relatórios gerenciais facilmente</p>
         </div>
         <div className="flex gap-2">
           <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
@@ -989,27 +989,27 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
 
       {/* ── Conta a Receber ── */}
       <div>
-        <h3 className="text-sm font-semibold text-[#A78BCC] mb-3">Conta a Receber</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)] mb-3">Conta a Receber</h3>
         <div className="grid grid-cols-2 gap-5 items-stretch">
           {/* Stat rows */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
             {STAT_ROWS_REC.map(({ label, value, color }, i) => (
               <div
                 key={label}
-                className={`flex items-center gap-3 px-5 py-4 ${i < STAT_ROWS_REC.length - 1 ? 'border-b border-[rgba(124,77,255,0.10)]' : ''}`}
+                className={`flex items-center gap-3 px-5 py-4 ${i < STAT_ROWS_REC.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}
               >
-                <div className="w-8 h-8 rounded-lg bg-[rgba(124,77,255,0.15)] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[var(--d2b-hover)] flex items-center justify-center shrink-0">
                   <DollarSign size={15} className="text-[#7C4DFF]" strokeWidth={1.8} />
                 </div>
-                <span className="text-sm text-[#A78BCC] flex-1">{label}</span>
+                <span className="text-sm text-[var(--d2b-text-secondary)] flex-1">{label}</span>
                 <span className="text-sm font-bold" style={{ color }}>{fmtBRL(value)}</span>
               </div>
             ))}
           </div>
           {/* Chart */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4" style={{ minHeight: 168 }}>
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] p-4" style={{ minHeight: 168 }}>
             {chartReceber.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-[#6B4E8A]">Sem dados</div>
+              <div className="h-full flex items-center justify-center text-xs text-[var(--d2b-text-muted)]">Sem dados</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartReceber} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
@@ -1036,16 +1036,16 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
         </div>
       </div>
 
-      <div className="border-t border-[rgba(124,77,255,0.10)]" />
+      <div className="border-t border-[var(--d2b-border)]" />
 
       {/* ── Conta a Pagar ── */}
       <div>
-        <h3 className="text-sm font-semibold text-[#A78BCC] mb-3">Conta a Pagar</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-secondary)] mb-3">Conta a Pagar</h3>
         <div className="grid grid-cols-2 gap-5 items-stretch">
           {/* Chart */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] p-4" style={{ minHeight: 168 }}>
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] p-4" style={{ minHeight: 168 }}>
             {chartPagar.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-[#6B4E8A]">Sem dados</div>
+              <div className="h-full flex items-center justify-center text-xs text-[var(--d2b-text-muted)]">Sem dados</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartPagar} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
@@ -1064,16 +1064,16 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
             )}
           </div>
           {/* Stat rows */}
-          <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
             {STAT_ROWS_PAG.map(({ label, value, color }, i) => (
               <div
                 key={label}
-                className={`flex items-center gap-3 px-5 py-4 ${i < STAT_ROWS_PAG.length - 1 ? 'border-b border-[rgba(124,77,255,0.10)]' : ''}`}
+                className={`flex items-center gap-3 px-5 py-4 ${i < STAT_ROWS_PAG.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}
               >
-                <div className="w-8 h-8 rounded-lg bg-[rgba(124,77,255,0.15)] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[var(--d2b-hover)] flex items-center justify-center shrink-0">
                   <DollarSign size={15} className="text-[#7C4DFF]" strokeWidth={1.8} />
                 </div>
-                <span className="text-sm text-[#A78BCC] flex-1">{label}</span>
+                <span className="text-sm text-[var(--d2b-text-secondary)] flex-1">{label}</span>
                 <span className="text-sm font-bold" style={{ color }}>{fmtBRL(value)}</span>
               </div>
             ))}
@@ -1336,13 +1336,13 @@ function TabMensalidades() {
     {modalAdd && <ModalAdicionarMensalidade onClose={() => setModalAdd(false)} onSave={handleAdd} />}
     {editRow  && <ModalEditarMensalidade row={editRow} onClose={() => setEditRow(null)} onSave={handleEdit} />}
 
-    <div className="rounded-xl border border-[rgba(124,77,255,0.18)] bg-[#120328] overflow-hidden">
+    <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b border-[rgba(124,77,255,0.12)]">
+      <div className="px-6 pt-6 pb-4 border-b border-[var(--d2b-border)]">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-base font-bold text-[#F5F0FF]">Mensalidades</h2>
-            <p className="text-xs text-[#A78BCC] mt-0.5">Controle o recebimento mensal de seus pacientes e de outras contas da sua clínica.</p>
+            <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Mensalidades</h2>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Controle o recebimento mensal de seus pacientes e de outras contas da sua clínica.</p>
           </div>
           <button onClick={() => setModalAdd(true)} className={BTN_PRIMARY + ' flex items-center gap-1.5'}>
             <Plus size={14} /> Adicionar
@@ -1350,12 +1350,12 @@ function TabMensalidades() {
         </div>
         <div className="flex items-center gap-2 mt-4">
           <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
             <input type="text" placeholder="Pesquisar" value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1) }}
               className={INP + ' pl-8 w-48'} />
           </div>
-          <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] rounded-lg hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             <Filter size={13} /> Filtrar
           </button>
         </div>
@@ -1365,31 +1365,31 @@ function TabMensalidades() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[rgba(124,77,255,0.12)] bg-[#0D0520]">
-              <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left w-24">AÇÕES</th>
-              <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left">NOME</th>
+            <tr className="border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-main)]">
+              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left w-24">AÇÕES</th>
+              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">NOME</th>
               {['PROFISSIONAL', 'PACIENTE', 'DATA'].map((h) => (
-                <th key={h} className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-left">
-                  <button className="flex items-center gap-1 hover:text-[#A78BCC] transition-colors">
+                <th key={h} className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">
+                  <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors">
                     {h} <ChevronDown size={10} />
                   </button>
                 </th>
               ))}
-              <th className="px-4 py-3 text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-widest text-right">PAGAMENTO</th>
+              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-right">PAGAMENTO</th>
             </tr>
           </thead>
           <tbody>
             {pageRows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[#6B4E8A]">Nenhuma mensalidade encontrada.</td>
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[var(--d2b-text-muted)]">Nenhuma mensalidade encontrada.</td>
               </tr>
             ) : pageRows.map((r) => (
-              <tr key={r.id} className="border-b border-[rgba(124,77,255,0.08)] hover:bg-[rgba(124,77,255,0.04)] transition-colors">
+              <tr key={r.id} className="border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
                 {/* Ações */}
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
                     <button onClick={() => setEditRow(r)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full border border-[rgba(124,77,255,0.30)] text-[#7C4DFF] hover:bg-[rgba(124,77,255,0.15)] transition-colors">
+                      className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button onClick={() => handleDelete(r.id)}
@@ -1399,19 +1399,19 @@ function TabMensalidades() {
                   </div>
                 </td>
                 {/* Nome */}
-                <td className="px-4 py-4 font-semibold text-[#F5F0FF]">{r.titulo}</td>
+                <td className="px-4 py-4 font-semibold text-[var(--d2b-text-primary)]">{r.titulo}</td>
                 {/* Profissional */}
-                <td className="px-4 py-4 text-[#A78BCC]">{r.profissional}</td>
+                <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.profissional}</td>
                 {/* Paciente */}
-                <td className="px-4 py-4 text-[#A78BCC]">{r.paciente}</td>
+                <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.paciente}</td>
                 {/* Data */}
                 <td className="px-4 py-4">
-                  <p className="text-[#A78BCC]">{r.data}</p>
+                  <p className="text-[var(--d2b-text-secondary)]">{r.data}</p>
                   <p className="text-xs text-[#7C4DFF] mt-0.5">Parcela {r.parcela}</p>
                 </td>
                 {/* Pagamento */}
                 <td className="px-4 py-4 text-right">
-                  <p className="text-sm font-medium text-[#F5F0FF]">
+                  <p className="text-sm font-medium text-[var(--d2b-text-primary)]">
                     R$ {r.recebido.toFixed(2).replace('.', ',')} de R$ {r.total.toFixed(2).replace('.', ',')}
                   </p>
                   <p className={`text-xs flex items-center gap-1 justify-end mt-0.5 ${statusMap[r.status]}`}>
@@ -1429,17 +1429,17 @@ function TabMensalidades() {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-[rgba(124,77,255,0.12)] flex items-center justify-between flex-wrap gap-3">
+      <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
         <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
           <Upload size={13} /> Exportar Dados
         </button>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-xs text-[#A78BCC]">
-              Total Recebido: <span className="font-semibold text-[#F5F0FF]">R$ {totalRecebido.toFixed(2).replace('.', ',')}</span>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
+              Total Recebido: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {totalRecebido.toFixed(2).replace('.', ',')}</span>
             </p>
-            <p className="text-xs text-[#A78BCC]">
-              A receber: <span className="font-semibold text-[#F5F0FF]">R$ {aReceber.toFixed(2).replace('.', ',')}</span>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">
+              A receber: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {aReceber.toFixed(2).replace('.', ',')}</span>
             </p>
           </div>
           {/* Pagination */}
@@ -1448,7 +1448,7 @@ function TabMensalidades() {
               const acts = [() => setPage(1), () => setPage((p) => Math.max(1,p-1)), () => setPage((p) => Math.min(totalPages,p+1)), () => setPage(totalPages)]
               return (
                 <button key={sym} onClick={acts[i]}
-                  className="w-7 h-7 flex items-center justify-center rounded text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] hover:text-[#F5F0FF] transition-colors">
+                  className="w-7 h-7 flex items-center justify-center rounded text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors">
                   {sym}
                 </button>
               )
@@ -1456,14 +1456,14 @@ function TabMensalidades() {
             <span className="w-7 h-7 flex items-center justify-center rounded bg-[#7C4DFF] text-white text-xs font-semibold">{page}</span>
             <div className="relative ml-1">
               <button onClick={() => setPSOOpen((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 border border-[rgba(124,77,255,0.25)] rounded text-xs text-[#A78BCC] hover:border-[#7C4DFF] transition-colors">
+                className="flex items-center gap-1 px-2 py-1.5 border border-[var(--d2b-border-strong)] rounded text-xs text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">
                 {pageSize} <ChevronDown size={11} />
               </button>
               {pageSizeOpen && (
-                <div className="absolute bottom-full mb-1 right-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-xl overflow-hidden z-20">
+                <div className="absolute bottom-full mb-1 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl overflow-hidden z-20">
                   {[5,10,20,50].map((n) => (
                     <button key={n} onClick={() => { setPageSize(n); setPage(1); setPSOOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[rgba(124,77,255,0.12)] transition-colors ${pageSize===n?'text-[#7C4DFF] font-semibold':'text-[#F5F0FF]'}`}>
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--d2b-hover)] transition-colors ${pageSize===n?'text-[#7C4DFF] font-semibold':'text-[var(--d2b-text-primary)]'}`}>
                       {n}
                     </button>
                   ))}
@@ -1505,7 +1505,7 @@ export function FinanceiroView({ empresaId }: { empresaId: string | null }) {
   return (
     <div className="flex h-full min-h-0">
       {/* ── Sub-menu lateral ── */}
-      <aside className="flex flex-col w-[80px] shrink-0 border-r border-[rgba(124,77,255,0.18)] bg-[#120328] py-3 gap-0.5 overflow-y-auto">
+      <aside className="flex flex-col w-[80px] shrink-0 border-r border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] py-3 gap-0.5 overflow-y-auto">
         {SUB_TABS.map(({ id, label, Icon }) => {
           const active = subTab === id
           return (
@@ -1514,7 +1514,7 @@ export function FinanceiroView({ empresaId }: { empresaId: string | null }) {
               onClick={() => setSubTab(id)}
               title={label}
               className={`flex flex-col items-center gap-1 py-3 mx-2 rounded-xl transition-all ${
-                active ? 'bg-[rgba(124,77,255,0.15)]' : 'hover:bg-[rgba(124,77,255,0.08)]'
+                active ? 'bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'
               }`}
             >
               <Icon size={20} color={active ? '#7C4DFF' : '#6B4E8A'} strokeWidth={active ? 2.5 : 1.5} />

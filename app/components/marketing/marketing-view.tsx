@@ -10,12 +10,12 @@ import {
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const INP =
-  'w-full bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
-const LBG = 'bg-[#0D0520]'
+const LBG = 'bg-[var(--d2b-bg-main)]'
 const BTN_GHOST =
-  'px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors'
+  'px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors'
 const BTN_PRIMARY =
   'px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
 
@@ -25,20 +25,20 @@ function FInput({ label, req, val, placeholder, prefix, type = 'text', hint }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       {prefix ? (
-        <div className="flex bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
-          <span className="flex items-center px-3 text-xs text-[#6B4E8A] border-r border-[rgba(124,77,255,0.18)] shrink-0 whitespace-nowrap">
+        <div className="flex bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
+          <span className="flex items-center px-3 text-xs text-[var(--d2b-text-muted)] border-r border-[var(--d2b-border)] shrink-0 whitespace-nowrap">
             {prefix}
           </span>
-          <input type={type} defaultValue={val} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none" />
+          <input type={type} defaultValue={val} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none" />
         </div>
       ) : (
         <input type={type} defaultValue={val} placeholder={placeholder} className={INP} />
       )}
-      {hint && <p className="text-[10px] text-[#6B4E8A] mt-1">{hint}</p>}
+      {hint && <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">{hint}</p>}
     </div>
   )
 }
@@ -49,14 +49,14 @@ function FSelect({ label, req, opts, val }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       <div className="relative">
         <select defaultValue={val ?? ''} className={INP + ' appearance-none pr-8 cursor-pointer'}>
           {opts.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </div>
   )
@@ -68,14 +68,14 @@ function FTextarea({ label, req, placeholder, rows = 4 }: {
 }) {
   return (
     <div className="relative">
-      <label className="text-xs font-medium text-[#A78BCC] block mb-1.5">
+      <label className="text-xs font-medium text-[var(--d2b-text-secondary)] block mb-1.5">
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
-      <div className="rounded-md border border-[rgba(124,77,255,0.25)] bg-[#0D0520] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
+      <div className="rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
         <textarea
           rows={rows}
           placeholder={placeholder}
-          className="w-full bg-transparent px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none resize-none"
+          className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none"
         />
       </div>
     </div>
@@ -88,7 +88,7 @@ function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) {
     <button
       type="button"
       onClick={() => set(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[#2D1B4E]'}`}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
     </button>
@@ -112,13 +112,13 @@ function HorarioTable() {
     <div className="space-y-2.5">
       {days.map((d, i) => (
         <div key={d.label} className="flex items-center gap-3">
-          <span className="text-sm font-medium text-[#A78BCC] w-10 shrink-0">{d.label}</span>
+          <span className="text-sm font-medium text-[var(--d2b-text-secondary)] w-10 shrink-0">{d.label}</span>
           <div className="relative flex-1">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>Abertura</label>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Abertura</label>
             <input type="time" defaultValue={d.aber} disabled={!d.aberto} className={INP + (!d.aberto ? ' opacity-40 cursor-not-allowed' : '')} />
           </div>
           <div className="relative flex-1">
-            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>Fechamento</label>
+            <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Fechamento</label>
             <input type="time" defaultValue={d.fec} disabled={!d.aberto} className={INP + (!d.aberto ? ' opacity-40 cursor-not-allowed' : '')} />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -128,7 +128,7 @@ function HorarioTable() {
               onChange={() => setDays((prev) => prev.map((x, j) => j === i ? { ...x, aberto: !x.aberto } : x))}
               className="accent-[#7C4DFF] w-4 h-4"
             />
-            <span className="text-sm text-[#A78BCC]">Aberto</span>
+            <span className="text-sm text-[var(--d2b-text-secondary)]">Aberto</span>
           </label>
         </div>
       ))}
@@ -268,28 +268,28 @@ function TabAutoAgendamento({ prof, empresaId }: TabAutoProps) {
 
       {/* Profissional disponível */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#F5F0FF]">Auto Agendamento</h3>
+        <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Auto Agendamento</h3>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#A78BCC]">Profissional Disponível?</span>
-          <div className="flex rounded-md overflow-hidden border border-[rgba(124,77,255,0.25)]">
+          <span className="text-xs text-[var(--d2b-text-secondary)]">Profissional Disponível?</span>
+          <div className="flex rounded-md overflow-hidden border border-[var(--d2b-border-strong)]">
             <button
               onClick={() => setF('disponivel', true)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel !== false ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel !== false ? 'bg-[#7C4DFF] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'}`}
             >Sim</button>
             <button
               onClick={() => setF('disponivel', false)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel === false ? 'bg-[#EF4444] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${form.disponivel === false ? 'bg-[#EF4444] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'}`}
             >Não</button>
           </div>
         </div>
       </div>
-      <p className="text-xs text-[#A78BCC] -mt-4">Configure e acesse as configurações do Auto Agendamento do profissional.</p>
+      <p className="text-xs text-[var(--d2b-text-secondary)] -mt-4">Configure e acesse as configurações do Auto Agendamento do profissional.</p>
 
       {/* Links */}
       <div className={`grid gap-4 ${clinicLink ? 'grid-cols-2' : 'grid-cols-1'}`}>
         {clinicLink && (
           <div>
-            <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Link Global da Clínica</p>
+            <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-1.5">Link Global da Clínica</p>
             <div className="flex items-center gap-2">
               <input readOnly value={clinicLink} className={INP + ' flex-1 text-xs'} />
               <CopyLink url={clinicLink} />
@@ -297,7 +297,7 @@ function TabAutoAgendamento({ prof, empresaId }: TabAutoProps) {
           </div>
         )}
         <div>
-          <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Link do Profissional</p>
+          <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-1.5">Link do Profissional</p>
           <div className="flex items-center gap-2">
             <input readOnly value={profLink} className={INP + ' flex-1 text-xs'} />
             <CopyLink url={profLink} />
@@ -335,7 +335,7 @@ function TabAutoAgendamento({ prof, empresaId }: TabAutoProps) {
 
       {/* Observações */}
       <div>
-        <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Observações</p>
+        <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-1.5">Observações</p>
         <textarea
           rows={4}
           value={form.observacoes ?? ''}
@@ -345,7 +345,7 @@ function TabAutoAgendamento({ prof, empresaId }: TabAutoProps) {
         />
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-[rgba(124,77,255,0.12)]">
+      <div className="flex items-center justify-between pt-4 border-t border-[var(--d2b-border)]">
         <div>
           {saveError && <p className="text-xs text-red-400">{saveError}</p>}
           {saved && <p className="text-xs text-green-400">Alterações salvas com sucesso.</p>}
@@ -365,7 +365,7 @@ function CFInput({ label, req, value, onChange, disabled }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       <input
@@ -384,7 +384,7 @@ function CFSelect({ label, req, opts, value, onChange }: {
 }) {
   return (
     <div className="relative">
-      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+      <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
         {label}{req && <span className="text-[#7C4DFF] ml-0.5">*</span>}
       </label>
       <div className="relative">
@@ -392,7 +392,7 @@ function CFSelect({ label, req, opts, value, onChange }: {
           <option value="">Selecione</option>
           {opts.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+        <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
       </div>
     </div>
   )
@@ -403,7 +403,7 @@ function CopyLink({ url }: { url: string }) {
   return (
     <>
       <button onClick={async () => { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[rgba(124,77,255,0.12)] text-[#7C4DFF] text-xs font-semibold border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors shrink-0">
+        className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-[var(--d2b-hover)] text-[#7C4DFF] text-xs font-semibold border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] transition-colors shrink-0">
         {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
         {copied ? 'Copiado!' : 'Copiar'}
       </button>
@@ -483,18 +483,18 @@ function ColorPickerDropdown({ value, onChange }: { value: string; onChange: (v:
 
   return (
     <div className="relative">
-      <label className="block text-[10px] font-medium text-[#A78BCC] mb-1.5">
+      <label className="block text-[10px] font-medium text-[var(--d2b-text-secondary)] mb-1.5">
         Cor Principal<span className="text-[#7C4DFF] ml-0.5">*</span>
       </label>
       <button type="button" onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 px-2 py-2 rounded-md border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors w-44 bg-[#0D0520]">
+        className="flex items-center gap-2 px-2 py-2 rounded-md border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] transition-colors w-44 bg-[var(--d2b-bg-main)]">
         <span className="w-24 h-5 rounded flex-shrink-0 border border-[rgba(255,255,255,0.1)]" style={{ background: value }} />
-        <span className="text-xs text-[#A78BCC] font-mono flex-1 text-left truncate">{value}</span>
-        <ChevronDown size={12} className="text-[#A78BCC] flex-shrink-0" />
+        <span className="text-xs text-[var(--d2b-text-secondary)] font-mono flex-1 text-left truncate">{value}</span>
+        <ChevronDown size={12} className="text-[var(--d2b-text-secondary)] flex-shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 left-0 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-xl shadow-2xl p-3 w-60 select-none">
+        <div className="absolute z-50 top-full mt-2 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl p-3 w-60 select-none">
 
           {/* Gradient area */}
           <div
@@ -525,17 +525,17 @@ function ColorPickerDropdown({ value, onChange }: { value: string; onChange: (v:
           {/* Preview + inputs */}
           <div className="flex items-center gap-1.5 mb-3">
             <span className="w-7 h-7 rounded flex-shrink-0 border border-[rgba(255,255,255,0.15)]" style={{ background: currentHex }} />
-            <div className="flex items-center gap-0.5 flex-1 bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-1.5 py-1 focus-within:border-[#7C4DFF] transition-colors">
-              <span className="text-xs text-[#6B4E8A]">#</span>
+            <div className="flex items-center gap-0.5 flex-1 bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-1.5 py-1 focus-within:border-[#7C4DFF] transition-colors">
+              <span className="text-xs text-[var(--d2b-text-muted)]">#</span>
               <input type="text" maxLength={6} value={hexInput}
                 onChange={(e) => handleHexInput(e.target.value)}
-                className="bg-transparent flex-1 text-xs text-[#F5F0FF] font-mono focus:outline-none w-14" />
+                className="bg-transparent flex-1 text-xs text-[var(--d2b-text-primary)] font-mono focus:outline-none w-14" />
             </div>
-            <div className="flex items-center bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-1.5 py-1 w-14 focus-within:border-[#7C4DFF] transition-colors">
+            <div className="flex items-center bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-1.5 py-1 w-14 focus-within:border-[#7C4DFF] transition-colors">
               <input type="number" min={0} max={100} value={alpha}
                 onChange={(e) => setAlpha(Math.max(0,Math.min(100,Number(e.target.value))))}
-                className="bg-transparent w-full text-xs text-[#F5F0FF] font-mono focus:outline-none" />
-              <span className="text-[10px] text-[#6B4E8A] ml-0.5">%</span>
+                className="bg-transparent w-full text-xs text-[var(--d2b-text-primary)] font-mono focus:outline-none" />
+              <span className="text-[10px] text-[var(--d2b-text-muted)] ml-0.5">%</span>
             </div>
             <button type="button" onClick={() => setOpen(false)}
               className="px-2 py-1.5 rounded-md bg-[#7C4DFF] text-white text-xs font-semibold hover:bg-[#5B21B6] transition-colors">OK</button>
@@ -572,9 +572,9 @@ type BlogPost = { id: string; titulo: string; data: string; status: 'Publicado' 
 function ImageUploadBox({ label, desc, wide }: { label: string; desc: string; wide?: boolean }) {
   return (
     <div className="flex-1">
-      <p className="text-sm font-semibold text-[#F5F0FF] mb-1">{label}</p>
-      <p className="text-xs text-[#A78BCC] mb-3">{desc}</p>
-      <div className={`rounded-xl border-2 border-dashed border-[rgba(124,77,255,0.25)] bg-[#150830] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors ${wide ? 'h-32 w-52' : 'h-32 w-36'}`}>
+      <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">{label}</p>
+      <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">{desc}</p>
+      <div className={`rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors ${wide ? 'h-32 w-52' : 'h-32 w-36'}`}>
         <User size={36} className="text-[#2D1B4E]" strokeWidth={1} />
       </div>
     </div>
@@ -771,13 +771,13 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
           </div>
         </div>
         <div className="space-y-3">
-          <p className="text-sm text-[#A78BCC]">
+          <p className="text-sm text-[var(--d2b-text-secondary)]">
             Este profissional ainda não tem um website configurado.{' '}
             <span className="text-[#7C4DFF]">Comece agora a sua configuração.</span>
           </p>
           <div className="flex items-center gap-3">
             <button onClick={() => setConfigured(true)} className={BTN_PRIMARY}>Configurar website</button>
-            <button className="text-sm text-[#7C4DFF] hover:text-[#A78BCC] transition-colors">Saiba Mais</button>
+            <button className="text-sm text-[#7C4DFF] hover:text-[var(--d2b-text-secondary)] transition-colors">Saiba Mais</button>
           </div>
         </div>
       </div>
@@ -789,11 +789,11 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-[#F5F0FF]">Meu Site & Blog</h3>
-          <p className="text-xs text-[#A78BCC] mt-0.5">Configure as informações do website e blog.</p>
+          <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Meu Site & Blog</h3>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Configure as informações do website e blog.</p>
         </div>
         <a href={`https://site.dev2b.tec.br/p/${linkSlug}`} target="_blank" rel="noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors">
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
           <Eye size={13} /> Preview
         </a>
       </div>
@@ -802,24 +802,24 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
       <div className="flex items-end gap-4 flex-wrap">
         {/* Link da Página */}
         <div className="relative flex-1 min-w-[260px]">
-          <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[#A78BCC] leading-none`}>
+          <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
             Link da Página<span className="text-[#7C4DFF] ml-0.5">*</span>
           </label>
-          <div className="flex bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
-            <span className="flex items-center px-3 text-xs text-[#6B4E8A] border-r border-[rgba(124,77,255,0.18)] shrink-0 whitespace-nowrap">
+          <div className="flex bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
+            <span className="flex items-center px-3 text-xs text-[var(--d2b-text-muted)] border-r border-[var(--d2b-border)] shrink-0 whitespace-nowrap">
               https://site.dev2b.tec.br/p/
             </span>
             <input
               type="text"
               value={linkSlug}
               onChange={(e) => setLinkSlug(e.target.value)}
-              className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[#F5F0FF] focus:outline-none"
+              className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] focus:outline-none"
             />
-            <button className="px-3 text-[#A78BCC] hover:text-[#7C4DFF] transition-colors border-l border-[rgba(124,77,255,0.18)]">
+            <button className="px-3 text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors border-l border-[var(--d2b-border)]">
               <Copy size={13} />
             </button>
           </div>
-          <p className="text-[10px] text-[#6B4E8A] mt-1">Este será o link público para acessar este site.</p>
+          <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">Este será o link público para acessar este site.</p>
         </div>
 
         {/* Cor Principal */}
@@ -827,25 +827,25 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
         {/* Disponibilidade */}
         <div>
-          <label className="block text-[10px] font-medium text-[#A78BCC] mb-1.5">
+          <label className="block text-[10px] font-medium text-[var(--d2b-text-secondary)] mb-1.5">
             Disponibilidade do Site<span className="text-[#7C4DFF] ml-0.5">*</span>
           </label>
-          <div className="flex rounded-md overflow-hidden border border-[rgba(124,77,255,0.25)]">
+          <div className="flex rounded-md overflow-hidden border border-[var(--d2b-border-strong)]">
             <button
               onClick={() => setDisponibilidade('ativo')}
-              className={`px-4 py-2 text-xs font-semibold transition-colors ${disponibilidade === 'ativo' ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              className={`px-4 py-2 text-xs font-semibold transition-colors ${disponibilidade === 'ativo' ? 'bg-[#7C4DFF] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'}`}
             >Ativo</button>
             <button
               onClick={() => setDisponibilidade('inativo')}
-              className={`px-4 py-2 text-xs font-semibold transition-colors ${disponibilidade === 'inativo' ? 'bg-[#EF4444] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF]'}`}
+              className={`px-4 py-2 text-xs font-semibold transition-colors ${disponibilidade === 'inativo' ? 'bg-[#EF4444] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)]'}`}
             >Inativo</button>
           </div>
         </div>
       </div>
 
       {/* ── Image sub-tabs ── */}
-      <div className="border border-[rgba(124,77,255,0.18)] rounded-xl overflow-hidden">
-        <div className="flex border-b border-[rgba(124,77,255,0.18)]">
+      <div className="border border-[var(--d2b-border)] rounded-xl overflow-hidden">
+        <div className="flex border-b border-[var(--d2b-border)]">
           {SITE_SUBTABS.map(({ id, label }) => (
             <button
               key={id}
@@ -853,7 +853,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
               className={`px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 subTab === id
                   ? 'text-[#7C4DFF] border-[#7C4DFF]'
-                  : 'text-[#A78BCC] border-transparent hover:text-[#F5F0FF]'
+                  : 'text-[var(--d2b-text-secondary)] border-transparent hover:text-[var(--d2b-text-primary)]'
               }`}
             >{label}</button>
           ))}
@@ -864,13 +864,13 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
             <div className="flex gap-8 flex-wrap">
               {/* Logo da Clínica */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[#F5F0FF] mb-1">Logo da Clínica</p>
-                <p className="text-xs text-[#A78BCC] mb-3">Este será o logo exibido em seu site.</p>
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Logo da Clínica</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Este será o logo exibido em seu site.</p>
                 <input ref={logoRef} type="file" accept="image/*" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setLogoSrc) }} />
                 <div
                   onClick={() => logoRef.current?.click()}
-                  className="relative rounded-xl border-2 border-dashed border-[rgba(124,77,255,0.25)] bg-[#150830] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-48 overflow-hidden group"
+                  className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-48 overflow-hidden group"
                 >
                   {logoSrc
                     ? <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
@@ -886,13 +886,13 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
               {/* Imagem de Perfil */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[#F5F0FF] mb-1">Imagem de Perfil Profissional</p>
-                <p className="text-xs text-[#A78BCC] mb-3">Imagem profissional a ser exibida no em seu site.</p>
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Imagem de Perfil Profissional</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Imagem profissional a ser exibida no em seu site.</p>
                 <input ref={perfilRef} type="file" accept="image/*" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setPerfilSrc) }} />
                 <div
                   onClick={() => perfilRef.current?.click()}
-                  className="relative rounded-xl border-2 border-dashed border-[rgba(124,77,255,0.25)] bg-[#150830] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-28 overflow-hidden group"
+                  className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-28 overflow-hidden group"
                 >
                   {perfilSrc
                     ? <img src={perfilSrc} alt="Perfil" className="w-full h-full object-cover" />
@@ -908,13 +908,13 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
               {/* Banner Principal */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[#F5F0FF] mb-1">Banner Principal</p>
-                <p className="text-xs text-[#A78BCC] mb-3">Este banner será exibido na página inicial do seu site.</p>
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Banner Principal</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Este banner será exibido na página inicial do seu site.</p>
                 <input ref={bannerRef} type="file" accept="image/*" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setBannerSrc) }} />
                 <div
                   onClick={() => bannerRef.current?.click()}
-                  className="relative rounded-xl border-2 border-dashed border-[rgba(124,77,255,0.25)] bg-[#150830] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-full min-w-[180px] overflow-hidden group"
+                  className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-full min-w-[180px] overflow-hidden group"
                 >
                   {bannerSrc
                     ? <img src={bannerSrc} alt="Banner" className="w-full h-full object-cover" />
@@ -957,20 +957,20 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
       </div>
 
       {/* ── Blog ── */}
-      <div className="rounded-xl border border-[rgba(124,77,255,0.18)] overflow-hidden">
-        <div className="px-5 py-4 flex items-center justify-between border-b border-[rgba(124,77,255,0.12)]">
+      <div className="rounded-xl border border-[var(--d2b-border)] overflow-hidden">
+        <div className="px-5 py-4 flex items-center justify-between border-b border-[var(--d2b-border)]">
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="text-sm font-semibold text-[#F5F0FF]">Blog</h4>
-              <button className="w-4 h-4 rounded-full bg-[rgba(124,77,255,0.18)] flex items-center justify-center" title="Gerencie publicações e artigos no seu blog.">
-                <Info size={9} className="text-[#A78BCC]" />
+              <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Blog</h4>
+              <button className="w-4 h-4 rounded-full bg-[var(--d2b-hover)] flex items-center justify-center" title="Gerencie publicações e artigos no seu blog.">
+                <Info size={9} className="text-[var(--d2b-text-secondary)]" />
               </button>
             </div>
-            <p className="text-xs text-[#A78BCC] mt-0.5">Gerencie publicações e artigos no seu blog.</p>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Gerencie publicações e artigos no seu blog.</p>
           </div>
           <button
             onClick={() => setNovaPublOpen(true)}
-            className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold text-[#7C4DFF] bg-[rgba(124,77,255,0.10)] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold text-[#7C4DFF] bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] transition-colors"
           >
             <Plus size={13} /> Nova Publicação
           </button>
@@ -979,7 +979,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
         <div className="p-5 space-y-4">
           {/* Search */}
           <div className="relative w-52">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4E8A]" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
             <input
               type="text"
               placeholder="Pesquisar"
@@ -990,22 +990,22 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
           </div>
 
           {/* Table */}
-          <div className="rounded-lg border border-[rgba(124,77,255,0.15)] overflow-hidden">
-            <div className="grid grid-cols-[1fr_160px_140px_100px] text-[10px] font-semibold text-[#6B4E8A] uppercase tracking-wide px-4 py-2.5 bg-[#0D0520] border-b border-[rgba(124,77,255,0.12)]">
-              <button className="flex items-center gap-1 text-left hover:text-[#A78BCC] transition-colors"><ArrowUpDown size={10} />TÍTULO</button>
-              <button className="flex items-center gap-1 hover:text-[#A78BCC] transition-colors"><ArrowUpDown size={10} />DATA</button>
-              <button className="flex items-center gap-1 hover:text-[#A78BCC] transition-colors"><ArrowUpDown size={10} />STATUS</button>
+          <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
+            <div className="grid grid-cols-[1fr_160px_140px_100px] text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-wide px-4 py-2.5 bg-[var(--d2b-bg-main)] border-b border-[var(--d2b-border)]">
+              <button className="flex items-center gap-1 text-left hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />TÍTULO</button>
+              <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />DATA</button>
+              <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />STATUS</button>
               <span>AÇÕES</span>
             </div>
 
             {pagePosts.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-[#6B4E8A]">Nenhum blog encontrado</div>
+              <div className="px-4 py-8 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum blog encontrado</div>
             ) : (
               pagePosts.map((p) => (
-                <div key={p.id} className="grid grid-cols-[1fr_160px_140px_100px] px-4 py-3 border-b border-[rgba(124,77,255,0.08)] hover:bg-[rgba(124,77,255,0.04)] items-center">
-                  <span className="text-sm text-[#F5F0FF]">{p.titulo}</span>
-                  <span className="text-sm text-[#A78BCC]">{p.data}</span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${p.status === 'Publicado' ? 'bg-[rgba(34,197,94,0.12)] text-[#22C55E]' : 'bg-[rgba(124,77,255,0.12)] text-[#A78BCC]'}`}>{p.status}</span>
+                <div key={p.id} className="grid grid-cols-[1fr_160px_140px_100px] px-4 py-3 border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] items-center">
+                  <span className="text-sm text-[var(--d2b-text-primary)]">{p.titulo}</span>
+                  <span className="text-sm text-[var(--d2b-text-secondary)]">{p.data}</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${p.status === 'Publicado' ? 'bg-[rgba(34,197,94,0.12)] text-[#22C55E]' : 'bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)]'}`}>{p.status}</span>
                   <button
                     onClick={() => deletePost(p.id)}
                     className="w-7 h-7 rounded-full bg-[rgba(239,68,68,0.08)] text-[#EF4444] flex items-center justify-center hover:bg-[rgba(239,68,68,0.18)] transition-colors"
@@ -1017,20 +1017,20 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
           {/* Pagination */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-[#A78BCC]">
+            <div className="flex items-center gap-2 text-xs text-[var(--d2b-text-secondary)]">
               Resultados por página
               <div className="relative">
                 <button
                   onClick={() => setBlogPageSizeOpen((v) => !v)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[rgba(124,77,255,0.25)] text-[#F5F0FF] hover:border-[#7C4DFF] transition-colors"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[var(--d2b-border-strong)] text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors"
                 >
                   {blogPageSize} <ChevronDown size={11} />
                 </button>
                 {blogPageSizeOpen && (
-                  <div className="absolute bottom-full mb-1 left-0 z-50 bg-[#1A0A38] border border-[rgba(124,77,255,0.30)] rounded-lg shadow-xl overflow-hidden">
+                  <div className="absolute bottom-full mb-1 left-0 z-50 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl overflow-hidden">
                     {[5, 10, 20, 50].map((n) => (
                       <button key={n} onClick={() => { setBlogPageSize(n); setBlogPage(1); setBlogPageSizeOpen(false) }}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-[rgba(124,77,255,0.12)] ${blogPageSize === n ? 'text-[#7C4DFF]' : 'text-[#F5F0FF]'}`}>
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-[var(--d2b-hover)] ${blogPageSize === n ? 'text-[#7C4DFF]' : 'text-[var(--d2b-text-primary)]'}`}>
                         {n}
                       </button>
                     ))}
@@ -1041,9 +1041,9 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
             <div className="flex items-center gap-1">
               {['«','‹','›','»'].map((sym, i) => {
                 const acts = [() => setBlogPage(1), () => setBlogPage((p) => Math.max(1, p-1)), () => setBlogPage((p) => Math.min(totalPages, p+1)), () => setBlogPage(totalPages)]
-                return <button key={sym} onClick={acts[i]} className="w-7 h-7 rounded-md flex items-center justify-center text-sm text-[#A78BCC] hover:bg-[rgba(124,77,255,0.12)] transition-colors">{sym}</button>
+                return <button key={sym} onClick={acts[i]} className="w-7 h-7 rounded-md flex items-center justify-center text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] transition-colors">{sym}</button>
               })}
-              <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[rgba(124,77,255,0.12)] border border-[rgba(124,77,255,0.25)] text-xs text-[#7C4DFF]">
+              <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] text-xs text-[#7C4DFF]">
                 {blogPage} <ChevronDown size={11} />
               </span>
             </div>
@@ -1051,7 +1051,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-[rgba(124,77,255,0.12)]">
+      <div className="flex items-center justify-between pt-2 border-t border-[var(--d2b-border)]">
         <div>
           {saveError && <p className="text-xs text-red-400">{saveError}</p>}
           {saved && <p className="text-xs text-green-400">Alterações salvas com sucesso.</p>}
@@ -1197,9 +1197,9 @@ function TabVendaMais() {
       case 'pessoais': return (
         <div className="space-y-5 pt-5">
           <div>
-            <p className="text-xs font-medium text-[#A78BCC] mb-2">Foto de Perfil<span className="text-[#7C4DFF] ml-0.5">*</span></p>
-            <div className="w-24 h-24 rounded-xl bg-[#150830] border-2 border-dashed border-[rgba(124,77,255,0.25)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors">
-              <User size={32} className="text-[#6B4E8A]" strokeWidth={1} />
+            <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-2">Foto de Perfil<span className="text-[#7C4DFF] ml-0.5">*</span></p>
+            <div className="w-24 h-24 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors">
+              <User size={32} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -1219,7 +1219,7 @@ function TabVendaMais() {
             <FSelect label="Especialidades" req opts={['Selecione uma especialidade', 'Clínico Geral', 'Ortodontia', 'Implantodontia', 'Pediatria']} val="Selecione uma especialidade" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-[#F5F0FF] mb-4">Horário de Funcionamento</h4>
+            <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-4">Horário de Funcionamento</h4>
             <HorarioTable />
           </div>
         </div>
@@ -1296,7 +1296,7 @@ function TabVendaMais() {
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex border-b border-[rgba(124,77,255,0.18)]">
+      <div className="flex border-b border-[var(--d2b-border)]">
         {BUSCADOR_SUB.map(({ id, label }) => (
           <button
             key={id}
@@ -1304,7 +1304,7 @@ function TabVendaMais() {
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
               subTab === id
                 ? 'text-[#7C4DFF] border-[#7C4DFF]'
-                : 'text-[#A78BCC] border-transparent hover:text-[#F5F0FF]'
+                : 'text-[var(--d2b-text-secondary)] border-transparent hover:text-[var(--d2b-text-primary)]'
             }`}
           >
             {label}
@@ -1314,7 +1314,7 @@ function TabVendaMais() {
 
       {content}
 
-      <div className="flex justify-end pt-4 border-t border-[rgba(124,77,255,0.12)]">
+      <div className="flex justify-end pt-4 border-t border-[var(--d2b-border)]">
         <button className={BTN_PRIMARY}>Salvar</button>
       </div>
     </div>
@@ -1352,34 +1352,34 @@ export function MarketingView({ empresaId, profissionais }: { empresaId: string 
     <div className="p-8 space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-base font-bold text-[#F5F0FF]">Configurações de Marketing</h2>
+        <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Configurações de Marketing</h2>
       </div>
 
       {/* Profissional selector */}
       <div>
-        <p className="text-xs font-medium text-[#A78BCC] mb-1.5">Profissional</p>
+        <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-1.5">Profissional</p>
         <div className="relative w-full">
           <button
             onClick={() => setProfDropdown((o) => !o)}
-            className="w-full flex items-center justify-between gap-2 bg-[#0D0520] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 text-sm hover:border-[#7C4DFF] transition-colors"
+            className="w-full flex items-center justify-between gap-2 bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 text-sm hover:border-[#7C4DFF] transition-colors"
           >
-            <span className={selected ? 'text-[#F5F0FF]' : 'text-[#6B4E8A]'}>
+            <span className={selected ? 'text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-muted)]'}>
               {selected ? selected.nome : 'Selecione um profissional...'}
             </span>
-            <ChevronDown size={13} className="text-[#A78BCC] shrink-0" />
+            <ChevronDown size={13} className="text-[var(--d2b-text-secondary)] shrink-0" />
           </button>
           {profDropdown && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setProfDropdown(false)} />
-              <div className="absolute left-0 top-full mt-1 w-full z-20 bg-[#1A0A38] border border-[rgba(124,77,255,0.35)] rounded-lg shadow-xl max-h-56 overflow-y-auto">
+              <div className="absolute left-0 top-full mt-1 w-full z-20 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl max-h-56 overflow-y-auto">
                 {profissionais.length === 0 ? (
-                  <div className="px-3 py-3 text-sm text-[#6B4E8A] text-center">Nenhum profissional encontrado</div>
+                  <div className="px-3 py-3 text-sm text-[var(--d2b-text-muted)] text-center">Nenhum profissional encontrado</div>
                 ) : (
                   profissionais.map((p) => (
                     <button key={p.id} onClick={() => { setSelectedId(p.id); setProfDropdown(false); setTab('auto') }}
-                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-[rgba(124,77,255,0.15)] transition-colors ${p.id === selectedId ? 'text-[#7C4DFF] font-medium' : 'text-[#F5F0FF]'}`}>
+                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-[var(--d2b-hover)] transition-colors ${p.id === selectedId ? 'text-[#7C4DFF] font-medium' : 'text-[var(--d2b-text-primary)]'}`}>
                       <div className="font-medium">{p.nome}</div>
-                      {p.especialidade && <div className="text-xs text-[#A78BCC]">{p.especialidade}</div>}
+                      {p.especialidade && <div className="text-xs text-[var(--d2b-text-secondary)]">{p.especialidade}</div>}
                     </button>
                   ))
                 )}
@@ -1390,7 +1390,7 @@ export function MarketingView({ empresaId, profissionais }: { empresaId: string 
       </div>
 
       {!selected && (
-        <div className="flex flex-col items-center py-20 text-center text-[#6B4E8A]">
+        <div className="flex flex-col items-center py-20 text-center text-[var(--d2b-text-muted)]">
           <User size={48} className="mb-4 opacity-30" />
           <p className="text-sm">Selecione um profissional para configurar o marketing.</p>
         </div>
@@ -1407,7 +1407,7 @@ export function MarketingView({ empresaId, profissionais }: { empresaId: string 
                   key={id}
                   onClick={() => setTab(id)}
                   className={`flex flex-col items-center gap-1 py-3 px-1 rounded-xl transition-all text-center ${
-                    active ? 'bg-[rgba(124,77,255,0.15)]' : 'hover:bg-[rgba(124,77,255,0.08)]'
+                    active ? 'bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'
                   }`}
                 >
                   <Icon size={20} color={active ? '#7C4DFF' : '#6B4E8A'} strokeWidth={active ? 2.5 : 1.5} />

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { EditarMensagemModal, ProgramarDisparosModal } from './tab-avisos-table'
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 export interface PacienteBasico {
   id: string
   nome: string
@@ -23,7 +23,7 @@ export interface AniversarioRow {
   idade: number
 }
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function addDays(d: Date, n: number) {
   const r = new Date(d)
   r.setDate(r.getDate() + n)
@@ -53,28 +53,28 @@ function birthdayInRange(dataNascimento: string, start: Date, end: Date): boolea
   return false
 }
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ────────────────────────────────────────────────────────────────
 const ROWS_OPTIONS = [10, 25, 50]
 
 const INP =
-  'w-full bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md ' +
-  'px-3 py-2.5 text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] ' +
+  'w-full bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md ' +
+  'px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] ' +
   'focus:outline-none focus:border-[#7C4DFF] transition-colors'
 
-// â”€â”€â”€ PageBtn â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── PageBtn ─────────────────────────────────────────────────────────────────
 function PageBtn({ onClick, disabled, children }: { onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-8 h-8 rounded-md flex items-center justify-center text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+      className="w-8 h-8 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
     >
       {children}
     </button>
   )
 }
 
-// â”€â”€â”€ AniversariosTab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── AniversariosTab ──────────────────────────────────────────────────────────
 export function AniversariosTab({
   empresaId,
   pacientes,
@@ -142,7 +142,7 @@ export function AniversariosTab({
         </button>
         <button
           onClick={() => setEditarOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[#A78BCC] border border-[rgba(124,77,255,0.25)] hover:border-[#7C4DFF] hover:text-[#F5F0FF] transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
         >
           <Pencil size={13} />
           Editar Mensagem
@@ -151,19 +151,19 @@ export function AniversariosTab({
 
       {/* Filters */}
       <div className="flex gap-3">
-        <div className="flex-1 flex items-center gap-2 bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
-          <Search size={14} className="text-[#6B4E8A] shrink-0" />
+        <div className="flex-1 flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2.5 focus-within:border-[#7C4DFF] transition-colors">
+          <Search size={14} className="text-[var(--d2b-text-muted)] shrink-0" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Pesquisar"
-            className="bg-transparent text-sm text-[#F5F0FF] placeholder:text-[#6B4E8A] focus:outline-none w-full"
+            className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none w-full"
           />
         </div>
 
         <div className="relative min-w-[280px]">
-          <label className="absolute -top-2 left-3 z-10 bg-[#0D0520] px-1 text-[10px] font-medium text-[#A78BCC] leading-none">
-            Dia do Aniversário
+          <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-main)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">
+            Dia do Anivers�rio
           </label>
           <input
             value={dateRange}
@@ -182,10 +182,10 @@ export function AniversariosTab({
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[rgba(124,77,255,0.18)] overflow-hidden">
-        <div className="grid grid-cols-[auto_2fr_1fr] bg-[rgba(124,77,255,0.06)] border-b border-[rgba(124,77,255,0.18)]">
+      <div className="rounded-xl border border-[var(--d2b-border)] overflow-hidden">
+        <div className="grid grid-cols-[auto_2fr_1fr] bg-[var(--d2b-hover)] border-b border-[var(--d2b-border)]">
           {['', 'PACIENTE', 'IDADE'].map((col) => (
-            <div key={col} className="px-4 py-3 text-[10px] font-semibold tracking-wider text-[#6B4E8A] uppercase">
+            <div key={col} className="px-4 py-3 text-[10px] font-semibold tracking-wider text-[var(--d2b-text-muted)] uppercase">
               {col}
             </div>
           ))}
@@ -199,7 +199,7 @@ export function AniversariosTab({
             </svg>
           </div>
         ) : paginated.length === 0 ? (
-          <div className="flex items-center justify-center py-12 text-sm text-[#6B4E8A]">
+          <div className="flex items-center justify-center py-12 text-sm text-[var(--d2b-text-muted)]">
             Nenhum registro encontrado
           </div>
         ) : (
@@ -207,22 +207,22 @@ export function AniversariosTab({
             <div
               key={row.id}
               onClick={() => router.push(`/dashboard/clientes?pacienteId=${row.id}`)}
-              className={`grid grid-cols-[auto_2fr_1fr] items-center border-b border-[rgba(124,77,255,0.10)] hover:bg-[rgba(124,77,255,0.08)] transition-colors cursor-pointer ${i % 2 === 1 ? 'bg-[rgba(124,77,255,0.02)]' : ''}`}
+              className={`grid grid-cols-[auto_2fr_1fr] items-center border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors cursor-pointer ${i % 2 === 1 ? 'bg-[var(--d2b-hover)]' : ''}`}
             >
               <div className="px-4 py-3">
                 <button
                   onClick={(e) => e.stopPropagation()}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-[rgba(20,184,166,0.15)] text-[#14B8A6] border border-[rgba(20,184,166,0.30)] hover:bg-[rgba(20,184,166,0.25)] transition-colors whitespace-nowrap"
                 >
-                  📱 Enviar
+                  ?? Enviar
                 </button>
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm font-semibold text-[#F5F0FF] leading-snug">{row.paciente}</p>
-                {row.telefone && <p className="text-xs text-[#6B4E8A]">{row.telefone}</p>}
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">{row.paciente}</p>
+                {row.telefone && <p className="text-xs text-[var(--d2b-text-muted)]">{row.telefone}</p>}
               </div>
               <div className="px-4 py-3">
-                <p className="text-sm text-[#A78BCC]">{row.idade} anos</p>
+                <p className="text-sm text-[var(--d2b-text-secondary)]">{row.idade} anos</p>
               </div>
             </div>
           ))
@@ -237,7 +237,7 @@ export function AniversariosTab({
           <button
             key={p}
             onClick={() => setPage(p)}
-            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${p === page ? 'bg-[#7C4DFF] text-white' : 'text-[#A78BCC] hover:text-[#F5F0FF] hover:bg-[rgba(124,77,255,0.12)]'}`}
+            className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${p === page ? 'bg-[#7C4DFF] text-white' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
           >{p}</button>
         ))}
         <PageBtn onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}><ChevronRight size={14} /></PageBtn>
@@ -246,11 +246,11 @@ export function AniversariosTab({
           <select
             value={rowsPerPage}
             onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1) }}
-            className="bg-[#150830] border border-[rgba(124,77,255,0.25)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[#F5F0FF] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
+            className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md pl-3 pr-7 py-1.5 text-sm text-[var(--d2b-text-primary)] appearance-none cursor-pointer focus:outline-none focus:border-[#7C4DFF] transition-colors"
           >
             {ROWS_OPTIONS.map((r) => <option key={r} value={r} style={{ background: '#1A0A38' }}>{r}</option>)}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A78BCC] pointer-events-none" />
+          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
       </div>
 
