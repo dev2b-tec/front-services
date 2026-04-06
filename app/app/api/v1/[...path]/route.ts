@@ -21,6 +21,7 @@ async function proxy(
     const lower = key.toLowerCase()
     if (lower === 'cookie') return
     if (lower === 'host') return
+    if (lower === 'origin') return          // server-to-server, no CORS needed
     if (lower === 'authorization') return   // will be set from session below
     if (HOP_BY_HOP.has(lower)) return
     headers.set(key, value)
