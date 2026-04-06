@@ -27,8 +27,13 @@ export default async function DashboardPage() {
   if (keycloakId) {
     try {
       const userRes = await fetch(
-        `${process.env.API_URL}/api/v1/usuarios/keycloak/${keycloakId}`,
-        { cache: 'no-store' }
+        `${process.env.API_URL}/api/v1/usuarios/sync`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: session?.user?.name ?? '', email: session?.user?.email ?? '', keycloakId }),
+          cache: 'no-store',
+        }
       )
       if (userRes.ok) {
         const usuario = await userRes.json()

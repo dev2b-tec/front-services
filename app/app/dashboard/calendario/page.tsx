@@ -11,8 +11,13 @@ export default async function CalendarioPage() {
   if (keycloakId) {
     try {
       const res = await fetch(
-        `${process.env.API_URL}/api/v1/usuarios/keycloak/${keycloakId}`,
-        { cache: 'no-store' }
+        `${process.env.API_URL}/api/v1/usuarios/sync`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: session?.user?.name ?? '', email: session?.user?.email ?? '', keycloakId }),
+          cache: 'no-store',
+        }
       )
       if (res.ok) {
         const usuario = await res.json()

@@ -10,34 +10,15 @@
  *  - O item de menu correspondente deve ser registrado em nav-config.ts
  */
 
-import { auth } from '@/lib/auth'
 import { SidebarProvider } from '@/components/shell/sidebar-context'
 import { Sidebar } from '@/components/shell/sidebar'
 import { Topbar } from '@/components/shell/topbar'
 
-async function syncUsuario(nome: string, email: string, keycloakId: string) {
-  try {
-    await fetch(`${process.env.API_URL}/api/v1/usuarios/sync`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, keycloakId }),
-      cache: 'no-store',
-    })
-  } catch {
-    // sync failures are non-fatal — user still accesses the dashboard
-  }
-}
-
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-  if (session?.user?.name && session.user.email && session.keycloakId) {
-    await syncUsuario(session.user.name, session.user.email, session.keycloakId)
-  }
-
   return (
     <SidebarProvider>
       <div className="flex h-screen overflow-hidden bg-[#0D0520]">
