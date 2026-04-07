@@ -5,7 +5,7 @@ const AGENDA_BACKEND = process.env.API_URL       ?? 'http://app-agenda:8011'
 const WHATS_BACKEND  = process.env.WHATS_API_URL ?? 'http://app-integration-watts:8012'
 
 // Paths handled by app-integration-watts instead of app-agenda
-const WHATS_PATHS = new Set(['instancias', 'mensagens'])
+const WHATS_PATHS = new Set(['instancias', 'mensagens', 'conversas'])
 
 const HOP_BY_HOP = new Set(['connection', 'keep-alive', 'transfer-encoding', 'te', 'upgrade', 'trailer', 'proxy-authorization', 'proxy-authenticate'])
 
