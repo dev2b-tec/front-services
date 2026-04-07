@@ -919,6 +919,8 @@ export function NovoAgendamentoModal({
         onClose={() => setMensagensOpen(false)}
         telefone={pacienteInfo?.telefone}
         empresaId={empresaId}
+        clienteId={pacienteInfo?.id ?? null}
+        nome={pacienteInfo?.nome ?? null}
         context={{
           nomePaciente: pacienteInfo?.nome,
           nomeProfissional: profissionalNome || undefined,

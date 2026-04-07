@@ -242,7 +242,7 @@ function StatusEventBadge({ status }: { status: string }) {
 }
 
 // --- Modal: Detalhes do Agendamento ------------------------------------------
-function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onClose: () => void; ag: Agendamento | null; empresaId?: string | null }) {
+function AgendamentoModal({ open, onClose, ag, empresaId, clienteId, clienteNome, clienteTelefone }: { open: boolean; onClose: () => void; ag: Agendamento | null; empresaId?: string | null; clienteId?: string | null; clienteNome?: string | null; clienteTelefone?: string | null }) {
   const [mensagensOpen, setMensagensOpen] = useState(false)
   if (!ag) return null
 
@@ -386,6 +386,9 @@ function AgendamentoModal({ open, onClose, ag, empresaId }: { open: boolean; onC
         open={mensagensOpen}
         onClose={() => setMensagensOpen(false)}
         empresaId={empresaId}
+        telefone={clienteTelefone}
+        clienteId={clienteId}
+        nome={clienteNome}
       />
     </>
   )

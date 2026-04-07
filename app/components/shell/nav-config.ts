@@ -18,6 +18,7 @@ import {
   Settings,
   DollarSign,
   Megaphone,
+  MessageSquare,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -71,6 +72,16 @@ export const navGroups: NavGroup[] = [
         label: 'Usuários',
         href: '/dashboard/usuarios',
         icon: UserCog,
+      },
+    ],
+  },
+  {
+    title: 'Omnichannel',
+    items: [
+      {
+        label: 'Chat',
+        href: '/dashboard/chat',
+        icon: MessageSquare,
       },
     ],
   },
