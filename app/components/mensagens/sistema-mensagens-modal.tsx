@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Send, Loader2, WifiOff, PhoneOff } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { X, Send, Loader2, WifiOff, PhoneOff, MessageSquare } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   Dialog,
@@ -24,6 +25,8 @@ export interface SistemaMensagensModalProps {
   onClose: () => void
   telefone?: string | null
   empresaId?: string | null
+  clienteId?: string | null
+  nome?: string | null
   context?: MensagemContext
 }
 
@@ -69,15 +72,19 @@ export function SistemaMensagensModal({
   onClose,
   telefone,
   empresaId,
+  clienteId,
+  nome,
   context = {},
 }: SistemaMensagensModalProps) {
   const { toast } = useToast()
+  const router = useRouter()
 
   const [instancia,        setInstancia]        = useState<Instancia | null>(null)
   const [loadingInstancia, setLoadingInstancia] = useState(false)
   const [enviando,         setEnviando]         = useState<string | null>(null)
   const [customText,       setCustomText]       = useState('')
   const [customExpanded,   setCustomExpanded]   = useState(false)
+  const [criandoChat,      setCriandoChat]      = useState(false)
 
   const telefoneNumerico = telefone?.replace(/\D/g, '') ?? ''
   const temTelefone      = telefoneNumerico.length >= 10
@@ -147,6 +154,35 @@ export function SistemaMensagensModal({
     enviar(tipo, buildMensagem(tipo, context))
   }
 
+  const abrirChat = async () => {
+    if (!empresaId || !temTelefone) return
+    setCriandoChat(true)
+    try {
+      const res = await fetch(`${WHATS_URL}/api/v1/conversas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          empresaId,
+          telefone: telefoneNumerico,
+          nome: nome ?? undefined,
+          clienteId: clienteId ?? undefined,
+        }),
+      })
+      if (res.ok) {
+        const conversa = await res.json()
+        onClose()
+        router.push(`/dashboard/chat?conversaId=${conversa.id}`)
+      } else {
+        const msg = await res.text().catch(() => '')
+        toast({ title: msg || 'Erro ao iniciar chat', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Erro ao iniciar chat', variant: 'destructive' })
+    } finally {
+      setCriandoChat(false)
+    }
+  }
+
   const instanciaOk = !!instancia
   const canSend     = instanciaOk && temTelefone && !loadingInstancia
 
@@ -199,6 +235,29 @@ export function SistemaMensagensModal({
             </span>
           </div>
         ) : null}
+
+        {/* ── Chat row ── */}
+        <div className="px-4 pt-4 pb-0">
+          <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-elevated)] overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Abrir Chat</p>
+                <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Inicie ou retome uma conversa no WhatsApp.</p>
+              </div>
+              <button
+                onClick={abrirChat}
+                disabled={!temTelefone || !empresaId || criandoChat}
+                className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-md transition-colors shrink-0"
+              >
+                {criandoChat
+                  ? <Loader2 size={11} className="animate-spin" />
+                  : <MessageSquare size={11} />
+                }
+                Chat
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* ── Message rows ── */}
         <div className="p-4 space-y-2">
