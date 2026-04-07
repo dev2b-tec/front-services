@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { NextResponse, type NextRequest } from "next/server"
 
 // Quando SKIP_AUTH=true no .env.local, o middleware libera tudo sem checar
-// sessão — útil para rodar localmente sem precisar de um Keycloak rodando.
+// sessão — útil para rodar localmente sem precisar de um Keycloak rodando..
 const SKIP_AUTH = process.env.SKIP_AUTH === "true"
 
 export default SKIP_AUTH
