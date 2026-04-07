@@ -42,7 +42,9 @@ export function useConversaWebSocket(
     disconnect()
 
     const base =
-      process.env.NEXT_PUBLIC_WHATS_API_URL ?? 'http://localhost:8012'
+      (typeof window !== 'undefined' && (window as any).__ENV__?.whatsApiUrl)
+        ? (window as any).__ENV__.whatsApiUrl
+        : (process.env.NEXT_PUBLIC_WHATS_API_URL ?? 'http://localhost:8012')
 
     const client = new Client({
       webSocketFactory: () => new SockJS(`${base}/ws`),
