@@ -24,6 +24,7 @@ import {
   ShoppingBag,
   Briefcase,
   Landmark,
+  Lightbulb,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -132,6 +133,16 @@ export const navGroups: NavGroup[] = [
         label: 'Serviços',
         href: '/dashboard/servicos',
         icon: Briefcase,
+      },
+    ],
+  },
+  {
+    title: 'Ideias',
+    items: [
+      {
+        label: 'Canal de Ideias',
+        href: '/dashboard/ideias',
+        icon: Lightbulb,
       },
     ],
   },

@@ -86,11 +86,12 @@ export type PacienteApi = {
   dataNascimentoResp?: string | null
   cpfResponsavel?: string | null
   telefoneResponsavel?: string | null
-  statusPagamento: string
+  statusPagamento: string | null
   sessoes: number
 }
 
-function statusLabel(s: string): string {
+function statusLabel(s: string | null | undefined): string {
+  if (!s) return '—'
   const map: Record<string, string> = {
     EM_ABERTO: 'Em Aberto',
     QUITADO: 'Quitado',
@@ -206,6 +207,9 @@ function Section({ title, open, onToggle, children }: { title: string; open: boo
 
 function StatusBadge({ status }: { status: string }) {
   const label = statusLabel(status)
+  if (label === '—') {
+    return <span className="text-sm text-[var(--d2b-text-muted)]">—</span>
+  }
   const color: Record<string, string> = { 'Em Aberto': '#EF4444', 'Quitado': '#22C55E', 'Pendente': '#F59E0B' }
   const c = color[label] ?? '#A78BCC'
   return (
@@ -716,6 +720,105 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
   const [notasOpen, setNotasOpen] = useState(false)
   const [compartilharOpen, setCompartilharOpen] = useState(false)
 
+  // Resumir Paciente
+  const [resumirOpen, setResumirOpen] = useState(false)
+  const [termosOpen, setTermosOpen] = useState(false)
+  const [termosAceitos, setTermosAceitos] = useState(false)
+  const [resumoGerado, setResumoGerado] = useState<string | null>(null)
+  const [gerandoResumo, setGerandoResumo] = useState(false)
+  const [resumoFontes, setResumoFontes] = useState<{ consultas: number; ultimoAtendimento: string | null } | null>(null)
+  const [pendingResumoAi, setPendingResumoAi] = useState<string | undefined>(undefined)
+
+  function abrirResumir() {
+    if (!termosAceitos) { setTermosOpen(true); return }
+    setResumoGerado(null)
+    setResumoFontes(null)
+    setResumirOpen(true)
+  }
+
+  function aceitarTermos() {
+    setTermosAceitos(true)
+    setTermosOpen(false)
+    setResumoGerado(null)
+    setResumoFontes(null)
+    setResumirOpen(true)
+  }
+
+  async function gerarResumo() {
+    setGerandoResumo(true)
+    try {
+      // 1. Buscar evoluções do paciente
+      const evolRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/evolucoes/paciente/${cliente.id}`)
+      if (!evolRes.ok) {
+        setResumoGerado('Não foi possível carregar as evoluções do paciente.')
+        setGerandoResumo(false)
+        return
+      }
+
+      const evolucoes = await evolRes.json()
+      
+      if (!evolucoes || evolucoes.length === 0) {
+        setResumoGerado('Este paciente ainda não possui evoluções registradas.')
+        setGerandoResumo(false)
+        return
+      }
+
+      // 2. Montar contexto com todas as evoluções
+      const contextoCompleto = evolucoes.map((ev: any, idx: number) => {
+        const partes = []
+        if (ev.comentariosGerais) partes.push(`Comentários: ${ev.comentariosGerais}`)
+        if (ev.conduta) partes.push(`Conduta: ${ev.conduta}`)
+        if (ev.examesRealizados) partes.push(`Exames: ${ev.examesRealizados}`)
+        if (ev.prescricao) partes.push(`Prescrição: ${ev.prescricao}`)
+        return `Evolução ${idx + 1} (${ev.data}):\n${partes.join('\n')}`
+      }).join('\n\n')
+
+      // 3. Chamar endpoint de IA
+      const iaRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/evolucoes/ia/gerar-resumo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          comentariosGerais: contextoCompleto,
+          conduta: '',
+          examesRealizados: '',
+          prescricao: '',
+          empresaId: empresaId || '',
+          usuarioId: '',
+        }),
+      })
+
+      if (iaRes.ok) {
+        const data = await iaRes.json()
+        setResumoGerado(data.resumo ?? 'Resumo gerado com sucesso.')
+        setResumoFontes({ 
+          consultas: evolucoes.length, 
+          ultimoAtendimento: evolucoes[0]?.data ?? null 
+        })
+      } else {
+        setResumoGerado('Não foi possível gerar o resumo com IA. Tente novamente.')
+      }
+    } catch (error) {
+      console.error('Erro ao gerar resumo:', error)
+      setResumoGerado('Erro ao conectar com o servidor.')
+    } finally {
+      setGerandoResumo(false)
+    }
+  }
+
+  async function salvarResumo() {
+    if (!resumoGerado) return
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${cliente.id}/resumo/salvar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumo: resumoGerado }),
+      })
+      setResumirOpen(false)
+      setPendingResumoAi(resumoGerado)
+      setTab('evolucoes')
+    } catch {}
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Sub-topbar */}
@@ -731,7 +834,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             <span className="text-[var(--d2b-text-secondary)]">-</span>
             <span className="text-[#C084FC]">{cliente.nome}</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
+          <button onClick={abrirResumir} className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
             ✦ Resumir Paciente
           </button>
         </div>
@@ -786,7 +889,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             {tab === 'dados'      && <TabDados paciente={cliente} />}
             {tab === 'timeline'   && <TabLinhaDoTempo pacienteId={cliente.id} empresaId={empresaId ?? ''} onIrParaAnamnese={() => setTab('anamnese')} />}
             {tab === 'anamnese'   && <TabAnamnese pacienteId={cliente.id} empresaId={empresaId ?? ''} />}
-            {tab === 'evolucoes'  && <TabEvolucoes pacienteId={cliente.id} />}
+            {tab === 'evolucoes'  && <TabEvolucoes pacienteId={cliente.id} autoOpenResumoAi={pendingResumoAi} />}
             {tab === 'financeiro' && <TabFinanceiro pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
             {tab === 'documentos' && <TabDocumentos pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
           </div>
@@ -794,6 +897,155 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
           {compartilharOpen && <CompartilharAcessoPanel onClose={() => setCompartilharOpen(false)} />}
         </div>
       </div>
+
+      {/* ── Modal: Termos de Uso IA ── */}
+      <Dialog open={termosOpen} onOpenChange={setTermosOpen}>
+        <DialogContent className="max-w-md bg-white border border-gray-200 text-gray-900">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-gray-900">Aceite do Termos</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <p className="text-sm text-gray-600 leading-relaxed border border-gray-200 rounded-lg p-3 bg-gray-50">
+              Ao utilizar essa ferramenta de inteligência artificial, você se declara ciente de que atua na posição de controlador de dados pessoais, podendo utilizar as informações de seu paciente somente mediante base legal legítima, tal como para a tutela de sua saúde. A Agenddn não utilizará as informações de seus pacientes para quaisquer finalidades não autorizadas por você.
+            </p>
+            <div className="flex gap-2 text-xs">
+              <a href="#" className="text-[#7C4DFF] hover:underline">Política de Privacidade</a>
+              <span className="text-gray-300">•</span>
+              <a href="#" className="text-[#7C4DFF] hover:underline">Termos de Uso</a>
+              <span className="text-gray-300">•</span>
+              <a href="#" className="text-[#7C4DFF] hover:underline">Termo de Responsabilidade</a>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-1">
+              <button onClick={() => setTermosOpen(false)}
+                className="px-5 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 font-medium hover:border-gray-300 transition-colors">
+                Negar
+              </button>
+              <button onClick={aceitarTermos}
+                className="px-6 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-bold transition-colors">
+                Aceitar
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Modal: Sumarização do Prontuário ── */}
+      <Dialog open={resumirOpen} onOpenChange={setResumirOpen}>
+        <DialogContent showCloseButton={false} className="max-w-[63rem] sm:max-w-[63rem] h-[90vh] bg-white border border-gray-200 text-gray-900 flex flex-col p-0 gap-0 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 flex-shrink-0">
+            <div>
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                Sumarização do prontuário
+                <span className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[10px] flex items-center justify-center cursor-help" title="Resumo clínico gerado por IA">?</span>
+              </h2>
+              <p className="text-xs text-gray-400 mt-0.5">Paciente: <span className="text-gray-600 font-medium">{cliente.nome}</span></p>
+            </div>
+            <button onClick={() => setResumirOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors mt-0.5">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Editor/output area */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {!resumoGerado && !gerandoResumo && (
+                <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-[#F3EEFF] flex items-center justify-center">
+                    <span className="text-2xl">✦</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Pronto para gerar o resumo do paciente?</p>
+                    <p className="text-xs text-gray-400 mt-1 max-w-xs">Clique no botão abaixo para que a IA analise o prontuário completo e gere um resumo clínico conciso.</p>
+                  </div>
+                  <button onClick={gerarResumo}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-bold transition-colors">
+                    ✦ Gerar sumarização
+                  </button>
+                </div>
+              )}
+
+              {gerandoResumo && (
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+                  <div className="w-8 h-8 border-2 border-[#7C4DFF] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-gray-500">Analisando prontuário…</p>
+                </div>
+              )}
+
+              {resumoGerado && !gerandoResumo && (
+                <div className="space-y-4">
+                  {/* Action bar */}
+                  <div className="flex items-center gap-4">
+                    <button onClick={gerarResumo}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-bold transition-colors">
+                      ✦ Gerar sumarização
+                    </button>
+                    {resumoGerado && (
+                      <span className="ml-auto text-xs text-gray-400">
+                        {resumoGerado.split(/\s+/).length} palavras · ~{Math.max(1, Math.round(resumoGerado.split(/\s+/).length / 200))} min leitura
+                      </span>
+                    )}
+                  </div>
+                  {/* Resumo content */}
+                  <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{resumoGerado}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Right sidebar: insights */}
+            <div className="w-52 flex-shrink-0 border-l border-gray-100 p-4 flex flex-col gap-3 overflow-y-auto">
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-3">
+                <p className="text-xs font-bold text-blue-700 flex items-center gap-1">ⓘ Insights Clínicos</p>
+                <p className="text-[11px] text-blue-600 mt-1 leading-tight">Gere insights clínicos relevantes com base no histórico do paciente.</p>
+              </div>
+
+              {resumoFontes && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Fontes</p>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-[#EDE9FE] text-[#5B21B6] text-[11px] font-semibold rounded-md">
+                    🗓 {resumoFontes.consultas} Consultas
+                  </span>
+                  {resumoFontes.ultimoAtendimento && (
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-2 mb-1">Datas Relevantes</p>
+                      <span className="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-700 text-[11px] font-semibold rounded-md">
+                        Último atendimento: {resumoFontes.ultimoAtendimento}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                <p className="text-[11px] text-yellow-800 leading-tight flex gap-1">
+                  <span>⚠</span>
+                  <span>ATENÇÃO: Os dados processados neste resumo são referentes aos cadastrados somente por você, então desconsideram dados cadastrados por outros usuários.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 flex-shrink-0">
+            <p className="text-[11px] text-gray-400 flex items-center gap-1">♡ Os resultados gerados por IA podem conter erros. Valide e edite as informações antes de salvar</p>
+            <div className="flex items-center gap-2">
+              {resumoGerado && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(resumoGerado)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-300 text-sm font-medium transition-colors"
+                >
+                  ⎘ Copiar
+                </button>
+              )}
+              <button onClick={() => setResumirOpen(false)}
+                className="px-4 py-2 text-sm text-[#7C4DFF] font-medium hover:underline transition-colors">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -1001,6 +1253,25 @@ function CriarClienteModal({
   const [dataNascimentoResp, setDataNascimentoResp] = useState('')
   const [cpfResponsavel, setCpfResponsavel] = useState('')
   const [telefoneResponsavel, setTelefoneResponsavel] = useState('')
+  const [buscandoCep, setBuscandoCep] = useState(false)
+
+  async function handleCepBlur() {
+    const cepLimpo = cep.replace(/\D/g, '')
+    if (cepLimpo.length !== 8) return
+    setBuscandoCep(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cep/${cepLimpo}`)
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.logradouro) setLogradouro(data.logradouro)
+      if (data.bairro)     setBairro(data.bairro)
+      if (data.localidade) setCidade(data.localidade)
+    } catch {
+      // silently ignore — user can fill manually
+    } finally {
+      setBuscandoCep(false)
+    }
+  }
 
   function resetForm() {
     setNome(''); setTelefone(''); setDataNascimento(''); setGenero('')
@@ -1106,7 +1377,15 @@ function CriarClienteModal({
               <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => setCpf(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FloatingField label="CEP"><input className={INPUT} value={cep} onChange={(e) => setCep(e.target.value)} /></FloatingField>
+              <FloatingField label="CEP">
+                <input
+                  className={INPUT}
+                  value={cep}
+                  onChange={(e) => setCep(e.target.value)}
+                  onBlur={handleCepBlur}
+                  placeholder={buscandoCep ? 'Buscando…' : ''}
+                />
+              </FloatingField>
               <FloatingField label="Email"><input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} /></FloatingField>
             </div>
             <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">

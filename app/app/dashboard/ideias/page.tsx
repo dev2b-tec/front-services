@@ -1,11 +1,12 @@
+import { Suspense } from 'react'
 import { auth } from '@/lib/auth'
-import { UsuariosView } from '@/components/usuarios/usuarios-view'
+import { CanalIdeias } from '@/components/ideias/canal-ideias'
 
-export default async function UsuariosPage() {
+export default async function IdeiaPage() {
   const session = await auth()
   const keycloakId = session?.keycloakId
 
-  let empresaId: string | null = null
+  let empresaId = ''
 
   if (keycloakId) {
     try {
@@ -14,18 +15,26 @@ export default async function UsuariosPage() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome: session?.user?.name ?? '', email: session?.user?.email ?? '', keycloakId }),
+          body: JSON.stringify({
+            nome: session?.user?.name ?? '',
+            email: session?.user?.email ?? '',
+            keycloakId,
+          }),
           cache: 'no-store',
         }
       )
       if (res.ok) {
         const usuario = await res.json()
-        empresaId = usuario.empresaId ?? null
+        empresaId = usuario.empresaId ?? ''
       }
     } catch {
       // backend offline
     }
   }
 
-  return <UsuariosView empresaId={empresaId} />
+  return (
+    <Suspense>
+      <CanalIdeias empresaId={empresaId} />
+    </Suspense>
+  )
 }

@@ -29,11 +29,12 @@ export function maskPhone(v: string) {
 }
 
 // ─── Reusable field components ────────────────────────────────────────────────
-export function FInput({ label, req, value, onChange, type = 'text' }: {
+export function FInput({ label, req, value, onChange, onBlur, type = 'text' }: {
   label: string
   req?: boolean
   value?: string
   onChange?: (v: string) => void
+  onBlur?: () => void
   type?: string
 }) {
   return (
@@ -45,6 +46,7 @@ export function FInput({ label, req, value, onChange, type = 'text' }: {
         type={type}
         value={value ?? ''}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        onBlur={onBlur}
         readOnly={!onChange}
         className={INP}
       />
@@ -79,11 +81,12 @@ export function FSelect({ label, req, opts, value, onChange }: {
   )
 }
 
-export function CepInput({ label, req, value, onChange }: {
+export function CepInput({ label, req, value, onChange, onBlur }: {
   label: string
   req?: boolean
   value?: string
   onChange?: (v: string) => void
+  onBlur?: () => void
 }) {
   return (
     <FInput
@@ -91,6 +94,7 @@ export function CepInput({ label, req, value, onChange }: {
       req={req}
       value={value}
       onChange={onChange ? (v) => onChange(maskCep(v)) : undefined}
+      onBlur={onBlur}
     />
   )
 }
@@ -108,7 +112,7 @@ export function PhoneInput({ label, req, value, onChange }: {
       </label>
       <div className="flex bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
         <div className="flex items-center gap-1 px-2.5 py-2.5 border-r border-[var(--d2b-border)] text-sm text-[var(--d2b-text-primary)] shrink-0">
-          🇧🇷 <span className="text-[var(--d2b-text-secondary)] text-xs ml-1">Brasil</span>
+          🇧🇷 <span className="text-[var(--d2b-text-secondary)] text-xs ml-1">+55</span>
           <ChevronDown size={11} className="text-[var(--d2b-text-muted)] ml-0.5" />
         </div>
         <input

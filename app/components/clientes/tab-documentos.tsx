@@ -69,9 +69,15 @@ export function TabDocumentos({
   const [novoProfOpen, setNovoProfOpen] = useState(false)
   const [novoPermProf, setNovoPermProf] = useState(true)
   const [novoPermAssist, setNovoPermAssist] = useState(true)
+  const [novoAssinaturaProf, setNovoAssinaturaProf] = useState(false)
+  const [novoAssinaturaPac, setNovoAssinaturaPac] = useState(false)
+  const [novoLogo, setNovoLogo] = useState(false)
+  const [novoTemplate, setNovoTemplate] = useState(false)
+  const [novoConteudo, setNovoConteudo] = useState('')
   const [novoErros, setNovoErros] = useState<Record<string, string>>({})
+  const [salvandoNovo, setSalvandoNovo] = useState(false)
 
-  // Editar / criar com template
+  // Editar
   const [editarOpen, setEditarOpen] = useState(false)
   const [editarId, setEditarId] = useState<string | null>(null)
   const [editTitulo, setEditTitulo] = useState('')
@@ -157,29 +163,67 @@ export function TabDocumentos({
     setEditarOpen(true)
   }
 
-  function openNovoComTemplate(template: string) {
-    const erros: Record<string, string> = {}
-    if (!novoTitulo.trim()) erros.titulo = 'Campo obrigatório'
-    if (!novoProf)          erros.prof   = 'Campo obrigatório'
-    if (Object.keys(erros).length > 0) { setNovoErros(erros); return }
-    setEditarId(null)
-    setEditTitulo(novoTitulo.trim())
-    setEditProf(novoProf)
-    setEditPermProf(novoPermProf)
-    setEditPermAssist(novoPermAssist)
-    setEditConteudo(template)
-    setEditErros({})
-    setNovoOpen(false)
-    setEditarOpen(true)
+  function openNovo() {
+    setNovoTitulo('')
+    setNovoProf(null)
+    setNovoProfOpen(false)
+    setNovoPermProf(true)
+    setNovoPermAssist(true)
+    setNovoAssinaturaProf(false)
+    setNovoAssinaturaPac(false)
+    setNovoLogo(false)
+    setNovoTemplate(false)
+    setNovoConteudo('')
+    setNovoErros({})
+    setNovoOpen(true)
   }
 
-  function resolveHashtags(html: string): string {
+  function resolveHashtags(html: string, prof: { id: string; nome: string } | null): string {
     const hoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
     return html
       .replace(/#nome_do_paciente#/g, pacienteNome)
       .replace(/#data_de_hoje#/g, hoje)
-      .replace(/#endereço_do_profissional#/g, editProf?.nome ?? '')
+      .replace(/#endereço_do_profissional#/g, prof?.nome ?? '')
       .replace(/#[^#<\s]+#/g, '')
+  }
+
+  async function salvarNovoDocumento() {
+    const erros: Record<string, string> = {}
+    if (!novoTitulo.trim()) erros.titulo = 'Campo obrigatório'
+    if (!novoProf)          erros.prof   = 'Campo obrigatório'
+    if (Object.keys(erros).length > 0) { setNovoErros(erros); return }
+
+    const conteudoFinal = resolveHashtags(novoConteudo, novoProf)
+    setSalvandoNovo(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/documentos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          empresaId, pacienteId,
+          usuarioId: novoProf!.id,
+          titulo: novoTitulo.trim(),
+          conteudo: conteudoFinal,
+          tipo: 'branco',
+          permProf: novoPermProf,
+          permAssist: novoPermAssist,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      const criado: { id: string; usuarioId?: string; usuarioNome?: string; titulo: string; conteudo?: string; tipo: string; permProf: boolean; permAssist: boolean; createdAt: string } = await res.json()
+      const ts = new Date(criado.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      setDocs((prev) => [...prev, {
+        id: criado.id, usuarioId: criado.usuarioId,
+        profissional: criado.usuarioNome ?? novoProf!.nome,
+        titulo: criado.titulo, conteudo: criado.conteudo ?? conteudoFinal,
+        tipo: criado.tipo, permProf: criado.permProf, permAssist: criado.permAssist, criadoEm: ts,
+      }])
+      setNovoOpen(false)
+    } catch {
+      setNovoErros({ titulo: 'Erro ao salvar. Tente novamente.' })
+    } finally {
+      setSalvandoNovo(false)
+    }
   }
 
   async function salvarDocumento() {
@@ -187,7 +231,7 @@ export function TabDocumentos({
     if (!editTitulo.trim()) erros.titulo = 'Campo obrigatório'
     if (Object.keys(erros).length > 0) { setEditErros(erros); return }
 
-    const conteudoFinal = resolveHashtags(editConteudo)
+    const conteudoFinal = resolveHashtags(editConteudo, editProf)
 
     setSalvando(true)
     try {
@@ -273,7 +317,7 @@ export function TabDocumentos({
         <h2 className="text-lg font-semibold text-[var(--d2b-text-primary)]">Documentos</h2>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => { setNovoTitulo(''); setNovoProf(null); setNovoPermProf(true); setNovoPermAssist(true); setNovoErros({}); setNovoOpen(true) }}
+            onClick={openNovo}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus size={14} /> Novo Documento
@@ -428,16 +472,20 @@ export function TabDocumentos({
       {novoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+            {/* Header */}
             <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100">
               <span className="text-base font-semibold text-gray-900">Novo Documento</span>
               <button onClick={() => setNovoOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                 <X size={15} />
               </button>
             </div>
+
+            {/* Body */}
             <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-5">
               <p className="text-sm font-semibold text-gray-700">Informações do Documento</p>
+
+              {/* Título + Profissional */}
               <div className="flex gap-4">
-                {/* Título */}
                 <div className="flex-1">
                   <div className="relative">
                     <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Título <span className="text-purple-600">*</span></label>
@@ -448,7 +496,6 @@ export function TabDocumentos({
                   </div>
                   {novoErros.titulo && <p className="text-xs text-red-500 mt-1">{novoErros.titulo}</p>}
                 </div>
-                {/* Profissional */}
                 <div className="flex-1">
                   <div className="relative">
                     <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500">Profissional <span className="text-purple-600">*</span></label>
@@ -462,7 +509,8 @@ export function TabDocumentos({
                         <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
                           {usuarios.map((u) => (
                             <button key={u.id} onClick={() => { setNovoProf(u); setNovoProfOpen(false); setNovoErros((e) => ({ ...e, prof: '' })) }}
-                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${novoProf?.id === u.id ? 'text-purple-600 bg-purple-50' : 'text-gray-700 hover:bg-gray-50'}`}>{u.nome}</button>
+                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${novoProf?.id === u.id ? 'text-purple-600 bg-purple-50' : 'text-gray-700 hover:bg-gray-50'}`}>{u.nome}
+                            </button>
                           ))}
                         </div>
                       )}
@@ -476,46 +524,52 @@ export function TabDocumentos({
               <div>
                 <p className="text-xs text-gray-500 mb-3">Permissões deste documento</p>
                 <div className="flex flex-col gap-2.5">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setNovoPermProf((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${novoPermProf ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${novoPermProf ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que outros profissionais visualizem esse documento</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <button onClick={() => setNovoPermAssist((v) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${novoPermAssist ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${novoPermAssist ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </button>
-                    <span className="text-sm text-gray-600">Permitir que assistentes visualizem esse documento</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-100" />
-
-              {/* Tipo */}
-              <div>
-                <p className="text-sm text-gray-700 mb-4">Selecione o tipo de documento que deseja criar <span className="text-purple-600">*</span></p>
-                <div className="grid grid-cols-4 gap-3">
-                  {TIPOS_DOC.map((tipo) => (
-                    <button key={tipo.id} onClick={() => openNovoComTemplate(tipo.template)}
-                      className="relative flex flex-col items-center gap-3 border border-gray-200 rounded-xl p-4 hover:border-purple-400 hover:bg-purple-50 transition-colors group">
-                      {tipo.badge && (
-                        <span className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">DEV2B</span>
-                      )}
-                      {tipo.id === 'branco'
-                        ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        : <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      }
-                      <span className="text-xs text-gray-500 text-center leading-tight group-hover:text-purple-700 transition-colors">{tipo.label}</span>
-                    </button>
+                  {([
+                    { label: 'Permitir que outros profissionais visualizem esse documento', on: novoPermProf,      set: setNovoPermProf },
+                    { label: 'Permitir que assistentes visualizem esse documento',          on: novoPermAssist,    set: setNovoPermAssist },
+                    { label: 'Solicitar assinatura do profissional ?',                      on: novoAssinaturaProf, set: setNovoAssinaturaProf },
+                    { label: 'Solicitar assinatura do paciente ?',                          on: novoAssinaturaPac, set: setNovoAssinaturaPac },
+                  ] as const).map(({ label, on, set }) => (
+                    <label key={label} className="flex items-center gap-3 cursor-pointer">
+                      <button onClick={() => set((v: boolean) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${on ? 'bg-purple-600' : 'bg-gray-300'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                      </button>
+                      <span className="text-sm text-gray-600">{label}</span>
+                    </label>
+                  ))}
+                  <p className="text-sm text-gray-500 pl-0.5">
+                    Créditos: 5{' '}
+                    <a href="/dashboard/configuracoes?tab=creditos" className="text-purple-600 underline hover:text-purple-700 transition-colors text-sm">Comprar Créditos</a>
+                  </p>
+                  {([
+                    { label: 'Adicionar o logo da clínica no documento ?', on: novoLogo,     set: setNovoLogo },
+                    { label: 'Salvar como template ?',                      on: novoTemplate, set: setNovoTemplate },
+                  ] as const).map(({ label, on, set }) => (
+                    <label key={label} className="flex items-center gap-3 cursor-pointer">
+                      <button onClick={() => set((v: boolean) => !v)} className={`relative w-9 h-5 rounded-full transition-colors flex-shrink-0 ${on ? 'bg-purple-600' : 'bg-gray-300'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                      </button>
+                      <span className="text-sm text-gray-600">{label}</span>
+                    </label>
                   ))}
                 </div>
               </div>
-              <p className="text-sm text-gray-500">Ou realize <button className="text-purple-600 underline hover:text-purple-700 transition-colors">Upload de Documento</button></p>
+
+              {/* Editor */}
+              <DocumentoEditor value={novoConteudo} onChange={setNovoConteudo} minHeight={200} />
+
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Adicione variáveis inserindo hashtag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento.
+              </p>
             </div>
-            <div className="flex justify-end px-7 py-5 border-t border-gray-100">
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-gray-100">
               <button onClick={() => setNovoOpen(false)} className="px-5 py-2 text-sm text-gray-500 border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-700 transition-colors">Voltar</button>
+              <button onClick={salvarNovoDocumento} disabled={salvandoNovo}
+                className="px-5 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors">
+                {salvandoNovo ? 'Salvando…' : 'Salvar'}
+              </button>
             </div>
           </div>
         </div>

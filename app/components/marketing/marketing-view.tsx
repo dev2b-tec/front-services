@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   ChevronDown, Copy, ExternalLink, AlertTriangle, Globe, User,
   MapPin, Share2, Clock, Check, X, Info, Eye, Search,
@@ -20,9 +20,13 @@ const BTN_PRIMARY =
   'px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors'
 
 // ─── FInput ───────────────────────────────────────────────────────────────────
-function FInput({ label, req, val, placeholder, prefix, type = 'text', hint }: {
+function FInput({ label, req, val, placeholder, prefix, type = 'text', hint, value, onChange }: {
   label: string; req?: boolean; val?: string; placeholder?: string; prefix?: string; type?: string; hint?: string
+  value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) {
+  const inputProps = value !== undefined
+    ? { value, onChange }
+    : { defaultValue: val }
   return (
     <div className="relative">
       <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
@@ -33,10 +37,10 @@ function FInput({ label, req, val, placeholder, prefix, type = 'text', hint }: {
           <span className="flex items-center px-3 text-xs text-[var(--d2b-text-muted)] border-r border-[var(--d2b-border)] shrink-0 whitespace-nowrap">
             {prefix}
           </span>
-          <input type={type} defaultValue={val} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none" />
+          <input type={type} {...inputProps} placeholder={placeholder} className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none" />
         </div>
       ) : (
-        <input type={type} defaultValue={val} placeholder={placeholder} className={INP} />
+        <input type={type} {...inputProps} placeholder={placeholder} className={INP} />
       )}
       {hint && <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">{hint}</p>}
     </div>
@@ -63,9 +67,11 @@ function FSelect({ label, req, opts, val }: {
 }
 
 // ─── FTextarea ────────────────────────────────────────────────────────────────
-function FTextarea({ label, req, placeholder, rows = 4 }: {
+function FTextarea({ label, req, placeholder, rows = 4, value, onChange }: {
   label: string; req?: boolean; placeholder?: string; rows?: number
+  value?: string; onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
 }) {
+  const textareaProps = value !== undefined ? { value, onChange } : {}
   return (
     <div className="relative">
       <label className="text-xs font-medium text-[var(--d2b-text-secondary)] block mb-1.5">
@@ -75,6 +81,7 @@ function FTextarea({ label, req, placeholder, rows = 4 }: {
         <textarea
           rows={rows}
           placeholder={placeholder}
+          {...textareaProps}
           className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none"
         />
       </div>
@@ -161,6 +168,20 @@ interface ProfissionalApi {
   empresaId?: string
   telefoneComercial?: string
   observacoes?: string
+  // Buscador
+  fotoUrl?: string
+  descricaoAtuacao?: string
+  cursosCertificacoes?: string
+  faixaPreco?: string
+  modoAtendimento?: string
+  aceitaConvenio?: boolean
+  instagram?: string
+  facebook?: string
+  linkedin?: string
+  youtube?: string
+  websiteLink?: string
+  whatsapp?: string
+  publicadoBuscador?: boolean
 }
 
 interface TabAutoProps {
@@ -567,7 +588,7 @@ const SITE_SUBTABS: { id: SiteSubTab; label: string }[] = [
   { id: 'redes',   label: 'Redes Sociais e Contatos' },
 ]
 
-type BlogPost = { id: string; titulo: string; data: string; status: 'Publicado' | 'Rascunho' | 'Preview' }
+type BlogPost = { id: string; titulo: string; data: string; dataIso?: string; status: 'Publicado' | 'Rascunho' | 'Preview'; conteudo?: string; imagemUrl?: string }
 
 function ImageUploadBox({ label, desc, wide }: { label: string; desc: string; wide?: boolean }) {
   return (
@@ -615,13 +636,24 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
   const [novaPublStatusOpen, setNovaPublStatusOpen] = useState(false)
   const [novaPublConteudo, setNovaPublConteudo] = useState('')
   const [novaPublImageSrc, setNovaPublImageSrc] = useState<string | null>(null)
+  const [novaPublImageFile, setNovaPublImageFile] = useState<File | null>(null)
+  const [editPostId, setEditPostId] = useState<string | null>(null)
   const novaPublImageRef = useRef<HTMLInputElement>(null)
   const [logoSrc, setLogoSrc] = useState<string | null>(null)
   const [perfilSrc, setPerfilSrc] = useState<string | null>(null)
   const [bannerSrc, setBannerSrc] = useState<string | null>(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingPerfil, setUploadingPerfil] = useState(false)
+  const [uploadingBanner, setUploadingBanner] = useState(false)
   const logoRef = useRef<HTMLInputElement>(null)
   const perfilRef = useRef<HTMLInputElement>(null)
   const bannerRef = useRef<HTMLInputElement>(null)
+
+  const publicUrl = `https://app.dev2b.tec.br/sites/blog/${prof.id}`
+  const [copied, setCopied] = useState(false)
+  function copyUrl() {
+    navigator.clipboard.writeText(publicUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+  }
 
   // Load site config when prof changes
   const prevProfId = useRef<string | null>(null)
@@ -648,13 +680,26 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
         setFacebook(data.facebook ?? '')
         setLinkedin(data.linkedin ?? '')
         setYoutube(data.youtube ?? '')
-        setPosts((data.posts ?? []).map((p: { id: string; titulo: string; dataPublicacao?: string; status: string }) => ({
+        setPosts((data.posts ?? []).map((p: { id: string; titulo: string; dataPublicacao?: string; status: string; conteudo?: string; imagemUrl?: string }) => ({
           id: p.id,
           titulo: p.titulo,
           data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
+          dataIso: p.dataPublicacao ?? undefined,
           status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
+          conteudo: p.conteudo ?? '',
+          imagemUrl: p.imagemUrl ?? undefined,
         } as BlogPost)))
         setConfigured(true)
+        // Load existing images
+        const fetchImg = async (endpoint: string, set: (v: string | null) => void) => {
+          try {
+            const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`)
+            if (r.ok) { const j = await r.json(); set(j.url ?? null) }
+          } catch { /* ignore */ }
+        }
+        fetchImg(`/api/v1/site-config/usuario/${prof.id}/logo-url`, setLogoSrc)
+        fetchImg(`/api/v1/site-config/usuario/${prof.id}/perfil-url`, setPerfilSrc)
+        fetchImg(`/api/v1/site-config/usuario/${prof.id}/banner-url`, setBannerSrc)
       } catch { setConfigured(false) }
     })
   }
@@ -696,40 +741,128 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
     }
   }
 
-  function handleImageFile(file: File, set: (src: string) => void) {
+  async function uploadImage(
+    file: File,
+    endpoint: string,
+    set: (src: string) => void,
+    setUploading: (v: boolean) => void
+  ) {
+    // Show local preview immediately
     const reader = new FileReader()
     reader.onload = (e) => { if (e.target?.result) set(e.target.result as string) }
     reader.readAsDataURL(file)
+    // Upload to MinIO via backend
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, { method: 'POST', body: form })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) set(data.url)
+      }
+    } catch { /* silently ignore */ } finally { setUploading(false) }
   }
 
   const filteredPosts = posts.filter((p) => p.titulo.toLowerCase().includes(blogSearch.toLowerCase()))
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / blogPageSize))
   const pagePosts = filteredPosts.slice((blogPage - 1) * blogPageSize, blogPage * blogPageSize)
 
+  function openNovaPubl() {
+    setEditPostId(null)
+    setNovaPublTitulo(''); setNovaPublData(''); setNovaPublStatus(''); setNovaPublConteudo('')
+    setNovaPublImageSrc(null); setNovaPublImageFile(null)
+    setNovaPublOpen(true)
+  }
+
+  function openEditPubl(p: BlogPost) {
+    setEditPostId(p.id)
+    setNovaPublTitulo(p.titulo)
+    // Convert stored ISO date to yyyy-mm-dd for <input type="date">
+    const isoDate = p.dataIso ? p.dataIso.slice(0, 10) : ''
+    setNovaPublData(isoDate)
+    setNovaPublStatus(p.status)
+    setNovaPublConteudo(p.conteudo ?? '')
+    setNovaPublImageFile(null)
+    setNovaPublImageSrc(null)
+    setNovaPublOpen(true)
+    // Fetch presigned image URL if post has an image
+    if (p.id) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/blog/${p.id}/imagem-url`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((j) => { if (j?.url) setNovaPublImageSrc(j.url) })
+        .catch(() => {})
+    }
+  }
+
   async function savePost() {
     if (!novaPublTitulo.trim() || !siteConfigId) return
     const statusMap: Record<string, string> = { 'Publicado': 'PUBLICADO', 'Preview': 'PREVIEW', 'Rascunho': 'RASCUNHO' }
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/usuario/${prof.id}/blog`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titulo: novaPublTitulo.trim(),
-          dataPublicacao: novaPublData || null,
-          status: statusMap[novaPublStatus] ?? 'RASCUNHO',
-          conteudo: novaPublConteudo,
-        }),
-      })
-      if (!res.ok) throw new Error(`Erro ${res.status}`)
-      const p = await res.json()
-      setPosts((prev) => [...prev, {
-        id: p.id,
-        titulo: p.titulo,
-        data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
-        status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
-      } as BlogPost])
+      let postId: string
+      if (editPostId) {
+        // Update existing post
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/blog/${editPostId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titulo: novaPublTitulo.trim(),
+            dataPublicacao: novaPublData || null,
+            status: statusMap[novaPublStatus] ?? 'RASCUNHO',
+            conteudo: novaPublConteudo || null,
+          }),
+        })
+        if (!res.ok) throw new Error(`Erro ${res.status}`)
+        const p = await res.json()
+        postId = p.id
+        setPosts((prev) => prev.map((x) => x.id === editPostId ? {
+          id: p.id, titulo: p.titulo,
+          data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
+          dataIso: p.dataPublicacao ?? undefined,
+          status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
+          conteudo: p.conteudo ?? '',
+          imagemUrl: x.imagemUrl,
+        } as BlogPost : x))
+      } else {
+        // Create new post
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/usuario/${prof.id}/blog`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titulo: novaPublTitulo.trim(),
+            dataPublicacao: novaPublData || null,
+            status: statusMap[novaPublStatus] ?? 'RASCUNHO',
+            conteudo: novaPublConteudo,
+          }),
+        })
+        if (!res.ok) throw new Error(`Erro ${res.status}`)
+        const p = await res.json()
+        postId = p.id
+        setPosts((prev) => [...prev, {
+          id: p.id, titulo: p.titulo,
+          data: p.dataPublicacao ? new Date(p.dataPublicacao).toLocaleDateString('pt-BR') : '',
+          dataIso: p.dataPublicacao ?? undefined,
+          status: p.status === 'PUBLICADO' ? 'Publicado' : p.status === 'PREVIEW' ? 'Preview' : 'Rascunho',
+          conteudo: p.conteudo ?? '',
+          imagemUrl: undefined,
+        } as BlogPost])
+      }
+      // Upload image if selected
+      if (novaPublImageFile) {
+        const form = new FormData()
+        form.append('file', novaPublImageFile)
+        const imgRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/site-config/blog/${postId}/imagem`, {
+          method: 'POST', body: form,
+        })
+        if (imgRes.ok) {
+          const imgData = await imgRes.json()
+          const newUrl = imgData.url as string
+          setPosts((prev) => prev.map((x) => x.id === postId ? { ...x, imagemUrl: newUrl } : x))
+        }
+      }
     } catch { /* silently ignore */ }
-    setNovaPublTitulo(''); setNovaPublData(''); setNovaPublStatus(''); setNovaPublConteudo(''); setNovaPublImageSrc(null)
+    setNovaPublTitulo(''); setNovaPublData(''); setNovaPublStatus(''); setNovaPublConteudo('')
+    setNovaPublImageSrc(null); setNovaPublImageFile(null); setEditPostId(null)
     setNovaPublOpen(false)
   }
 
@@ -792,7 +925,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
           <h3 className="text-sm font-semibold text-[var(--d2b-text-primary)]">Meu Site & Blog</h3>
           <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Configure as informações do website e blog.</p>
         </div>
-        <a href={`https://site.dev2b.tec.br/p/${linkSlug}`} target="_blank" rel="noreferrer"
+        <a href={publicUrl} target="_blank" rel="noreferrer"
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
           <Eye size={13} /> Preview
         </a>
@@ -803,23 +936,17 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
         {/* Link da Página */}
         <div className="relative flex-1 min-w-[260px]">
           <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
-            Link da Página<span className="text-[#7C4DFF] ml-0.5">*</span>
+            Link da Página
           </label>
-          <div className="flex bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden focus-within:border-[#7C4DFF] transition-colors">
-            <span className="flex items-center px-3 text-xs text-[var(--d2b-text-muted)] border-r border-[var(--d2b-border)] shrink-0 whitespace-nowrap">
-              https://site.dev2b.tec.br/p/
+          <div className="flex bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-md overflow-hidden">
+            <span className="flex items-center flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] select-all truncate">
+              {publicUrl}
             </span>
-            <input
-              type="text"
-              value={linkSlug}
-              onChange={(e) => setLinkSlug(e.target.value)}
-              className="bg-transparent flex-1 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] focus:outline-none"
-            />
-            <button className="px-3 text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors border-l border-[var(--d2b-border)]">
-              <Copy size={13} />
+            <button onClick={copyUrl} title="Copiar link" className="px-3 text-[var(--d2b-text-secondary)] hover:text-[#7C4DFF] transition-colors border-l border-[var(--d2b-border)] shrink-0">
+              {copied ? <span className="text-[10px] text-green-500">Copiado!</span> : <Copy size={13} />}
             </button>
           </div>
-          <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">Este será o link público para acessar este site.</p>
+          <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1">Link público do seu site (imutável).</p>
         </div>
 
         {/* Cor Principal */}
@@ -867,11 +994,12 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
                 <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Logo da Clínica</p>
                 <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Este será o logo exibido em seu site.</p>
                 <input ref={logoRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setLogoSrc) }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f, `/api/v1/site-config/usuario/${prof.id}/logo`, setLogoSrc, setUploadingLogo) }} />
                 <div
                   onClick={() => logoRef.current?.click()}
                   className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-48 overflow-hidden group"
                 >
+                  {uploadingLogo && <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10"><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>}
                   {logoSrc
                     ? <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
                     : <User size={36} className="text-[#2D1B4E]" strokeWidth={1} />
@@ -889,11 +1017,12 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
                 <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Imagem de Perfil Profissional</p>
                 <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Imagem profissional a ser exibida no em seu site.</p>
                 <input ref={perfilRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setPerfilSrc) }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f, `/api/v1/site-config/usuario/${prof.id}/perfil`, setPerfilSrc, setUploadingPerfil) }} />
                 <div
                   onClick={() => perfilRef.current?.click()}
                   className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-28 overflow-hidden group"
                 >
+                  {uploadingPerfil && <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10"><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>}
                   {perfilSrc
                     ? <img src={perfilSrc} alt="Perfil" className="w-full h-full object-cover" />
                     : <User size={28} className="text-[#2D1B4E]" strokeWidth={1} />
@@ -911,11 +1040,12 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
                 <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">Banner Principal</p>
                 <p className="text-xs text-[var(--d2b-text-secondary)] mb-3">Este banner será exibido na página inicial do seu site.</p>
                 <input ref={bannerRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setBannerSrc) }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f, `/api/v1/site-config/usuario/${prof.id}/banner`, setBannerSrc, setUploadingBanner) }} />
                 <div
                   onClick={() => bannerRef.current?.click()}
                   className="relative rounded-xl border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors h-28 w-full min-w-[180px] overflow-hidden group"
                 >
+                  {uploadingBanner && <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10"><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>}
                   {bannerSrc
                     ? <img src={bannerSrc} alt="Banner" className="w-full h-full object-cover" />
                     : <div className="flex flex-col items-center gap-1 opacity-30"><svg width="40" height="28" viewBox="0 0 40 28" fill="none"><rect width="40" height="28" rx="3" fill="#7C4DFF"/><circle cx="12" cy="10" r="4" fill="white" opacity="0.5"/><path d="M0 22l10-8 8 6 8-10 14 16H0z" fill="white" opacity="0.4"/></svg></div>
@@ -932,25 +1062,27 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
           {subTab === 'textos' && (
             <div className="space-y-5">
-              <FTextarea label="Sobre mim" req rows={4} placeholder="Descrição sobre o trabalho e/ou experiências do profissional" />
-              <FTextarea label="Serviços Oferecidos" rows={3} placeholder="Liste os principais serviços e tratamentos oferecidos" />
+              <FTextarea label="Sobre mim" req rows={4} placeholder="Descrição sobre o trabalho e/ou experiências do profissional"
+                value={sobreMim} onChange={(e) => setSobreMim(e.target.value)} />
+              <FTextarea label="Serviços Oferecidos" rows={3} placeholder="Liste os principais serviços e tratamentos oferecidos"
+                value={servicos} onChange={(e) => setServicos(e.target.value)} />
               <div className="grid grid-cols-2 gap-4">
-                <FInput label="Slogan / Frase de Destaque" />
-                <FInput label="Título da Página" />
+                <FInput label="Slogan / Frase de Destaque" value={slogan} onChange={(e) => setSlogan(e.target.value)} />
+                <FInput label="Título da Página" value={tituloPagina} onChange={(e) => setTituloPagina(e.target.value)} />
               </div>
             </div>
           )}
 
           {subTab === 'redes' && (
             <div className="grid grid-cols-2 gap-4">
-              <FInput label="WhatsApp" />
-              <FInput label="Email" />
-              <FInput label="Telefone" />
-              <FInput label="Link do Website" />
-              <FInput label="Instagram" prefix="https://instagram.com/" />
-              <FInput label="Facebook"  prefix="https://facebook.com/" />
-              <FInput label="LinkedIn"  prefix="https://linkedin.com/" />
-              <FInput label="YouTube"   prefix="https://youtube.com/" />
+              <FInput label="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
+              <FInput label="Email" value={emailContato} onChange={(e) => setEmailContato(e.target.value)} />
+              <FInput label="Telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
+              <FInput label="Link do Website" value={websiteLink} onChange={(e) => setWebsiteLink(e.target.value)} />
+              <FInput label="Instagram" prefix="https://instagram.com/" value={instagram} onChange={(e) => setInstagram(e.target.value)} />
+              <FInput label="Facebook"  prefix="https://facebook.com/" value={facebook} onChange={(e) => setFacebook(e.target.value)} />
+              <FInput label="LinkedIn"  prefix="https://linkedin.com/" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+              <FInput label="YouTube"   prefix="https://youtube.com/" value={youtube} onChange={(e) => setYoutube(e.target.value)} />
             </div>
           )}
         </div>
@@ -969,7 +1101,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
             <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Gerencie publicações e artigos no seu blog.</p>
           </div>
           <button
-            onClick={() => setNovaPublOpen(true)}
+            onClick={openNovaPubl}
             className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold text-[#7C4DFF] bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] transition-colors"
           >
             <Plus size={13} /> Nova Publicação
@@ -991,7 +1123,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
 
           {/* Table */}
           <div className="rounded-lg border border-[var(--d2b-border)] overflow-hidden">
-            <div className="grid grid-cols-[1fr_160px_140px_100px] text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-wide px-4 py-2.5 bg-[var(--d2b-bg-main)] border-b border-[var(--d2b-border)]">
+            <div className="grid grid-cols-[1fr_160px_140px_120px] text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-wide px-4 py-2.5 bg-[var(--d2b-bg-main)] border-b border-[var(--d2b-border)]">
               <button className="flex items-center gap-1 text-left hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />TÍTULO</button>
               <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />DATA</button>
               <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors"><ArrowUpDown size={10} />STATUS</button>
@@ -1002,14 +1134,22 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
               <div className="px-4 py-8 text-center text-sm text-[var(--d2b-text-muted)]">Nenhum blog encontrado</div>
             ) : (
               pagePosts.map((p) => (
-                <div key={p.id} className="grid grid-cols-[1fr_160px_140px_100px] px-4 py-3 border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] items-center">
+                <div key={p.id} className="grid grid-cols-[1fr_160px_140px_120px] px-4 py-3 border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] items-center">
                   <span className="text-sm text-[var(--d2b-text-primary)]">{p.titulo}</span>
                   <span className="text-sm text-[var(--d2b-text-secondary)]">{p.data}</span>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${p.status === 'Publicado' ? 'bg-[rgba(34,197,94,0.12)] text-[#22C55E]' : 'bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)]'}`}>{p.status}</span>
-                  <button
-                    onClick={() => deletePost(p.id)}
-                    className="w-7 h-7 rounded-full bg-[rgba(239,68,68,0.08)] text-[#EF4444] flex items-center justify-center hover:bg-[rgba(239,68,68,0.18)] transition-colors"
-                  ><X size={12} /></button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => openEditPubl(p)}
+                      className="w-7 h-7 rounded-full bg-[var(--d2b-hover)] text-[var(--d2b-text-secondary)] flex items-center justify-center hover:bg-[rgba(124,77,255,0.12)] hover:text-[#7C4DFF] transition-colors"
+                      title="Editar"
+                    ><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button
+                      onClick={() => deletePost(p.id)}
+                      className="w-7 h-7 rounded-full bg-[rgba(239,68,68,0.08)] text-[#EF4444] flex items-center justify-center hover:bg-[rgba(239,68,68,0.18)] transition-colors"
+                      title="Excluir"
+                    ><X size={12} /></button>
+                  </div>
                 </div>
               ))
             )}
@@ -1068,7 +1208,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
           <div className="bg-white rounded-2xl w-full max-w-[810px] shadow-2xl flex flex-col max-h-[90vh]">
             {/* Header */}
             <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900">Nova publicação no blog</h3>
+              <h3 className="text-base font-semibold text-gray-900">{editPostId ? 'Editar publicação' : 'Nova publicação no blog'}</h3>
               <button onClick={() => setNovaPublOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                 <X size={15} />
               </button>
@@ -1118,7 +1258,7 @@ function TabMeuSite({ prof }: { prof: ProfissionalApi }) {
               {/* Image upload */}
               <div>
                 <input ref={novaPublImageRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f, setNovaPublImageSrc) }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) { setNovaPublImageFile(f); const r = new FileReader(); r.onload = (ev) => { if (ev.target?.result) setNovaPublImageSrc(ev.target.result as string) }; r.readAsDataURL(f) } }} />
                 <div onClick={() => novaPublImageRef.current?.click()}
                   className="w-52 h-28 rounded-xl border-2 border-dashed border-gray-300 bg-gray-100 flex items-center justify-center cursor-pointer hover:border-purple-400 transition-colors overflow-hidden">
                   {novaPublImageSrc
@@ -1189,8 +1329,111 @@ const BUSCADOR_SUB: { id: BuscadorSubTab; label: string }[] = [
   { id: 'redes',         label: 'Redes Sociais e Contatos' },
 ]
 
-function TabVendaMais() {
+const FAIXA_PRECO_OPTS = ['R$ 0 – R$ 100', 'R$ 100 – R$ 200', 'R$ 200 – R$ 400', 'Acima de R$ 400']
+const MODO_ATEND_OPTS  = ['Presencial', 'Online', 'Ambos']
+
+function TabVendaMais({ prof }: { prof: ProfissionalApi }) {
   const [subTab, setSubTab] = useState<BuscadorSubTab>('pessoais')
+  const [saving, setSaving]   = useState(false)
+  const [saved, setSaved]     = useState(false)
+  const [saveErr, setSaveErr] = useState<string | null>(null)
+
+  // pessoais
+  const [nome,          setNome]          = useState(prof.nome ?? '')
+  const [fotoSrc,       setFotoSrc]       = useState<string | null>(null)
+  const [uploadingFoto, setUploadingFoto] = useState(false)
+  const fotoRef = useRef<HTMLInputElement>(null)
+
+  // profissionais
+  const [descricao,      setDescricao]      = useState(prof.descricaoAtuacao ?? '')
+  const [cursos,         setCursos]         = useState(prof.cursosCertificacoes ?? '')
+  const [conselho,       setConselho]       = useState(prof.conselho ?? '')
+  const [numeroConselho, setNumeroConselho] = useState(prof.numeroConselho ?? '')
+  const [faixaPreco,     setFaixaPreco]     = useState(prof.faixaPreco ?? '')
+  const [modoAtend,      setModoAtend]      = useState(prof.modoAtendimento ?? '')
+  const [aceitaConvenio, setAceitaConvenio] = useState<string>(
+    prof.aceitaConvenio === true ? 'Sim' : prof.aceitaConvenio === false ? 'Não' : ''
+  )
+
+  // endereço
+  const [cep,         setCep]         = useState(prof.cep ?? '')
+  const [logradouro,  setLogradouro]  = useState(prof.logradouro ?? '')
+  const [numero,      setNumero]      = useState(prof.numero ?? '')
+  const [complemento, setComplemento] = useState(prof.complemento ?? '')
+  const [bairro,      setBairro]      = useState(prof.bairro ?? '')
+  const [cidade,      setCidade]      = useState(prof.cidade ?? '')
+
+  // redes
+  const [whatsapp,    setWhatsapp]    = useState(prof.whatsapp ?? '')
+  const [email,       setEmail]       = useState(prof.email ?? '')
+  const [websiteLink, setWebsiteLink] = useState(prof.websiteLink ?? '')
+  const [instagram,   setInstagram]   = useState(prof.instagram ?? '')
+  const [facebook,    setFacebook]    = useState(prof.facebook ?? '')
+  const [linkedin,    setLinkedin]    = useState(prof.linkedin ?? '')
+  const [youtube,     setYoutube]     = useState(prof.youtube ?? '')
+
+  // publicado
+  const [publicado, setPublicado] = useState(prof.publicadoBuscador ?? false)
+
+  // Load foto on mount
+  useEffect(() => {
+    if (!prof.id) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${prof.id}/foto-url`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((j: { fotoUrl?: string } | null) => { if (j?.fotoUrl) setFotoSrc(j.fotoUrl) })
+      .catch(() => {})
+  }, [prof.id])
+
+  async function uploadFoto(file: File) {
+    const reader = new FileReader()
+    reader.onload = (e) => { if (e.target?.result) setFotoSrc(e.target.result as string) }
+    reader.readAsDataURL(file)
+    setUploadingFoto(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${prof.id}/foto`, { method: 'POST', body: form })
+      if (res.ok) { const j: { fotoUrl?: string } = await res.json(); if (j.fotoUrl) setFotoSrc(j.fotoUrl) }
+    } catch { /* ignore */ } finally { setUploadingFoto(false) }
+  }
+
+  async function handleSave() {
+    setSaving(true); setSaveErr(null); setSaved(false)
+    try {
+      const body: Record<string, unknown> = {
+        nome:                nome           || undefined,
+        descricaoAtuacao:    descricao      || undefined,
+        cursosCertificacoes: cursos         || undefined,
+        conselho:            conselho       || undefined,
+        numeroConselho:      numeroConselho || undefined,
+        faixaPreco:          faixaPreco     || undefined,
+        modoAtendimento:     modoAtend      || undefined,
+        aceitaConvenio:      aceitaConvenio === 'Sim' ? true : aceitaConvenio === 'Não' ? false : undefined,
+        cep:                 cep            || undefined,
+        logradouro:          logradouro     || undefined,
+        numero:              numero         || undefined,
+        complemento:         complemento    || undefined,
+        bairro:              bairro         || undefined,
+        cidade:              cidade         || undefined,
+        whatsapp:            whatsapp       || undefined,
+        websiteLink:         websiteLink    || undefined,
+        instagram:           instagram      || undefined,
+        facebook:            facebook       || undefined,
+        linkedin:            linkedin       || undefined,
+        youtube:             youtube        || undefined,
+        publicadoBuscador:   publicado,
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${prof.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+      setSaved(true)
+    } catch (e) {
+      setSaveErr(e instanceof Error ? e.message : 'Erro ao salvar')
+    } finally { setSaving(false) }
+  }
 
   const content = (() => {
     switch (subTab) {
@@ -1198,25 +1441,67 @@ function TabVendaMais() {
         <div className="space-y-5 pt-5">
           <div>
             <p className="text-xs font-medium text-[var(--d2b-text-secondary)] mb-2">Foto de Perfil<span className="text-[#7C4DFF] ml-0.5">*</span></p>
-            <div className="w-24 h-24 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors">
-              <User size={32} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFoto(f) }} />
+            <div
+              onClick={() => fotoRef.current?.click()}
+              className="relative w-24 h-24 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
+            >
+              {fotoSrc
+                ? <img src={fotoSrc} alt="Foto" className="w-full h-full object-cover" />
+                : <User size={32} className="text-[var(--d2b-text-muted)]" strokeWidth={1} />
+              }
+              {uploadingFoto && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-[#7C4DFF] flex items-center justify-center">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <FInput label="Nome" req />
+            <FInput label="Nome" req value={nome} onChange={(e) => setNome(e.target.value)} />
           </div>
         </div>
       )
       case 'profissionais': return (
         <div className="space-y-5 pt-5">
-          <FTextarea label="Descrição da Atuação" req rows={4} />
-          <FTextarea label="Cursos e Certificações" req rows={3} />
+          <FTextarea label="Descrição da Atuação" req rows={4} value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+          <FTextarea label="Cursos e Certificações" rows={3} value={cursos} onChange={(e) => setCursos(e.target.value)} />
           <div className="grid grid-cols-2 gap-4">
-            <FInput label="Sigla e Número do Conselho" />
-            <FSelect label="Faixa de Preço" req opts={['Selecione uma faixa de preço', 'R$ 0 – R$ 100', 'R$ 100 – R$ 200', 'R$ 200 – R$ 400', 'Acima de R$ 400']} val="Selecione uma faixa de preço" />
-            <FSelect label="Modo de Atendimento" req opts={['Selecione uma opção', 'Presencial', 'Online', 'Ambos']} val="Selecione uma opção" />
-            <FSelect label="Aceita convênio" req opts={['Selecione uma opção', 'Sim', 'Não']} val="Selecione uma opção" />
-            <FSelect label="Especialidades" req opts={['Selecione uma especialidade', 'Clínico Geral', 'Ortodontia', 'Implantodontia', 'Pediatria']} val="Selecione uma especialidade" />
+            <FInput label="Sigla do Conselho"   value={conselho}       onChange={(e) => setConselho(e.target.value)} />
+            <FInput label="Número do Conselho"  value={numeroConselho} onChange={(e) => setNumeroConselho(e.target.value)} />
+            <div className="relative">
+              <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Faixa de Preço<span className="text-[#7C4DFF] ml-0.5">*</span></label>
+              <div className="relative">
+                <select value={faixaPreco} onChange={(e) => setFaixaPreco(e.target.value)} className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                  <option value="">Selecione</option>
+                  {FAIXA_PRECO_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+              </div>
+            </div>
+            <div className="relative">
+              <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Modo de Atendimento<span className="text-[#7C4DFF] ml-0.5">*</span></label>
+              <div className="relative">
+                <select value={modoAtend} onChange={(e) => setModoAtend(e.target.value)} className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                  <option value="">Selecione</option>
+                  {MODO_ATEND_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+              </div>
+            </div>
+            <div className="relative">
+              <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Aceita Convênio<span className="text-[#7C4DFF] ml-0.5">*</span></label>
+              <div className="relative">
+                <select value={aceitaConvenio} onChange={(e) => setAceitaConvenio(e.target.value)} className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                  <option value="">Selecione</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+              </div>
+            </div>
           </div>
           <div>
             <h4 className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-4">Horário de Funcionamento</h4>
@@ -1227,26 +1512,25 @@ function TabVendaMais() {
       case 'endereco': return (
         <div className="space-y-5 pt-5">
           <div className="grid grid-cols-2 gap-4">
-            <FInput label="CEP" />
-            <FInput label="Logradouro" />
-            <FInput label="Número" />
-            <FInput label="Complemento" />
-            <FInput label="Bairro" />
-            <FInput label="Cidade" />
+            <FInput label="CEP"         value={cep}         onChange={(e) => setCep(e.target.value)} />
+            <FInput label="Logradouro"  value={logradouro}  onChange={(e) => setLogradouro(e.target.value)} />
+            <FInput label="Número"      value={numero}      onChange={(e) => setNumero(e.target.value)} />
+            <FInput label="Complemento" value={complemento} onChange={(e) => setComplemento(e.target.value)} />
+            <FInput label="Bairro"      value={bairro}      onChange={(e) => setBairro(e.target.value)} />
+            <FInput label="Cidade"      value={cidade}      onChange={(e) => setCidade(e.target.value)} />
           </div>
         </div>
       )
       case 'redes': return (
         <div className="space-y-5 pt-5">
           <div className="grid grid-cols-2 gap-4">
-            <FInput label="WhatsApp" />
-            <FInput label="Email" />
-            <FInput label="Link do Website" />
-            <FInput label="Instagram" prefix="https://instagram.com/" />
-            <FInput label="Facebook"  prefix="https://facebook.com/" />
-            <FInput label="LinkedIn"  prefix="https://linkedin.com/" />
-            <FInput label="YouTube"   prefix="https://youtube.com/" />
-            <FInput label="Twitter"   prefix="https://twitter.com/" />
+            <FInput label="WhatsApp"        value={whatsapp}    onChange={(e) => setWhatsapp(e.target.value)} />
+            <FInput label="Email"           value={email}       onChange={(e) => setEmail(e.target.value)} />
+            <FInput label="Link do Website" value={websiteLink} onChange={(e) => setWebsiteLink(e.target.value)} />
+            <FInput label="Instagram" prefix="https://instagram.com/" value={instagram} onChange={(e) => setInstagram(e.target.value)} />
+            <FInput label="Facebook"  prefix="https://facebook.com/"  value={facebook}  onChange={(e) => setFacebook(e.target.value)} />
+            <FInput label="LinkedIn"  prefix="https://linkedin.com/"  value={linkedin}  onChange={(e) => setLinkedin(e.target.value)} />
+            <FInput label="YouTube"   prefix="https://youtube.com/"   value={youtube}   onChange={(e) => setYoutube(e.target.value)} />
           </div>
         </div>
       )
@@ -1262,7 +1546,6 @@ function TabVendaMais() {
             <rect width="80" height="80" rx="12" fill="#3B82F6" />
             <rect x="10" y="20" width="60" height="40" rx="4" fill="white" opacity="0.9" />
             <rect x="18" y="28" width="18" height="18" rx="2" fill="#7C4DFF" opacity="0.5" />
-            <circle cx="18" cy="52" r="0" />
             <rect x="42" y="28" width="20" height="4" rx="2" fill="#1D4ED8" opacity="0.5" />
             <rect x="42" y="36" width="14" height="3" rx="1.5" fill="#1D4ED8" opacity="0.3" />
             <rect x="42" y="43" width="16" height="3" rx="1.5" fill="#1D4ED8" opacity="0.3" />
@@ -1282,21 +1565,38 @@ function TabVendaMais() {
         </div>
       </div>
 
-      {/* Aviso perfil não publicado */}
-      <div className="rounded-lg bg-[rgba(245,158,11,0.08)] border border-[rgba(245,158,11,0.25)] p-4 flex items-start gap-3">
-        <div className="w-7 h-7 rounded-full bg-[rgba(245,158,11,0.15)] flex items-center justify-center shrink-0 mt-0.5">
-          <AlertTriangle size={14} className="text-[#F59E0B]" />
+      {/* Status publicado */}
+      {!publicado ? (
+        <div className="rounded-lg bg-[rgba(245,158,11,0.08)] border border-[rgba(245,158,11,0.25)] p-4 flex items-start gap-3">
+          <div className="w-7 h-7 rounded-full bg-[rgba(245,158,11,0.15)] flex items-center justify-center shrink-0 mt-0.5">
+            <AlertTriangle size={14} className="text-[#F59E0B]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-[#F59E0B]">Perfil não publicado!</p>
+            <p className="text-xs text-[#F59E0B] opacity-80">
+              O perfil deste profissional ainda não está publicado no buscador. Preencha as informações obrigatórias* para que seja publicado.
+            </p>
+          </div>
+          <button onClick={() => setPublicado(true)}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F59E0B] text-white hover:opacity-90 transition-opacity">
+            Publicar
+          </button>
         </div>
-        <div>
-          <p className="text-sm font-bold text-[#F59E0B]">Perfil não publicado!</p>
-          <p className="text-xs text-[#F59E0B] opacity-80">
-            O perfil deste profissional ainda não está publicado no buscador. Preencha as informações obrigatórias* para que seja publicado.
-          </p>
+      ) : (
+        <div className="rounded-lg bg-[rgba(34,197,94,0.08)] border border-[rgba(34,197,94,0.25)] p-4 flex items-center gap-3">
+          <div className="w-7 h-7 rounded-full bg-[rgba(34,197,94,0.15)] flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <p className="flex-1 text-sm font-bold text-[#22C55E]">Perfil publicado no buscador!</p>
+          <button onClick={() => setPublicado(false)}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:border-[#EF4444] hover:text-[#EF4444] transition-colors">
+            Despublicar
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Sub-tabs */}
-      <div className="flex border-b border-[var(--d2b-border)]">
+      <div className="flex border-b border-[var(--d2b-border)] overflow-x-auto">
         {BUSCADOR_SUB.map(({ id, label }) => (
           <button
             key={id}
@@ -1314,8 +1614,15 @@ function TabVendaMais() {
 
       {content}
 
-      <div className="flex justify-end pt-4 border-t border-[var(--d2b-border)]">
-        <button className={BTN_PRIMARY}>Salvar</button>
+      <div className="flex items-center justify-between pt-4 border-t border-[var(--d2b-border)]">
+        <div>
+          {saveErr && <p className="text-xs text-red-400">{saveErr}</p>}
+          {saved   && <p className="text-xs text-green-400">Alterações salvas com sucesso.</p>}
+        </div>
+        <button onClick={handleSave} disabled={saving || !nome.trim()} className={BTN_PRIMARY + ' flex items-center gap-2 disabled:opacity-60'}>
+          {saving && <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {saving ? 'Salvando...' : 'Salvar'}
+        </button>
       </div>
     </div>
   )
@@ -1344,7 +1651,7 @@ export function MarketingView({ empresaId, profissionais }: { empresaId: string 
     switch (tab) {
       case 'auto':  return <TabAutoAgendamento key={selected.id} prof={selected} empresaId={empresaId} />
       case 'site':  return <TabMeuSite key={selected.id} prof={selected} />
-      case 'venda': return <TabVendaMais />
+      case 'venda': return <TabVendaMais key={selected.id} prof={selected} />
     }
   })() : null
 

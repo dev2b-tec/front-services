@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Filter, Plus, Upload, ChevronDown, X, Check } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { Search, Filter, Plus, Upload, ChevronDown, X, Check, Printer, FileText, FileSpreadsheet, FileDown } from 'lucide-react'
 
 // ─── Shared styles (dark theme) ───────────────────────────────────────────────
 const INP =
@@ -14,6 +15,30 @@ const JOIN = (base: string, extra: string) => `${base} ${extra}`
 function fmtBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
+function defaultPeriodo(): string {
+  const now = new Date()
+  const day = now.getDay()
+  const start = new Date(now); start.setDate(now.getDate() - day + (day === 0 ? -6 : 1))
+  const end   = new Date(start); end.setDate(start.getDate() + 6)
+  const fmt = (d: Date) => d.toLocaleDateString('pt-BR')
+  return `${fmt(start)} - ${fmt(end)}`
+}
+function parsePeriodo(p: string): { inicio: Date | null; fim: Date | null } {
+  const parts = p.split(' - ').map((s) => s.trim())
+  if (parts.length !== 2) return { inicio: null, fim: null }
+  const parse = (s: string) => {
+    const [d, m, y] = s.split('/').map(Number)
+    if (!d || !m || !y) return null
+    return new Date(y, m - 1, d)
+  }
+  return { inicio: parse(parts[0]), fim: parse(parts[1]) }
+}
+function parseBRDate(s: string): Date | null {
+  const [d, m, y] = s.split('/').map(Number)
+  if (!d || !m || !y) return null
+  return new Date(y, m - 1, d)
+}
+const METODO_OPTIONS = ['Todos', 'PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'DINHEIRO', 'BOLETO', 'TRANSFERENCIA']
 function maskBRL(raw: string): string {
   const digits = raw.replace(/\D/g, '')
   if (!digits) return ''
@@ -533,6 +558,36 @@ export function TabContasPagar({ empresaId }: { empresaId: string | null }) {
   const [modalAdd,      setModalAdd]      = useState(false)
   const [editRow,       setEditRow]       = useState<Movimento | null>(null)
   const [delRow,        setDelRow]        = useState<Movimento | null>(null)
+  const [showExport,    setShowExport]    = useState(false)
+  const exportRef                         = useRef<HTMLDivElement>(null)
+
+  // ── Filter state
+  const [filtroOpen,      setFiltroOpen]      = useState(false)
+  const [filtroBtnRect,   setFiltroBtnRect]   = useState<DOMRect | null>(null)
+  const filtroBtnRef                          = useRef<HTMLButtonElement>(null)
+  const [periodoFiltro,   setPeriodoFiltro]   = useState(defaultPeriodo)
+  const [profFiltro,      setProfFiltro]      = useState('')
+  const [pagamentoFiltro, setPagamentoFiltro] = useState('')
+  // applied copies
+  const [appliedPeriodo,   setAppliedPeriodo]   = useState('')
+  const [appliedProf,      setAppliedProf]      = useState('')
+  const [appliedPagamento, setAppliedPagamento] = useState('')
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setShowExport(false)
+      if (filtroBtnRef.current && !filtroBtnRef.current.contains(e.target as Node)) setFiltroOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function exportar(tipo: 'pdf' | 'excel' | 'csv' | 'imprimir') {
+    if (!empresaId) return
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/relatorios/contas-a-pagar/${tipo}?empresaId=${empresaId}`
+    window.open(url, '_blank')
+    setShowExport(false)
+  }
 
   const load = useCallback(async () => {
     if (!empresaId) return
@@ -573,21 +628,44 @@ export function TabContasPagar({ empresaId }: { empresaId: string | null }) {
     if (!empresaId) return
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/empresa/${empresaId}`)
       .then((r) => r.ok ? r.json() : [])
-      .then((profs: Array<{ id: string; nomeCompleto?: string; nome?: string }>) => {
-        setProfissionais(profs.map((u) => ({ id: u.id, nome: u.nomeCompleto ?? u.nome ?? u.id })))
-      })
-      .catch(() => {})
+      .then((users: Array<{ id: string; nome?: string }>) => {
+        setProfissionais(users.map((u) => ({ id: u.id, nome: u.nome ?? u.id })))
+      }).catch(() => {})
   }, [empresaId])
 
-  const filtered = rows.filter((r) =>
-    r.titulo.toLowerCase().includes(search.toLowerCase()) ||
-    r.usuarioNome.toLowerCase().includes(search.toLowerCase())
-  )
+  function aplicarFiltro() {
+    setAppliedPeriodo(periodoFiltro)
+    setAppliedProf(profFiltro)
+    setAppliedPagamento(pagamentoFiltro)
+    setFiltroOpen(false)
+  }
+  function limparFiltro() {
+    setPeriodoFiltro(defaultPeriodo()); setAppliedPeriodo('')
+    setProfFiltro('');                  setAppliedProf('')
+    setPagamentoFiltro('');             setAppliedPagamento('')
+    setFiltroOpen(false)
+  }
+
+  const { inicio, fim } = parsePeriodo(appliedPeriodo)
+
+  const filtered = rows.filter((r) => {
+    const q = search.toLowerCase()
+    if (q && !r.titulo.toLowerCase().includes(q) && !r.usuarioNome.toLowerCase().includes(q)) return false
+    if (appliedProf && r.usuarioNome !== appliedProf) return false
+    if (appliedPagamento && r.metodoPagamento !== appliedPagamento) return false
+    if (inicio || fim) {
+      const d = parseBRDate(r.dataVencimento)
+      if (!d) return false
+      if (inicio && d < inicio) return false
+      if (fim) { const fimInc = new Date(fim); fimInc.setHours(23, 59, 59); if (d > fimInc) return false }
+    }
+    return true
+  })
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const pageRows   = filtered.slice((page - 1) * pageSize, page * pageSize)
 
-  const totalPago = rows.reduce((s, r) => s + r.valorPago, 0)
-  const aPagar    = rows.reduce((s, r) => s + Math.max(0, r.valorParcela - r.valorPago), 0)
+  const totalPago = filtered.reduce((s, r) => s + r.valorPago, 0)
+  const aPagar    = filtered.reduce((s, r) => s + Math.max(0, r.valorParcela - r.valorPago), 0)
 
   function onSaved() {
     setModalAdd(false)
@@ -648,9 +726,60 @@ export function TabContasPagar({ empresaId }: { empresaId: string | null }) {
                 className="bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-lg pl-8 pr-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors w-48"
               />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
+            <button
+              ref={filtroBtnRef}
+              onClick={() => { setFiltroBtnRect(filtroBtnRef.current?.getBoundingClientRect() ?? null); setFiltroOpen(v => !v) }}
+              className={'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border rounded-lg transition-colors ' + (filtroOpen ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)]')}
+            >
               <Filter size={13} /> Filtrar
             </button>
+
+            {/* Filter popover – portal so overflow-hidden never clips it */}
+            {filtroOpen && filtroBtnRect && createPortal(
+              <div
+                style={{ position: 'fixed', top: filtroBtnRect.bottom + 8, left: filtroBtnRect.left, zIndex: 9999 }}
+                className="w-72 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 space-y-4">
+                  {/* Período */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Período</label>
+                    <input type="text" value={periodoFiltro} onChange={(e) => setPeriodoFiltro(e.target.value)}
+                      placeholder="DD/MM/AAAA - DD/MM/AAAA"
+                      className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors" />
+                  </div>
+                  {/* Profissional */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Profissional</label>
+                    <div className="relative">
+                      <select value={profFiltro} onChange={(e) => setProfFiltro(e.target.value)}
+                        className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors appearance-none pr-8 cursor-pointer">
+                        <option value="">Todos os profissionais</option>
+                        {profissionais.map((p) => <option key={p.id} value={p.nome}>{p.nome}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+                  {/* Pagamento */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Pagamento</label>
+                    <div className="relative">
+                      <select value={pagamentoFiltro} onChange={(e) => setPagamentoFiltro(e.target.value)}
+                        className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors appearance-none pr-8 cursor-pointer">
+                        {METODO_OPTIONS.map((m) => <option key={m} value={m === 'Todos' ? '' : m}>{m}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+                <div className="px-4 pb-4 flex justify-between gap-2">
+                  <button onClick={limparFiltro} className="flex-1 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-xs font-semibold text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">Limpar Filtros</button>
+                  <button onClick={aplicarFiltro} className="flex-1 py-2 rounded-lg bg-[#7C4DFF] text-xs font-bold text-white hover:bg-[#5B21B6] transition-colors">Aplicar</button>
+                </div>
+              </div>,
+              document.body
+            )}
           </div>
         </div>
 
@@ -734,11 +863,32 @@ export function TabContasPagar({ empresaId }: { empresaId: string | null }) {
           </table>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
-          <button className="flex items-center gap-1.5 px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
-            <Upload size={13} /> Exportar Dados
-          </button>
+          {/* Exportar dropdown */}
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExport((v) => !v)}
+              className="flex items-center gap-1.5 px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
+            >
+              <Upload size={13} /> Exportar Dados <ChevronDown size={13} />
+            </button>
+            {showExport && (
+              <div className="absolute left-0 bottom-full mb-1 w-44 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] shadow-lg z-50 overflow-hidden">
+                <button onClick={() => exportar('excel')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileSpreadsheet size={14} /> Exportar Excel
+                </button>
+                <button onClick={() => exportar('csv')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileText size={14} /> Exportar CSV
+                </button>
+                <button onClick={() => exportar('pdf')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileDown size={14} /> Exportar PDF
+                </button>
+                <button onClick={() => exportar('imprimir')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <Printer size={14} /> Imprimir
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-6">
             <div className="text-right">
               <p className="text-xs text-[var(--d2b-text-secondary)]">

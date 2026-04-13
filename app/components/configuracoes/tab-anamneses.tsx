@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, ChevronDown, FileText, Pencil } from 'lucide-react'
+import { Plus, Trash2, GripVertical, ChevronDown, FileText, Pencil, BookOpen } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   Dialog,
@@ -106,6 +106,23 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
     } catch (error) {
       console.error('Erro ao criar anamnese:', error)
       toast({ title: 'Erro ao criar anamnese', variant: 'destructive' })
+    }
+  }
+
+  const handleCriarPadrao = async () => {
+    if (!initialEmpresa?.id) return
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/anamneses/empresa/${initialEmpresa.id}/padrao`, {
+        method: 'POST',
+      })
+      if (res.ok) {
+        toast({ title: 'Anamnese padrão criada com sucesso!' })
+        carregarAnamneses()
+      } else {
+        toast({ title: 'Erro ao criar anamnese padrão', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Erro ao criar anamnese padrão', variant: 'destructive' })
     }
   }
 
@@ -231,13 +248,24 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
           </p>
         </div>
         
-        <button
-          onClick={() => setDialogNovaOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors"
-        >
-          <Plus size={16} />
-          Nova Anamnese
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCriarPadrao}
+            disabled={loading || anamneses.length > 0}
+            title={anamneses.length > 0 ? 'Já existem anamneses cadastradas' : 'Criar anamnese padrão com perguntas prontas'}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-sm font-semibold transition-colors hover:border-[#7C4DFF] hover:text-[#7C4DFF] disabled:opacity-40 disabled:pointer-events-none"
+          >
+            <BookOpen size={16} />
+            Anamnese Padrão
+          </button>
+          <button
+            onClick={() => setDialogNovaOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors"
+          >
+            <Plus size={16} />
+            Nova Anamnese
+          </button>
+        </div>
       </div>
 
       {loading ? (

@@ -61,6 +61,9 @@ async function proxy(
   })
 }
 
+// Desabilita o body parser interno do Next.js para este proxy (permite uploads grandes)
+export const dynamic = 'force-dynamic'
+
 export const GET     = proxy
 export const POST    = proxy
 export const PUT     = proxy

@@ -9,6 +9,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    // Aumenta o limite do body para uploads de arquivos via proxy
+    serverBodySizeLimit: '50mb',
+  },
   images: {
     unoptimized: true,
   },

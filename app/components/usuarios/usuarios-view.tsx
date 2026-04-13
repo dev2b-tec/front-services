@@ -732,7 +732,7 @@ function CadastrarUsuarioModal({
 }
 
 // ─── UsuariosView ─────────────────────────────────────────────────────────────
-export function UsuariosView() {
+export function UsuariosView({ empresaId }: { empresaId: string | null }) {
   const [search, setSearch] = useState('')
   const [especialidade, setEspecialidade] = useState('')
   const [niveisSelected, setNiveisSelected] = useState<string[]>([])
@@ -743,7 +743,8 @@ export function UsuariosView() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios`)
+    if (!empresaId) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/empresa/${empresaId}`)
       .then((r) => r.ok ? r.json() : [])
       .then((data: Array<{
         id: string; nome: string; email: string; telefone?: string
@@ -774,7 +775,7 @@ export function UsuariosView() {
         })))
       )
       .catch(() => {})
-  }, [])
+  }, [empresaId])
 
   // Filtering
   const filtered = usuarios.filter((u) => {

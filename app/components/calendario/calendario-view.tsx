@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
   ChevronDown, ChevronLeft, ChevronRight, Plus,
-  Filter, Globe, Settings, Lock, Search, X, RefreshCw, CalendarIcon, Trash2, MessageCircle, Pencil, Check,
+  Filter, Palette, Settings, Lock, Search, X, RefreshCw, CalendarIcon, Trash2, MessageCircle, Pencil, Check, Video, Copy,
 } from 'lucide-react'
 import {
   Dialog,
@@ -13,12 +14,31 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SistemaMensagensModal } from '@/components/mensagens/sistema-mensagens-modal'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+
+// ─── AgendaConfig ────────────────────────────────────────────────────────────
+export interface AgendaConfig {
+  segAberto?: boolean
+  terAberto?: boolean
+  quaAberto?: boolean
+  quiAberto?: boolean
+  sexAberto?: boolean
+  sabAberto?: boolean
+  domAberto?: boolean
+  segAbertura?: string; segFechamento?: string
+  terAbertura?: string; terFechamento?: string
+  quaAbertura?: string; quaFechamento?: string
+  quiAbertura?: string; quiFechamento?: string
+  sexAbertura?: string; sexFechamento?: string
+  sabAbertura?: string; sabFechamento?: string
+  domAbertura?: string; domFechamento?: string
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CELL_H = 64 // px per hour
-const GRID_START = 6
-const GRID_END = 22
-const HOURS = Array.from({ length: GRID_END - GRID_START }, (_, i) => i + GRID_START)
+const DEFAULT_GRID_START = 6
+const DEFAULT_GRID_END   = 22
 
 const ESPECIALIDADES = ['Dentista', 'Médico', 'Psicólogo', 'Fisioterapeuta']
 const TURNOS = ['Manhã', 'Tarde', 'Noite', 'Integral']
@@ -42,6 +62,8 @@ export type Profissional = { id: string; nome: string }
 export type ApiAgendamento = {
   id: string
   empresaId: string
+  tipo: string
+  titulo: string | null
   pacienteId: string | null
   pacienteNome: string | null
   usuarioId: string | null
@@ -58,10 +80,16 @@ export type ApiAgendamento = {
   valorRecebido: number | null
   dataPagamento: string | null
   metodoPagamento: string | null
+  wherebyMeetingId?: string | null
+  wherebyHostUrl?: string | null
+  wherebyViewerUrl?: string | null
+  atendimentoRemoto?: boolean | null
 }
 
 type Appointment = {
   id: string
+  tipo: string
+  titulo: string | null
   pacienteNome: string
   usuarioNome: string
   inicio: string  // "HH:mm"
@@ -107,15 +135,33 @@ function isSameDay(a: Date, b: Date) {
   )
 }
 
-function getWeekDays(base: Date): Date[] {
+// dayOfWeek: 0=Dom,1=Seg,...,6=Sáb
+function getWeekDays(base: Date, agendaConfig?: AgendaConfig | null): Date[] {
   const d = base.getDay()
   const monday = new Date(base)
   monday.setDate(base.getDate() + (d === 0 ? -6 : 1 - d))
-  return Array.from({ length: 5 }, (_, i) => {
+  // All 7 days starting from monday
+  const all7 = Array.from({ length: 7 }, (_, i) => {
     const x = new Date(monday)
     x.setDate(monday.getDate() + i)
     return x
   })
+  if (!agendaConfig) {
+    // fallback: Mon–Fri only
+    return all7.slice(0, 5)
+  }
+  const openFlags: Record<number, boolean> = {
+    1: agendaConfig.segAberto !== false,
+    2: agendaConfig.terAberto !== false,
+    3: agendaConfig.quaAberto !== false,
+    4: agendaConfig.quiAberto !== false,
+    5: agendaConfig.sexAberto !== false,
+    6: agendaConfig.sabAberto === true,
+    0: agendaConfig.domAberto === true,
+  }
+  // Keep days that are open; always keep at least 1 day
+  const filtered = all7.filter((day) => openFlags[day.getDay()])
+  return filtered.length > 0 ? filtered : all7.slice(0, 5)
 }
 
 function formatDayLabel(d: Date) {
@@ -236,10 +282,34 @@ function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) {
   return (
     <button
       type="button"
-      onClick={() => set(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
+      onClick={(e) => { e.stopPropagation(); set(!on) }}
+      style={{
+        position: 'relative',
+        width: 40,
+        height: 22,
+        borderRadius: 999,
+        flexShrink: 0,
+        transition: 'background-color 0.2s',
+        backgroundColor: on ? '#7C4DFF' : '#C8BFE0',
+        cursor: 'pointer',
+        border: 'none',
+        padding: 0,
+        outline: 'none',
+      }}
     >
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
+      <span
+        style={{
+          position: 'absolute',
+          top: 3,
+          left: on ? 21 : 3,
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          backgroundColor: 'white',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+          transition: 'left 0.15s ease',
+        }}
+      />
     </button>
   )
 }
@@ -351,6 +421,7 @@ export function NovoAgendamentoModal({
   const [fim,        setFim]        = useState(defaults.fim)
   const [sala,       setSala]       = useState('')
   const [recorrente, setRecorrente] = useState(false)
+  const [atendimentoRemoto, setAtendimentoRemoto] = useState(false)
   const [status,     setStatus]     = useState('Aguardando')
   const [salas,      setSalas]      = useState<{ id: string; nome: string }[]>([])
 
@@ -396,6 +467,7 @@ export function NovoAgendamentoModal({
       setFim(isoToDatetimeLocal(effectiveAgendamento.fim))
       setSala(effectiveAgendamento.sala ?? '')
       setRecorrente(effectiveAgendamento.recorrente ?? false)
+      setAtendimentoRemoto(effectiveAgendamento.atendimentoRemoto ?? false)
       setObservacoes(effectiveAgendamento.observacoes ?? '')
       setStatus(effectiveAgendamento.status ?? 'Aguardando')
       setServicoLines(
@@ -414,7 +486,7 @@ export function NovoAgendamentoModal({
       setProfissionalNome(profissionaisApi[0]?.nome ?? '')
       setInicio(defaultInicio ?? defaults.inicio)
       setFim(defaultFim ?? defaults.fim)
-      setSala(''); setRecorrente(false); setObservacoes(''); setStatus('Aguardando')
+      setSala(''); setRecorrente(false); setAtendimentoRemoto(false); setObservacoes(''); setStatus('Aguardando')
       setServicoLines([]); setValorRecebido('0'); setValorManual('0'); setDataPagamento(''); setMetodoPagamento('')
     }
     setPacienteSugestoes([]); setShowSugestoes(false); setError('')
@@ -490,7 +562,7 @@ export function NovoAgendamentoModal({
       .map((l) => ({ servicoId: l.servicoId || null, servicoNome: l.servicoNome || 'Serviço', quantidade: l.quantidade, valorUnitario: l.valorUnitario }))
     const body: Record<string, unknown> = {
       inicio: datetimeLocalToISO(inicio), fim: datetimeLocalToISO(fim),
-      sala: sala || null, recorrente, observacoes: observacoes || null,
+      sala: sala || null, recorrente, atendimentoRemoto, observacoes: observacoes || null,
       servicos: servicosBody,
       valorTotal, valorRecebido: parseFloat(valorRecebido) || 0,
       dataPagamento: dataPagamento || null, metodoPagamento: metodoPagamento || null,
@@ -551,7 +623,10 @@ export function NovoAgendamentoModal({
             </DialogTitle>
             <div className="flex items-center gap-2">
               {!isEditing && (
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors">
+                <button
+                  onClick={() => { setSelectedBloqueio(undefined); setBloqueioClickDT(undefined); setBloqueioOpen(true) }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[var(--d2b-hover)] text-[#C084FC] border border-[var(--d2b-border-strong)] hover:bg-[var(--d2b-hover)] transition-colors"
+                >
                   <Lock size={12} />
                   Novo Bloqueio de Agenda
                 </button>
@@ -638,6 +713,53 @@ export function NovoAgendamentoModal({
                   <ReadonlyField label="Convênio"              value={pacienteInfo.plano             || 'PARTICULAR'} />
                   <ReadonlyField label="Número da Carteirinha" value={pacienteInfo.numeroCarteirinha || '-'} />
                 </div>
+
+                {/* Whereby video call links */}
+                {(effectiveAgendamento?.wherebyHostUrl || effectiveAgendamento?.wherebyViewerUrl) && (
+                  <div className="mt-4 rounded-xl bg-gradient-to-r from-[#EEF2FF] to-[#F5F3FF] border border-[#C7D2FE] p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 rounded-full bg-[#7C4DFF] flex items-center justify-center shrink-0">
+                        <Video size={12} className="text-white" />
+                      </div>
+                      <p className="text-xs font-bold text-[#4338CA] tracking-wide">VIDEOCHAMADA</p>
+                    </div>
+                    <div className="space-y-2">
+                      {effectiveAgendamento?.wherebyHostUrl && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={effectiveAgendamento.wherebyHostUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#7C4DFF] text-white text-xs font-semibold hover:bg-[#5B21B6] transition-colors"
+                          >
+                            <Video size={12} /> Entrar como Profissional
+                          </a>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(effectiveAgendamento.wherebyHostUrl!)}
+                            className="p-2 rounded-lg bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors"
+                            title="Copiar link do profissional"
+                          >
+                            <Copy size={12} />
+                          </button>
+                        </div>
+                      )}
+                      {effectiveAgendamento?.wherebyViewerUrl && (
+                        <div className="flex items-center gap-2">
+                          <span className="flex-1 truncate text-xs text-[#4338CA] bg-white border border-[#C7D2FE] rounded-lg px-3 py-2">
+                            🔗 Link do paciente: {effectiveAgendamento.wherebyViewerUrl}
+                          </span>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(effectiveAgendamento.wherebyViewerUrl!)}
+                            className="p-2 rounded-lg bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors"
+                            title="Copiar link do paciente"
+                          >
+                            <Copy size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : !isEditing ? (
               /* ── PACIENTE (create mode) ─────────────────────────── */
@@ -736,6 +858,13 @@ export function NovoAgendamentoModal({
                     <span className="text-sm text-[var(--d2b-text-secondary)]">É um evento recorrente?</span>
                   </div>
                 )}
+                <div className="flex items-center gap-3">
+                  <Toggle on={atendimentoRemoto} set={setAtendimentoRemoto} />
+                  <div className="flex items-center gap-1.5">
+                    <Video size={14} className={atendimentoRemoto ? 'text-[#7C4DFF]' : 'text-[var(--d2b-text-muted)]'} />
+                    <span className="text-sm text-[var(--d2b-text-secondary)]">Atendimento remoto (videochamada)</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -978,9 +1107,11 @@ const COR_BG: Record<string, { bg: string; border: string }> = {
 export function CalendarioView({
   empresaId,
   profissionais,
+  agendaConfig,
 }: {
   empresaId: string | null
   profissionais: Profissional[]
+  agendaConfig?: AgendaConfig | null
 }) {
   const [weekBase, setWeekBase]     = useState(new Date())
   const [viewMode, setViewMode]     = useState<ViewMode>('Semana')
@@ -988,13 +1119,32 @@ export function CalendarioView({
   const [clickDT, setClickDT]       = useState<{ inicio: string; fim: string } | undefined>()
   const [filtrosOpen, setFiltrosOpen]   = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [filtros, setFiltros]           = useState<Record<string, boolean>>({})
+  const filtrosBtnRef = useRef<HTMLButtonElement>(null)
+  const filtroCalBtnRef = useRef<HTMLButtonElement>(null)
+  const [filtrosRect, setFiltrosRect] = useState<DOMRect | null>(null)
+  const [filtroTab, setFiltroTab] = useState<'calendario' | 'cores'>('calendario')
+  const [filtros, setFiltros]           = useState<Record<string, boolean>>(
+    Object.fromEntries(FILTROS_CORES.map((f) => [f, true]))
+  )
+  // Filtros do Calendário
+  const [filtroEspecialidade, setFiltroEspecialidade] = useState('')
+  const [filtroConvenio, setFiltroConvenio]           = useState('')
+  const [filtroPaciente, setFiltroPaciente]           = useState('')
+  const [filtroSala, setFiltroSala]                   = useState('')
+  const [filtroIntervalo, setFiltroIntervalo]         = useState('30')
+  const [mostrarDesmarcados, setMostrarDesmarcados]   = useState(false)
+  const [mostrarBloqueios, setMostrarBloqueios]       = useState(true)
   const [now, setNow]               = useState(new Date())
 
   const [appointments, setAppointments]               = useState<Appointment[]>([])
   const [selectedAgendamento, setSelectedAgendamento] = useState<ApiAgendamento | undefined>()
   const [selectedProfissional, setSelectedProfissional] = useState('')
   const [profDropdownOpen, setProfDropdownOpen]         = useState(false)
+  const [bloqueioOpen, setBloqueioOpen]                 = useState(false)
+  const [selectedBloqueio, setSelectedBloqueio]         = useState<ApiAgendamento | undefined>()
+  const [bloqueioClickDT, setBloqueioClickDT]           = useState<{ inicio: string; fim: string } | undefined>()
+
+  const router = useRouter()
 
   // ── Clock ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1016,7 +1166,7 @@ export function CalendarioView({
         end = new Date(weekBase.getFullYear(), weekBase.getMonth() + 1, 0)
         end.setHours(23, 59, 59, 999)
       } else {
-        const days = getWeekDays(weekBase)
+        const days = getWeekDays(weekBase, agendaConfig)
         start = new Date(days[0]); start.setHours(0, 0, 0, 0)
         end   = new Date(days[days.length - 1]); end.setHours(23, 59, 59, 999)
       }
@@ -1027,6 +1177,8 @@ export function CalendarioView({
       setAppointments(
         data.map((a) => ({
           id:           a.id,
+          tipo:         a.tipo ?? 'AGENDAMENTO',
+          titulo:       a.titulo ?? null,
           pacienteNome: a.pacienteNome ?? 'Sem paciente',
           usuarioNome:  a.usuarioNome  ?? '',
           inicio:       timeFromISO(a.inicio),
@@ -1046,7 +1198,33 @@ export function CalendarioView({
 
   // ── Navigation ──────────────────────────────────────────────────────────
   const today    = new Date()
-  const weekDays = getWeekDays(weekBase)
+  const weekDays = getWeekDays(weekBase, agendaConfig)
+
+  // ── Grid hours derived from agendaConfig ─────────────────────────────
+  // Collect all open-day opening/closing hours and use the earliest/latest
+  const dayHourMap: Record<number, { open: number; close: number }> = {}
+  if (agendaConfig) {
+    const entries: [boolean | undefined, string | undefined, string | undefined, number][] = [
+      [agendaConfig.segAberto, agendaConfig.segAbertura, agendaConfig.segFechamento, 1],
+      [agendaConfig.terAberto, agendaConfig.terAbertura, agendaConfig.terFechamento, 2],
+      [agendaConfig.quaAberto, agendaConfig.quaAbertura, agendaConfig.quaFechamento, 3],
+      [agendaConfig.quiAberto, agendaConfig.quiAbertura, agendaConfig.quiFechamento, 4],
+      [agendaConfig.sexAberto, agendaConfig.sexAbertura, agendaConfig.sexFechamento, 5],
+      [agendaConfig.sabAberto, agendaConfig.sabAbertura, agendaConfig.sabFechamento, 6],
+      [agendaConfig.domAberto, agendaConfig.domAbertura, agendaConfig.domFechamento, 0],
+    ]
+    for (const [isOpen, abertura, fechamento, dow] of entries) {
+      if (isOpen) {
+        const open  = abertura  ? parseInt(abertura.split(':')[0],  10) : DEFAULT_GRID_START
+        const close = fechamento ? parseInt(fechamento.split(':')[0], 10) : DEFAULT_GRID_END
+        dayHourMap[dow] = { open, close }
+      }
+    }
+  }
+  const configuredHours = Object.values(dayHourMap)
+  const GRID_START = configuredHours.length > 0 ? Math.min(...configuredHours.map((h) => h.open))  : DEFAULT_GRID_START
+  const GRID_END   = configuredHours.length > 0 ? Math.max(...configuredHours.map((h) => h.close)) : DEFAULT_GRID_END
+  const HOURS = Array.from({ length: GRID_END - GRID_START }, (_, i) => i + GRID_START)
 
   const goBack = () => {
     const d = new Date(weekBase)
@@ -1070,7 +1248,7 @@ export function CalendarioView({
     ? `${MONTHS_PT[weekBase.getMonth()]} ${weekBase.getFullYear()}`
     : viewMode === 'Dia'
       ? `${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][weekBase.getDay()]}, ${pad2(weekBase.getDate())}/${pad2(weekBase.getMonth()+1)}/${weekBase.getFullYear()}`
-      : (() => { const d = getWeekDays(weekBase); return `${pad2(d[0].getDate())}/${pad2(d[0].getMonth()+1)} – ${pad2(d[d.length-1].getDate())}/${pad2(d[d.length-1].getMonth()+1)}` })()
+      : (() => { const d = getWeekDays(weekBase, agendaConfig); return `${pad2(d[0].getDate())}/${pad2(d[0].getMonth()+1)} – ${pad2(d[d.length-1].getDate())}/${pad2(d[d.length-1].getMonth()+1)}` })()
 
   // ── Modal helpers ───────────────────────────────────────────────────────
   function openCreateModal(dt?: { inicio: string; fim: string }) {
@@ -1192,10 +1370,25 @@ export function CalendarioView({
 
         {/* Right: actions */}
         <div className="flex items-center gap-1.5">
-          {/* Timezone */}
-          <button className="w-9 h-9 flex items-center justify-center rounded-lg text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
-            <Globe size={18} />
-          </button>
+          {/* Filtros de Cores (paleta) */}
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <button
+              ref={filtrosBtnRef}
+              onClick={() => {
+                if (!filtrosOpen || filtroTab !== 'cores') {
+                  setFiltrosRect(filtrosBtnRef.current?.getBoundingClientRect() ?? null)
+                  setFiltroTab('cores')
+                  setFiltrosOpen(true)
+                } else {
+                  setFiltrosOpen(false)
+                }
+                setSettingsOpen(false)
+              }}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${filtrosOpen && filtroTab === 'cores' ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
+            >
+              <Palette size={18} />
+            </button>
+          </div>
 
           {/* Settings dropdown */}
           <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -1208,43 +1401,179 @@ export function CalendarioView({
             {settingsOpen && (
               <div className="absolute right-0 top-11 z-50 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
                 <p className="px-4 pt-3 pb-1.5 text-[10px] font-bold tracking-widest text-[#7C4DFF] uppercase">Configurações</p>
-                {[
-                  { label: 'Configuração de Agenda', icon: CalendarIcon },
-                  { label: 'Bloqueio de Agenda',     icon: Lock },
-                ].map(({ label, icon: Icon }) => (
-                  <button key={label} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors text-left">
-                    <Icon size={14} className="text-[#7C4DFF] shrink-0" />
-                    {label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => { setSettingsOpen(false); router.push('/dashboard/configuracoes?tab=agenda') }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors text-left"
+                >
+                  <CalendarIcon size={14} className="text-[#7C4DFF] shrink-0" />
+                  Configuração de Agenda
+                </button>
+                <button
+                  onClick={() => { setSettingsOpen(false); setSelectedBloqueio(undefined); setBloqueioClickDT(undefined); setBloqueioOpen(true) }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors text-left"
+                >
+                  <Lock size={14} className="text-[#7C4DFF] shrink-0" />
+                  Bloqueio de Agenda
+                </button>
                 <div className="h-2" />
               </div>
             )}
           </div>
 
-          {/* Filtros de Cores */}
+          {/* Filtros do Calendário */}
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => { setFiltrosOpen((p) => !p); setSettingsOpen(false) }}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${filtrosOpen ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
+              ref={filtroCalBtnRef}
+              onClick={() => {
+                if (!filtrosOpen || filtroTab !== 'calendario') {
+                  setFiltrosRect(filtroCalBtnRef.current?.getBoundingClientRect() ?? null)
+                  setFiltroTab('calendario')
+                  setFiltrosOpen(true)
+                } else {
+                  setFiltrosOpen(false)
+                }
+                setSettingsOpen(false)
+              }}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${filtrosOpen && filtroTab === 'calendario' ? 'bg-[var(--d2b-hover)] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}
             >
               <Filter size={18} />
             </button>
-            {filtrosOpen && (
-              <div className="absolute right-0 top-11 z-50 w-64 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-[var(--d2b-border)]">
-                  <p className="text-[10px] font-bold tracking-widest text-[#7C4DFF] uppercase">Filtros de Cores</p>
-                  <Lock size={13} className="text-[var(--d2b-text-muted)]" />
+            {filtrosOpen && filtrosRect && typeof document !== 'undefined' && createPortal(
+              <div
+                style={{
+                  position: 'fixed',
+                  top: filtrosRect.bottom + 8,
+                  right: window.innerWidth - filtrosRect.right,
+                  zIndex: 9999,
+                }}
+                className="w-80 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="px-4 pt-3 pb-2 border-b border-[var(--d2b-border)]">
+                  <p className="text-[10px] font-bold tracking-widest text-[#7C4DFF] uppercase">
+                    {filtroTab === 'calendario' ? 'Filtros do Calendário' : 'Filtros de Cores'}
+                  </p>
                 </div>
-                <div className="py-1">
-                  {FILTROS_CORES.map((f) => (
-                    <label key={f} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-[var(--d2b-hover)] transition-colors">
-                      <span className="text-sm text-[var(--d2b-text-secondary)]">{f}</span>
-                      <Toggle on={filtros[f] ?? false} set={(v) => setFiltros((p) => ({ ...p, [f]: v }))} />
-                    </label>
-                  ))}
-                </div>
-              </div>
+
+                {filtroTab === 'calendario' && (
+                  <div className="p-4 space-y-3">
+                    {/* Profissional */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Profissional</label>
+                      <select
+                        value={selectedProfissional}
+                        onChange={(e) => setSelectedProfissional(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      >
+                        <option value="">Selecione um profissional</option>
+                        {profissionais.map((p) => <option key={p.id} value={p.nome}>{p.nome}</option>)}
+                      </select>
+                    </div>
+
+                    {/* Especialidade */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Especialidade</label>
+                      <select
+                        value={filtroEspecialidade}
+                        onChange={(e) => setFiltroEspecialidade(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      >
+                        <option value="">Selecione uma especialidade</option>
+                        {ESPECIALIDADES.map((e) => <option key={e}>{e}</option>)}
+                      </select>
+                    </div>
+
+                    {/* Convênio */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Convênio</label>
+                      <select
+                        value={filtroConvenio}
+                        onChange={(e) => setFiltroConvenio(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      >
+                        <option value="">Selecione um convênio</option>
+                      </select>
+                    </div>
+
+                    {/* Paciente */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Paciente</label>
+                      <input
+                        type="text"
+                        value={filtroPaciente}
+                        onChange={(e) => setFiltroPaciente(e.target.value)}
+                        placeholder="Busque pelo paciente"
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      />
+                    </div>
+
+                    {/* Sala */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Sala</label>
+                      <select
+                        value={filtroSala}
+                        onChange={(e) => setFiltroSala(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      >
+                        <option value="">Selecione uma sala</option>
+                        {SALAS.map((s) => <option key={s}>{s}</option>)}
+                      </select>
+                    </div>
+
+                    {/* Intervalo de Agenda */}
+                    <div className="relative">
+                      <label className="absolute -top-2 left-3 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] text-[var(--d2b-text-muted)]">Intervalo de Agenda</label>
+                      <select
+                        value={filtroIntervalo}
+                        onChange={(e) => setFiltroIntervalo(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                      >
+                        <option value="15">15 minutos</option>
+                        <option value="30">30 minutos</option>
+                        <option value="45">45 minutos</option>
+                        <option value="60">60 minutos</option>
+                      </select>
+                    </div>
+
+                    {/* Preferências */}
+                    <div className="pt-1 space-y-2">
+                      <p className="text-[11px] font-semibold text-[var(--d2b-text-secondary)]">Preferências do Calendário</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--d2b-text-secondary)] flex items-center gap-1.5">
+                          <CalendarIcon size={13} className="text-[var(--d2b-text-muted)]" /> Mostrar eventos desmarcados
+                        </span>
+                        <Toggle on={mostrarDesmarcados} set={setMostrarDesmarcados} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--d2b-text-secondary)] flex items-center gap-1.5">
+                          <Lock size={13} className="text-[var(--d2b-text-muted)]" /> Mostrar Bloqueios
+                        </span>
+                        <Toggle on={mostrarBloqueios} set={setMostrarBloqueios} />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setFiltrosOpen(false)}
+                      className="w-full py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-bold transition-colors"
+                    >
+                      Filtrar
+                    </button>
+                  </div>
+                )}
+
+                {filtroTab === 'cores' && (
+                  <div className="py-1">
+                    {FILTROS_CORES.map((f) => (
+                      <div key={f} className="flex items-center justify-between px-4 py-2.5 hover:bg-[var(--d2b-hover)] transition-colors">
+                        <span className="flex-1 min-w-0 pr-4 text-sm text-[var(--d2b-text-secondary)] leading-snug">{f}</span>
+                        <Toggle on={filtros[f] ?? false} set={(v) => setFiltros((p) => ({ ...p, [f]: v }))} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>,
+              document.body
             )}
           </div>
 
@@ -1307,16 +1636,26 @@ export function CalendarioView({
 
                     {/* Grid rows + events */}
                     <div className="relative flex-1">
-                      {HOURS.map((h) => (
-                        <div
-                          key={h}
-                          onClick={() => openCreateModal(toDatetimeLocal(day, h))}
-                          className="border-b cursor-pointer transition-colors"
-                          style={{ height: CELL_H, background: h === 12 ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}
-                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)'}
-                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = h === 12 ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)'}
-                        />
-                      ))}
+                      {HOURS.map((h) => {
+                        const dow = day.getDay()
+                        const dayHours = dayHourMap[dow]
+                        const isOutsideHours = dayHours
+                          ? h < dayHours.open || h >= dayHours.close
+                          : false
+                        const baseBg = isOutsideHours
+                          ? 'var(--d2b-bg-elevated)'
+                          : h === 12 ? 'var(--d2b-hover)' : 'var(--d2b-bg-main)'
+                        return (
+                          <div
+                            key={h}
+                            onClick={() => !isOutsideHours && openCreateModal(toDatetimeLocal(day, h))}
+                            className={`border-b transition-colors${isOutsideHours ? ' cursor-default' : ' cursor-pointer'}`}
+                            style={{ height: CELL_H, background: baseBg, borderColor: 'var(--d2b-border)' }}
+                            onMouseEnter={e => { if (!isOutsideHours) (e.currentTarget as HTMLElement).style.background = 'var(--d2b-hover)' }}
+                            onMouseLeave={e => { if (!isOutsideHours) (e.currentTarget as HTMLElement).style.background = baseBg }}
+                          />
+                        )
+                      })}
 
                       {/* Current time line */}
                       {isToday && nowMinutes >= gridStartMin && nowMinutes < GRID_END * 60 && (
@@ -1335,8 +1674,26 @@ export function CalendarioView({
                         const endMin   = timeToMin(appt.fim)
                         const top      = ((startMin - gridStartMin) / 60) * CELL_H
                         const height   = Math.max(((endMin - startMin) / 60) * CELL_H - 2, 24)
-                        const { bg, border } = COR_BG[appt.cor] ?? COR_BG.purple
+                        const isBloqueio = appt.tipo === 'BLOQUEIO'
 
+                        if (isBloqueio) {
+                          return (
+                            <div
+                              key={appt.id}
+                              onClick={(e) => { e.stopPropagation(); setSelectedBloqueio(appt.raw); setBloqueioClickDT(undefined); setBloqueioOpen(true) }}
+                              className="absolute left-1 right-1 rounded-md cursor-pointer z-10 hover:brightness-95 transition-all"
+                              style={{ top, height, background: 'rgba(100,116,139,0.10)', border: '1px solid rgba(100,116,139,0.30)', backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(100,116,139,0.08) 4px, rgba(100,116,139,0.08) 8px)' }}
+                            >
+                              <div className="flex items-center gap-1.5 px-2 h-full">
+                                <Lock size={11} className="shrink-0 text-[#64748B]" />
+                                <span className="text-xs font-medium text-[#64748B] truncate">{appt.titulo || '– Bloqueio'}</span>
+                                <span className="text-[10px] text-[#94A3B8] shrink-0 ml-auto">{appt.inicio} - {appt.fim}</span>
+                              </div>
+                            </div>
+                          )
+                        }
+
+                        const { bg, border } = COR_BG[appt.cor] ?? COR_BG.purple
                         return (
                           <div
                             key={appt.id}
@@ -1446,6 +1803,325 @@ export function CalendarioView({
         agendamento={selectedAgendamento}
         onSaved={fetchAppointments}
       />
+
+      <BloqueioModal
+        open={bloqueioOpen}
+        onClose={() => { setBloqueioOpen(false); setSelectedBloqueio(undefined); setBloqueioClickDT(undefined) }}
+        empresaId={empresaId}
+        profissionaisApi={profissionais}
+        bloqueio={selectedBloqueio}
+        defaultInicio={bloqueioClickDT?.inicio}
+        defaultFim={bloqueioClickDT?.fim}
+        onSaved={fetchAppointments}
+      />
     </div>
+  )
+}
+
+// ─── BloqueioModal ────────────────────────────────────────────────────────────
+function BloqueioModal({
+  open, onClose, empresaId, profissionaisApi, bloqueio, defaultInicio, defaultFim, onSaved,
+}: {
+  open: boolean
+  onClose: () => void
+  empresaId: string | null
+  profissionaisApi: Profissional[]
+  bloqueio?: ApiAgendamento
+  defaultInicio?: string
+  defaultFim?: string
+  onSaved: () => void
+}) {
+  const isViewing = !!bloqueio
+  const [editMode, setEditMode]     = useState(false)
+  const [saving, setSaving]         = useState(false)
+  const [deleting, setDeleting]     = useState(false)
+  const [confirmDel, setConfirmDel] = useState(false)
+  const [calOpen, setCalOpen]       = useState(false)
+
+  const [titulo, setTitulo]         = useState('')
+  const [usuarioId, setUsuarioId]   = useState('')
+  const [dia, setDia]               = useState<Date | undefined>(undefined)
+  const [horaInicio, setHoraInicio] = useState('08:00')
+  const [horaFim, setHoraFim]       = useState('09:00')
+  const [recorrente, setRecorrente] = useState(false)
+
+  function isoToTimeParts(iso: string): { date: Date; hhmm: string } {
+    const d = new Date(iso)
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return { date: d, hhmm: `${pad(d.getHours())}:${pad(d.getMinutes())}` }
+  }
+
+  // Populate fields when opening
+  useEffect(() => {
+    if (!open) { setEditMode(false); setConfirmDel(false); return }
+    if (bloqueio) {
+      setTitulo(bloqueio.titulo ?? '')
+      setUsuarioId(bloqueio.usuarioId ?? '')
+      const { date, hhmm } = isoToTimeParts(bloqueio.inicio)
+      setDia(date)
+      setHoraInicio(hhmm)
+      setHoraFim(isoToTimeParts(bloqueio.fim).hhmm)
+      setRecorrente(bloqueio.recorrente ?? false)
+    } else {
+      setTitulo('')
+      setUsuarioId(profissionaisApi[0]?.id ?? '')
+      if (defaultInicio) {
+        const { date, hhmm } = isoToTimeParts(defaultInicio)
+        setDia(date)
+        setHoraInicio(hhmm)
+      } else {
+        setDia(new Date())
+        setHoraInicio('08:00')
+      }
+      if (defaultFim) setHoraFim(isoToTimeParts(defaultFim).hhmm)
+      else setHoraFim('09:00')
+      setRecorrente(false)
+    }
+  }, [open, bloqueio, defaultInicio, defaultFim, profissionaisApi])
+
+  function buildISO(date: Date | undefined, hhmm: string): string {
+    if (!date) return ''
+    const [h, m] = hhmm.split(':').map(Number)
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m).toISOString()
+  }
+
+  function formatDisplay(iso: string) {
+    try {
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return iso
+      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    } catch { return iso }
+  }
+
+  function formatDia(d: Date | undefined) {
+    if (!d) return 'Selecionar data'
+    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })
+  }
+
+  async function salvar() {
+    if (!empresaId || !dia) return
+    setSaving(true)
+    try {
+      const body = {
+        empresaId,
+        tipo: 'BLOQUEIO',
+        titulo: titulo || null,
+        usuarioId: usuarioId || null,
+        inicio: buildISO(dia, horaInicio),
+        fim: buildISO(dia, horaFim),
+        recorrente,
+      }
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/agendamentos${bloqueio && editMode ? `/${bloqueio.id}` : ''}`
+      const method = bloqueio && editMode ? 'PATCH' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error()
+      onSaved()
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function excluir() {
+    if (!bloqueio) return
+    setDeleting(true)
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/agendamentos/${bloqueio.id}`, { method: 'DELETE' })
+      onSaved()
+      onClose()
+    } finally {
+      setDeleting(false)
+      setConfirmDel(false)
+    }
+  }
+
+  const profNome = profissionaisApi.find(p => p.id === (bloqueio?.usuarioId ?? usuarioId))?.nome
+    ?? bloqueio?.usuarioNome
+    ?? 'Todos os profissionais'
+
+  if (!open) return null
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent
+        showCloseButton={false}
+        className="bg-white border border-[#EDE8F5] text-[#2D1B5A] !max-w-lg p-0 gap-0 rounded-2xl overflow-hidden"
+      >
+        {/* Header */}
+        <DialogHeader className="flex-row items-center justify-between px-6 py-4 border-b border-[#EDE8F5] space-y-0">
+          <DialogTitle className="text-base font-bold text-[#2D1B5A] flex items-center gap-2">
+            <Lock size={16} className="text-[#7C4DFF]" />
+            {isViewing && !editMode ? 'Bloqueio Agenda' : bloqueio ? 'Editar Bloqueio' : 'Bloquear Agenda'}
+          </DialogTitle>
+          <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[#9E8BBF] hover:text-[#2D1B5A] hover:bg-[#F3F0FA] transition-colors text-lg leading-none">✕</button>
+        </DialogHeader>
+
+        <div className="px-6 py-5 space-y-4">
+          {/* VIEW mode */}
+          {isViewing && !editMode ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9E8BBF] mb-0.5">Profissional</p>
+                  <p className="text-sm font-semibold text-[#2D1B5A]">{profNome}</p>
+                  <div className="border-b border-dashed border-[#D8D0ED] mt-1.5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9E8BBF] mb-0.5">Título</p>
+                  <p className="text-sm font-semibold text-[#2D1B5A]">{bloqueio?.titulo || '–'}</p>
+                  <div className="border-b border-dashed border-[#D8D0ED] mt-1.5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9E8BBF] mb-0.5">Início</p>
+                  <p className="text-sm text-[#2D1B5A]">{formatDisplay(bloqueio?.inicio ?? '')}</p>
+                  <div className="border-b border-dashed border-[#D8D0ED] mt-1.5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9E8BBF] mb-0.5">Fim</p>
+                  <p className="text-sm text-[#2D1B5A]">{formatDisplay(bloqueio?.fim ?? '')}</p>
+                  <div className="border-b border-dashed border-[#D8D0ED] mt-1.5" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* CRIAR / EDITAR form */
+            <div className="space-y-4">
+              {/* Profissional */}
+              <div className="relative">
+                <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF]">Profissional</label>
+                <div className="relative">
+                  <select
+                    value={usuarioId}
+                    onChange={e => setUsuarioId(e.target.value)}
+                    className="w-full rounded-lg border border-[#D8D0ED] bg-white px-3 py-2.5 text-sm text-[#2D1B5A] focus:outline-none focus:border-[#7C4DFF] appearance-none pr-8"
+                  >
+                    <option value="">Toda a clínica</option>
+                    {profissionaisApi.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Título */}
+              <div className="relative">
+                <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF]">Título do Bloqueio</label>
+                <input
+                  value={titulo}
+                  onChange={e => setTitulo(e.target.value)}
+                  placeholder="Ex: Almoço, Reunião, Férias..."
+                  className="w-full rounded-lg border border-[#D8D0ED] px-3 py-2.5 text-sm text-[#2D1B5A] placeholder:text-[#C4B9DC] focus:outline-none focus:border-[#7C4DFF]"
+                />
+              </div>
+
+              {/* Data (compartilhada) */}
+              <div className="relative">
+                <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF]">Data do Bloqueio*</label>
+                <Popover open={calOpen} onOpenChange={setCalOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between rounded-lg border border-[#D8D0ED] px-3 py-2.5 text-sm text-left focus:outline-none focus:border-[#7C4DFF] hover:border-[#7C4DFF] transition-colors"
+                    >
+                      <span className={dia ? 'text-[#2D1B5A]' : 'text-[#C4B9DC]'}>{formatDia(dia)}</span>
+                      <CalendarIcon size={15} className="text-[#9E8BBF] shrink-0" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 border border-[#EDE8F5] shadow-xl" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dia}
+                      onSelect={(d) => { setDia(d); setCalOpen(false) }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Horários */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF]">Hora Início*</label>
+                  <input
+                    type="time"
+                    value={horaInicio}
+                    onChange={e => setHoraInicio(e.target.value)}
+                    className="w-full rounded-lg border border-[#D8D0ED] px-3 py-2.5 text-sm text-[#2D1B5A] focus:outline-none focus:border-[#7C4DFF]"
+                  />
+                </div>
+                <div className="relative">
+                  <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF]">Hora Fim*</label>
+                  <input
+                    type="time"
+                    value={horaFim}
+                    onChange={e => setHoraFim(e.target.value)}
+                    className="w-full rounded-lg border border-[#D8D0ED] px-3 py-2.5 text-sm text-[#2D1B5A] focus:outline-none focus:border-[#7C4DFF]"
+                  />
+                </div>
+              </div>
+
+              {/* Recorrente */}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={recorrente}
+                  onChange={e => setRecorrente(e.target.checked)}
+                  className="w-4 h-4 accent-[#7C4DFF]"
+                />
+                <span className="text-sm text-[#2D1B5A]">É um evento recorrente?</span>
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#EDE8F5]">
+          {isViewing && !editMode ? (
+            <>
+              {confirmDel ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#EF4444]">Confirmar exclusão?</span>
+                  <button onClick={excluir} disabled={deleting} className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#EF4444] text-white hover:bg-red-600 transition-colors">
+                    {deleting ? '...' : 'Sim, excluir'}
+                  </button>
+                  <button onClick={() => setConfirmDel(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#D8D0ED] text-[#2D1B5A] hover:bg-[#F3F0FA] transition-colors">
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setConfirmDel(true)} className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#FEE2E2] text-[#EF4444] hover:bg-red-100 transition-colors">
+                  Excluir Bloqueio
+                </button>
+              )}
+              <div className="flex gap-2">
+                <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold border border-[#D8D0ED] text-[#2D1B5A] hover:bg-[#F3F0FA] transition-colors">
+                  Fechar
+                </button>
+                <button onClick={() => setEditMode(true)} className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">
+                  Editar
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div />
+              <div className="flex gap-2">
+                <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold border border-[#D8D0ED] text-[#2D1B5A] hover:bg-[#F3F0FA] transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={salvar} disabled={saving || !dia} className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 transition-colors">
+                  {saving ? 'Salvando...' : 'Cadastrar Bloqueio'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

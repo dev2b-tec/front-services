@@ -1,12 +1,14 @@
 import { auth } from '@/lib/auth'
-import { CalendarioView } from '@/components/calendario/calendario-view'
+import { CalendarioView, type AgendaConfig } from '@/components/calendario/calendario-view'
 
 export default async function CalendarioPage() {
   const session = await auth()
   const keycloakId = session?.keycloakId
 
   let empresaId: string | null = null
+  let agendaId: string | null = null
   let profissionais: { id: string; nome: string }[] = []
+  let agendaConfig: AgendaConfig | null = null
 
   if (keycloakId) {
     try {
@@ -30,22 +32,37 @@ export default async function CalendarioPage() {
 
   if (empresaId) {
     try {
-      const res = await fetch(
-        `${process.env.API_URL}/api/v1/usuarios/empresa/${empresaId}`,
-        { cache: 'no-store' }
-      )
-      if (res.ok) {
-        const lista = await res.json()
+      const [profRes, empRes] = await Promise.all([
+        fetch(`${process.env.API_URL}/api/v1/usuarios/empresa/${empresaId}`, { cache: 'no-store' }),
+        fetch(`${process.env.API_URL}/api/v1/empresas/${empresaId}`, { cache: 'no-store' }),
+      ])
+      if (profRes.ok) {
+        const lista = await profRes.json()
         profissionais = lista.map((u: { id: string; nome: string }) => ({
           id: u.id,
           nome: u.nome,
         }))
+      }
+      if (empRes.ok) {
+        const empresa = await empRes.json()
+        agendaId = empresa.agendaId ?? null
       }
     } catch {
       // backend offline
     }
   }
 
-  return <CalendarioView empresaId={empresaId} profissionais={profissionais} />
+  if (agendaId) {
+    try {
+      const res = await fetch(`${process.env.API_URL}/api/v1/agendas/${agendaId}`, { cache: 'no-store' })
+      if (res.ok) {
+        agendaConfig = await res.json()
+      }
+    } catch {
+      // backend offline
+    }
+  }
+
+  return <CalendarioView empresaId={empresaId} profissionais={profissionais} agendaConfig={agendaConfig} />
 }
 
