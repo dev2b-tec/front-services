@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   DollarSign, TrendingUp, TrendingDown, ArrowDownCircle, ArrowUpCircle,
   ChevronDown, Search, Plus, Filter, Download, X, Check, Upload,
@@ -12,6 +13,7 @@ import {
   LineChart, Line,
 } from 'recharts'
 import { TabContasPagar } from './tab-contas-pagar'
+import { TabMensalidades } from './tab-mensalidades'
 import { NovoAgendamentoModal, ApiAgendamento, Profissional } from '@/components/calendario/calendario-view'
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
@@ -366,6 +368,27 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
   const [modalRecibo, setModalRecibo]   = useState<AgendaReceber | null>(null)
   const [agendamentoModal, setAgendamentoModal] = useState<ApiAgendamento | null>(null)
   const [buscandoAgendamento, setBuscandoAgendamento] = useState(false)
+  const [showExport, setShowExport]     = useState(false)
+  const exportRef                       = useRef<HTMLDivElement>(null)
+
+  // ── Filter state
+  const [filtroOpen, setFiltroOpen]     = useState(false)
+  const [filtroBtnRect, setFiltroBtnRect] = useState<DOMRect | null>(null)
+  const filtroBtnRef                    = useRef<HTMLButtonElement>(null)
+  const [tipoData,        setTipoData]        = useState<'atendimento' | 'pagamento'>('atendimento')
+  const [periodoFiltro,   setPeriodoFiltro]   = useState(defaultPeriodo)
+  const [profFiltro,      setProfFiltro]      = useState('')
+  const [pacienteFiltro,  setPacienteFiltro]  = useState('')
+  const [pagamentoFiltro, setPagamentoFiltro] = useState('')
+  const [statusFiltro,    setStatusFiltro]    = useState('')
+  // applied
+  const [appliedTipoData,   setAppliedTipoData]   = useState<'atendimento' | 'pagamento'>('atendimento')
+  const [appliedPeriodo,    setAppliedPeriodo]     = useState(defaultPeriodo)
+  const [appliedProf,       setAppliedProf]        = useState('')
+  const [appliedPaciente,   setAppliedPaciente]    = useState('')
+  const [appliedPagamento,  setAppliedPagamento]   = useState('')
+  const [appliedStatus,     setAppliedStatus]      = useState('')
+  const [profissionaisRec,  setProfissionaisRec]   = useState<ProfissionalSimples[]>([])
 
   useEffect(() => {
     if (!empresaId) return
@@ -376,7 +399,7 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
         dataVencimento: string; status: string; valorParcela: number; valorPago: number
         referenciaId?: string
       }>) => {
-        setRows(data.map((m) => ({
+        const mapped = data.map((m) => ({
           id: m.id,
           referenciaId: m.referenciaId ?? null,
           paciente: m.pacienteNome ?? '—',
@@ -389,15 +412,68 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
                : 'Aguardando' as StatusAgenda,
           recebido: m.valorPago,
           total: m.valorParcela,
-        })))
+        }))
+        setRows(mapped)
+        // Derive profissionais from loaded data
+        const names = Array.from(new Set(data.map((m) => m.usuarioNome ?? '').filter(Boolean)))
+        setProfissionaisRec(names.map((nome) => ({ id: nome, nome })))
       })
       .catch(() => {})
   }, [empresaId])
 
-  const filtered = rows.filter((r) =>
-    r.paciente.toLowerCase().includes(search.toLowerCase()) ||
-    r.profissional.toLowerCase().includes(search.toLowerCase())
-  )
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setShowExport(false)
+      if (
+        filtroBtnRef.current && !filtroBtnRef.current.contains(e.target as Node)
+      ) setFiltroOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function exportar(tipo: 'pdf' | 'excel' | 'csv' | 'imprimir') {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/relatorios/contas-a-receber/${tipo}?empresaId=${empresaId}`
+    window.open(url, '_blank')
+    setShowExport(false)
+  }
+
+  function aplicarFiltroRec() {
+    setAppliedTipoData(tipoData)
+    setAppliedPeriodo(periodoFiltro)
+    setAppliedProf(profFiltro)
+    setAppliedPaciente(pacienteFiltro)
+    setAppliedPagamento(pagamentoFiltro)
+    setAppliedStatus(statusFiltro)
+    setFiltroOpen(false)
+    setPage(1)
+  }
+
+  function limparFiltroRec() {
+    const pd = defaultPeriodo()
+    setTipoData('atendimento'); setPeriodoFiltro(pd); setProfFiltro(''); setPacienteFiltro(''); setPagamentoFiltro(''); setStatusFiltro('')
+    setAppliedTipoData('atendimento'); setAppliedPeriodo(pd); setAppliedProf(''); setAppliedPaciente(''); setAppliedPagamento(''); setAppliedStatus('')
+    setPage(1)
+  }
+
+  const { inicio: recInicio, fim: recFim } = parsePeriodo(appliedPeriodo)
+
+  const filtered = rows.filter((r) => {
+    if (search && !r.paciente.toLowerCase().includes(search.toLowerCase()) && !r.profissional.toLowerCase().includes(search.toLowerCase())) return false
+    if (appliedProf && r.profissional !== appliedProf) return false
+    if (appliedPaciente && !r.paciente.toLowerCase().includes(appliedPaciente.toLowerCase())) return false
+    if (appliedStatus && r.status !== appliedStatus) return false
+    // periodo filter on data field (DD/MM/YYYY HH:MM)
+    if (recInicio || recFim) {
+      const parts = r.data.split(' ')[0].split('/')
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
+        if (recInicio && d < recInicio) return false
+        if (recFim) { const f = new Date(recFim); f.setHours(23,59,59); if (d > f) return false }
+      }
+    }
+    return true
+  })
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const pageRows   = filtered.slice((page - 1) * pageSize, page * pageSize)
 
@@ -516,19 +592,112 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
         <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Controle o recebimento do pagamento de seus agendamentos e de outras contas que achar necessário.</p>
 
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
-          <span className="text-sm font-medium text-[#7C4DFF] underline cursor-pointer hover:text-[var(--d2b-text-secondary)] transition-colors">
+          <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">
             Lista de agendamentos
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative">
             <div className="relative">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
               <input type="text" placeholder="Pesquisar" value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1) }}
                 className={INP + ' pl-8 w-44'} />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
+            <button
+              ref={filtroBtnRef}
+              onClick={() => { setFiltroBtnRect(filtroBtnRef.current?.getBoundingClientRect() ?? null); setFiltroOpen(v => !v) }}
+              className={'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border rounded-lg transition-colors ' + (filtroOpen ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)]')}
+            >
               <Filter size={13} /> Filtrar dados
             </button>
+
+            {/* Filter popover – rendered in portal so overflow-hidden containers don't clip it */}
+            {filtroOpen && filtroBtnRect && createPortal(
+              <div
+                style={{ position: 'fixed', top: filtroBtnRect.bottom + 8, right: window.innerWidth - filtroBtnRect.right, zIndex: 9999 }}
+                className="w-80 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 space-y-4">
+                  {/* Tipo de data */}
+                  <div>
+                    <p className="text-xs font-semibold text-[var(--d2b-text-primary)] mb-2">Filtrar por tipo de data</p>
+                    <div className="flex gap-4">
+                      {(['atendimento', 'pagamento'] as const).map((t) => (
+                        <label key={t} className="flex items-center gap-1.5 cursor-pointer text-xs text-[var(--d2b-text-secondary)]">
+                          <span
+                            onClick={() => setTipoData(t)}
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${tipoData === t ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)]'}`}
+                          >
+                            {tipoData === t && <span className="w-2 h-2 rounded-full bg-[#7C4DFF]" />}
+                          </span>
+                          {t === 'atendimento' ? 'Data de Atendimento' : 'Data de Pagamento'}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Período */}
+                  <div className="relative">
+                    <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Período</label>
+                    <input type="text" value={periodoFiltro} onChange={(e) => setPeriodoFiltro(e.target.value)}
+                      placeholder="DD/MM/AAAA - DD/MM/AAAA" className={INP} />
+                  </div>
+
+                  {/* Profissional */}
+                  <div className="relative">
+                    <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Profissional</label>
+                    <div className="relative">
+                      <select value={profFiltro} onChange={(e) => setProfFiltro(e.target.value)}
+                        className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                        <option value="">Todos os profissionais</option>
+                        {profissionaisRec.map((p) => <option key={p.id} value={p.nome}>{p.nome}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Paciente */}
+                  <div className="relative">
+                    <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Paciente</label>
+                    <input type="text" value={pacienteFiltro} onChange={(e) => setPacienteFiltro(e.target.value)}
+                      placeholder="Busque pelo paciente" className={INP} />
+                  </div>
+
+                  {/* Pagamento */}
+                  <div className="relative">
+                    <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Pagamento</label>
+                    <div className="relative">
+                      <select value={pagamentoFiltro} onChange={(e) => setPagamentoFiltro(e.target.value)}
+                        className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                        <option value="">Todos</option>
+                        {METODO_OPTIONS.slice(1).map((m) => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="relative">
+                    <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>Status</label>
+                    <div className="relative">
+                      <select value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}
+                        className={INP + ' appearance-none pr-8 cursor-pointer'}>
+                        <option value="">Todos</option>
+                        {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Botões */}
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button onClick={limparFiltroRec} className={BTN_GHOST}>Limpar Filtros</button>
+                    <button onClick={aplicarFiltroRec} className={BTN_PRIMARY}>Aplicar</button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
           </div>
         </div>
       </div>
@@ -645,9 +814,22 @@ function TabContasReceber({ empresaId }: { empresaId: string | null }) {
 
       {/* ── Footer ── */}
       <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
-        <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
-          <Upload size={13} /> Exportar Dados
-        </button>
+        <div className="relative" ref={exportRef}>
+          <button onClick={() => setShowExport((v) => !v)}
+            className={BTN_GHOST + ' flex items-center gap-1.5'}>
+            <Upload size={13} /> Exportar Dados <ChevronDown size={11} />
+          </button>
+          {showExport && (
+            <div className="absolute bottom-full mb-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl z-30 min-w-[160px] py-1">
+              {([['excel', 'Excel (.xlsx)'], ['csv', 'CSV (.csv)'], ['pdf', 'PDF'], ['imprimir', 'Imprimir']] as const).map(([tipo, label]) => (
+                <button key={tipo} onClick={() => exportar(tipo)}
+                  className="w-full text-left px-4 py-2 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-6">
           <div className="text-right">
@@ -907,13 +1089,16 @@ type MovimentoDto = {
   dataVencimento: string   // YYYY-MM-DD
   dataPagamento: string | null
   status: string           // 'Em Aberto' | 'Pago' | 'Atrasado'
+  usuarioId?: string
+  usuarioNome?: string
 }
 
-function buildChartData(movs: MovimentoDto[]): { date: string; valor: number }[] {
+function buildChartData(movs: MovimentoDto[], campo: 'dataVencimento' | 'dataPagamento'): { date: string; valor: number }[] {
   const map = new Map<string, number>()
   for (const m of movs) {
-    if (!m.dataVencimento) continue
-    const [y, mo, d] = m.dataVencimento.split('-')
+    const raw = campo === 'dataPagamento' ? m.dataPagamento : m.dataVencimento
+    if (!raw) continue
+    const [y, mo, d] = raw.split('-')
     const label = `${d}/${mo}`
     map.set(label, (map.get(label) ?? 0) + (m.valorParcela ?? 0))
   }
@@ -922,22 +1107,92 @@ function buildChartData(movs: MovimentoDto[]): { date: string; valor: number }[]
     .map(([date, valor]) => ({ date, valor }))
 }
 
+// Returns today's week range as "DD/MM/YYYY - DD/MM/YYYY"
+function defaultPeriodo(): string {
+  const today = new Date()
+  const start = new Date(today); start.setDate(today.getDate() - today.getDay() + 1)
+  const end   = new Date(start); end.setDate(start.getDate() + 6)
+  const fmt = (d: Date) => d.toLocaleDateString('pt-BR')
+  return `${fmt(start)} - ${fmt(end)}`
+}
+
+function parsePeriodo(periodo: string): { inicio: Date | null; fim: Date | null } {
+  const parts = periodo.split(' - ')
+  function parseBR(s: string) {
+    const [d, m, y] = s.trim().split('/')
+    if (!d || !m || !y) return null
+    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d))
+  }
+  return { inicio: parseBR(parts[0] ?? ''), fim: parseBR(parts[1] ?? '') }
+}
+
+type ProfissionalSimples = { id: string; nome: string }
+
 function TabDashboard({ empresaId }: { empresaId: string | null }) {
-  const [receberMovs, setReceberMovs] = useState<MovimentoDto[]>([])
-  const [pagarMovs,   setPagarMovs]   = useState<MovimentoDto[]>([])
-  const [loading,     setLoading]     = useState(true)
+  const [allMovs,   setAllMovs]   = useState<MovimentoDto[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [profissionais, setProfissionais] = useState<ProfissionalSimples[]>([])
+
+  // ── Filter state
+  const [filtroOpen,       setFiltroOpen]       = useState(false)
+  const [filtroBtnRect,    setFiltroBtnRect]    = useState<DOMRect | null>(null)
+  const filtroBtnRef                             = useRef<HTMLButtonElement>(null)
+  const [tipoData,         setTipoData]          = useState<'atendimento' | 'pagamento'>('atendimento')
+  const [periodo,          setPeriodo]            = useState(defaultPeriodo)
+  const [profissionalFiltro, setProfissionalFiltro] = useState('')
+
+  // Applied filter (applied on "Aplicar" click)
+  const [appliedTipoData,   setAppliedTipoData]   = useState<'atendimento' | 'pagamento'>('atendimento')
+  const [appliedPeriodo,    setAppliedPeriodo]     = useState(defaultPeriodo)
+  const [appliedProfissional, setAppliedProfissional] = useState('')
 
   useEffect(() => {
     if (!empresaId) { setLoading(false); return }
     setLoading(true)
-    Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/movimentos-financeiros/empresa/${empresaId}`).then((r) => r.json()),
-    ]).then(([all]) => {
-      const arr: MovimentoDto[] = Array.isArray(all) ? all : []
-      setReceberMovs(arr.filter((m) => m.tipo !== 'A_PAGAR'))
-      setPagarMovs(arr.filter((m) => m.tipo === 'A_PAGAR'))
-    }).catch(() => {}).finally(() => setLoading(false))
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/movimentos-financeiros/empresa/${empresaId}`)
+      .then((r) => r.json())
+      .then((all) => {
+        const arr: MovimentoDto[] = Array.isArray(all) ? all : []
+        setAllMovs(arr)
+        // Derive profissionais from loaded data
+        const names = Array.from(new Set(arr.map((m) => m.usuarioNome ?? '').filter(Boolean)))
+        setProfissionais(names.map((nome) => ({ id: nome, nome })))
+      }).catch(() => {}).finally(() => setLoading(false))
   }, [empresaId])
+
+  // Close filter panel on outside click
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (!filtroBtnRef.current) return
+      if (!filtroBtnRef.current.contains(e.target as Node)) setFiltroOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
+
+  function aplicarFiltro() {
+    setAppliedTipoData(tipoData)
+    setAppliedPeriodo(periodo)
+    setAppliedProfissional(profissionalFiltro)
+    setFiltroOpen(false)
+  }
+
+  // ── Apply filter to movements
+  const { inicio, fim } = parsePeriodo(appliedPeriodo)
+  const campo = appliedTipoData === 'pagamento' ? 'dataPagamento' : 'dataVencimento'
+
+  const filteredMovs = allMovs.filter((m) => {
+    const raw = m[campo]
+    if (!raw) return false
+    const d = new Date(raw + 'T00:00:00')
+    if (inicio && d < inicio) return false
+    if (fim)   { const fimInc = new Date(fim); fimInc.setHours(23,59,59); if (d > fimInc) return false }
+    if (appliedProfissional && m.usuarioNome !== appliedProfissional) return false
+    return true
+  })
+
+  const receberMovs = filteredMovs.filter((m) => m.tipo !== 'A_PAGAR')
+  const pagarMovs   = filteredMovs.filter((m) => m.tipo === 'A_PAGAR')
 
   const recebido  = receberMovs.reduce((s, m) => s + (m.valorPago ?? 0), 0)
   const aReceber  = receberMovs.filter((m) => m.status !== 'Pago').reduce((s, m) => s + ((m.valorParcela ?? 0) - (m.valorPago ?? 0)), 0)
@@ -947,8 +1202,8 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
   const aPagar    = pagarMovs.filter((m) => m.status !== 'Pago').reduce((s, m) => s + ((m.valorParcela ?? 0) - (m.valorPago ?? 0)), 0)
   const totalPag  = quitado + aPagar
 
-  const chartReceber = buildChartData(receberMovs)
-  const chartPagar   = buildChartData(pagarMovs)
+  const chartReceber = buildChartData(receberMovs, campo)
+  const chartPagar   = buildChartData(pagarMovs, campo)
 
   const STAT_ROWS_REC = [
     { label: 'Recebido',              value: recebido, color: '#22C55E' },
@@ -977,13 +1232,91 @@ function TabDashboard({ empresaId }: { empresaId: string | null }) {
           <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Dashboard</h2>
           <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Faça análises e crie relatórios gerenciais facilmente</p>
         </div>
-        <div className="flex gap-2">
-          <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
+        <div className="flex gap-2 items-center relative">
+          <button
+            className={BTN_GHOST + ' flex items-center gap-1.5'}
+            onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/movimentos-financeiros/modelos/dre`, '_blank')}
+          >
             <Download size={14} /> DRE Modelo
           </button>
-          <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
+          <button
+            ref={filtroBtnRef}
+            onClick={() => { setFiltroBtnRect(filtroBtnRef.current?.getBoundingClientRect() ?? null); setFiltroOpen(v => !v) }}
+            className={BTN_GHOST + ' flex items-center gap-1.5' + (filtroOpen ? ' border-[#7C4DFF] text-[var(--d2b-text-primary)]' : '')}
+          >
             <Filter size={14} /> Filtrar dados
           </button>
+
+          {/* Filter popover – rendered in portal so containers don't clip it */}
+          {filtroOpen && filtroBtnRect && createPortal(
+            <div
+              style={{ position: 'fixed', top: filtroBtnRect.bottom + 8, right: window.innerWidth - filtroBtnRect.right, zIndex: 9999 }}
+              className="w-80 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="p-4 space-y-4">
+                {/* Tipo de data */}
+                <div>
+                  <p className="text-xs font-semibold text-[var(--d2b-text-primary)] mb-2">Filtrar por tipo de data</p>
+                  <div className="flex gap-4">
+                    {(['atendimento', 'pagamento'] as const).map((t) => (
+                      <label key={t} className="flex items-center gap-1.5 cursor-pointer text-xs text-[var(--d2b-text-secondary)]">
+                        <span
+                          onClick={() => setTipoData(t)}
+                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${tipoData === t ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)]'}`}
+                        >
+                          {tipoData === t && <span className="w-2 h-2 rounded-full bg-[#7C4DFF]" />}
+                        </span>
+                        {t === 'atendimento' ? 'Data de Atendimento' : 'Data de Pagamento'}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Período */}
+                <div className="relative">
+                  <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
+                    Período
+                  </label>
+                  <input
+                    type="text"
+                    value={periodo}
+                    onChange={(e) => setPeriodo(e.target.value)}
+                    placeholder="DD/MM/AAAA - DD/MM/AAAA"
+                    className={INP}
+                  />
+                </div>
+
+                {/* Profissional */}
+                <div className="relative">
+                  <label className={`absolute -top-2 left-3 z-10 ${LBG} px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none`}>
+                    Profissional
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={profissionalFiltro}
+                      onChange={(e) => setProfissionalFiltro(e.target.value)}
+                      className={INP + ' appearance-none pr-8 cursor-pointer'}
+                    >
+                      <option value="">Todos os profissionais</option>
+                      {profissionais.map((p) => (
+                        <option key={p.id} value={p.id}>{p.nome}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Aplicar */}
+                <div className="flex justify-end">
+                  <button onClick={aplicarFiltro} className={BTN_PRIMARY}>
+                    Aplicar
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
         </div>
       </div>
 
@@ -1106,379 +1439,6 @@ const MOCK_MENSALIDADES: Mensalidade[] = [
 const PROFISSIONAIS_OPTS = ['JESSE DOS SANTOS BEZERRA']
 const PACIENTES_OPTS = ['Monique Franca', 'Paciente Exemplo']
 
-function ModalAdicionarMensalidade({ onClose, onSave }: {
-  onClose: () => void
-  onSave: (m: Mensalidade) => void
-}) {
-  const [titulo,    setTitulo]    = useState('')
-  const [paciente,  setPaciente]  = useState('')
-  const [prof,      setProf]      = useState('')
-  const [data,      setData]      = useState('')
-  const [parcelas,  setParcelas]  = useState('')
-  const [valor,     setValor]     = useState('0,00')
-
-  const INP_W = 'w-full border border-[#D8D0ED] rounded-md px-3 py-2.5 text-sm text-[#2D1B5A] placeholder:text-[#B0A0CC] focus:outline-none focus:border-[#7C4DFF] transition-colors bg-white'
-  const LBL_W = 'absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF] leading-none'
-
-  function handleSave() {
-    if (!titulo || !data || !valor) return
-    onSave({
-      id: Date.now(),
-      titulo,
-      profissional: prof || PROFISSIONAIS_OPTS[0],
-      paciente: paciente || '',
-      data,
-      parcela: `1/${parcelas || '1'}`,
-      recebido: 0,
-      total: parseFloat(valor.replace(',', '.')) || 0,
-      status: 'Em Aberto',
-    })
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8F5]">
-          <h3 className="text-base font-bold text-[#2D1B5A]">Adicionar conta a receber</h3>
-          <button onClick={onClose} className="text-[#9E8BBF] hover:text-[#2D1B5A] transition-colors"><X size={18} /></button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          {/* Título */}
-          <div className="relative">
-            <label className={LBL_W}>Título da Conta<span className="text-[#7C4DFF]">*</span></label>
-            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className={INP_W} />
-          </div>
-          {/* Paciente + Profissional */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <label className={LBL_W}>Selecione um paciente</label>
-              <div className="relative">
-                <select value={paciente} onChange={(e) => setPaciente(e.target.value)}
-                  className={INP_W + ' appearance-none pr-8 cursor-pointer'}>
-                  <option value="">Busque pelo paciente</option>
-                  {PACIENTES_OPTS.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
-              </div>
-            </div>
-            <div className="relative">
-              <label className={LBL_W}>Profissional</label>
-              <div className="relative">
-                <select value={prof} onChange={(e) => setProf(e.target.value)}
-                  className={INP_W + ' appearance-none pr-8 cursor-pointer'}>
-                  <option value="">Selecione um profissional</option>
-                  {PROFISSIONAIS_OPTS.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
-              </div>
-            </div>
-          </div>
-          {/* Data + Parcelas */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <label className={LBL_W}>Data do Recebimento<span className="text-[#7C4DFF]">*</span></label>
-              <input value={data} onChange={(e) => setData(e.target.value)} placeholder="dd/mm/aaaa" className={INP_W} />
-            </div>
-            <div className="relative">
-              <label className={LBL_W}>Número de Parcelas<span className="text-[#7C4DFF]">*</span></label>
-              <input value={parcelas} onChange={(e) => setParcelas(e.target.value)} placeholder="1" className={INP_W} />
-            </div>
-          </div>
-          {/* Valor */}
-          <div className="relative w-1/2">
-            <label className={LBL_W}>Valor<span className="text-[#7C4DFF]">*</span></label>
-            <input value={`R$ ${valor}`}
-              onChange={(e) => setValor(e.target.value.replace(/^R\$\s?/, ''))}
-              className={INP_W} />
-          </div>
-        </div>
-        <div className="px-6 py-4 border-t border-[#EDE8F5] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#9E8BBF] hover:bg-[#F3F0FA] transition-colors">Cancelar</button>
-          <button onClick={handleSave} className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Salvar</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ModalEditarMensalidade({ row, onClose, onSave }: {
-  row: Mensalidade
-  onClose: () => void
-  onSave: (updated: Mensalidade) => void
-}) {
-  const [titulo,      setTitulo]      = useState(row.titulo)
-  const [prof,        setProf]        = useState(row.profissional)
-  const [data,        setData]        = useState(row.data)
-  const [valor,       setValor]       = useState(row.total.toFixed(2).replace('.', ','))
-  const [recebido,    setRecebido]    = useState(row.recebido.toFixed(2).replace('.', ','))
-
-  const INP_W = 'w-full border border-[#D8D0ED] rounded-md px-3 py-2.5 text-sm text-[#2D1B5A] placeholder:text-[#B0A0CC] focus:outline-none focus:border-[#7C4DFF] transition-colors bg-white'
-  const LBL_W = 'absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF] leading-none'
-
-  function handleSave() {
-    onSave({
-      ...row,
-      titulo,
-      profissional: prof,
-      data,
-      total: parseFloat(valor.replace(',', '.')) || 0,
-      recebido: parseFloat(recebido.replace(',', '.')) || 0,
-      status: (parseFloat(recebido.replace(',', '.')) || 0) >= (parseFloat(valor.replace(',', '.')) || 0) ? 'Pago' : 'Em Aberto',
-    })
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8F5]">
-          <h3 className="text-base font-bold text-[#2D1B5A]">Alterar informações da conta</h3>
-          <button onClick={onClose} className="text-[#9E8BBF] hover:text-[#2D1B5A] transition-colors"><X size={18} /></button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          {/* Título */}
-          <div className="relative">
-            <label className={LBL_W}>Título da Conta<span className="text-[#7C4DFF]">*</span></label>
-            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className={INP_W} />
-          </div>
-          {/* Paciente (read-only) + Profissional */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <label className={LBL_W}>Paciente</label>
-              <input value={row.paciente} readOnly className={INP_W + ' bg-[#F3F0FA] text-[#9E8BBF] cursor-not-allowed'} />
-            </div>
-            <div className="relative">
-              <label className={LBL_W}>Profissional<span className="text-[#7C4DFF]">*</span></label>
-              <div className="relative">
-                <select value={prof} onChange={(e) => setProf(e.target.value)}
-                  className={INP_W + ' appearance-none pr-8 cursor-pointer'}>
-                  {PROFISSIONAIS_OPTS.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
-              </div>
-            </div>
-          </div>
-          {/* Data + Valor */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <label className={LBL_W}>Data do Recebimento<span className="text-[#7C4DFF]">*</span></label>
-              <input value={data} onChange={(e) => setData(e.target.value)} className={INP_W} />
-            </div>
-            <div className="relative">
-              <label className={LBL_W}>Valor<span className="text-[#7C4DFF]">*</span></label>
-              <input value={`R$ ${valor}`}
-                onChange={(e) => setValor(e.target.value.replace(/^R\$\s?/, ''))}
-                className={INP_W} />
-            </div>
-          </div>
-          {/* Valor Recebido + Quitar */}
-          <div className="flex items-end gap-3">
-            <div className="relative flex-1">
-              <label className={LBL_W}>Valor Recebido<span className="text-[#7C4DFF]">*</span></label>
-              <input value={`R$ ${recebido}`}
-                onChange={(e) => setRecebido(e.target.value.replace(/^R\$\s?/, ''))}
-                className={INP_W} />
-            </div>
-            <button onClick={() => setRecebido(valor)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-bold text-white bg-[#14B8A6] hover:bg-[#0D9488] transition-colors whitespace-nowrap">
-              <Check size={13} /> Quitar
-            </button>
-          </div>
-        </div>
-        <div className="px-6 py-4 border-t border-[#EDE8F5] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#9E8BBF] hover:bg-[#F3F0FA] transition-colors">Cancelar</button>
-          <button onClick={handleSave} className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">Salvar</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function TabMensalidades() {
-  const [search,     setSearch]     = useState('')
-  const [rows,       setRows]       = useState<Mensalidade[]>(MOCK_MENSALIDADES)
-  const [page,       setPage]       = useState(1)
-  const [pageSize,   setPageSize]   = useState(10)
-  const [pageSizeOpen, setPSOOpen]  = useState(false)
-  const [modalAdd,   setModalAdd]   = useState(false)
-  const [editRow,    setEditRow]    = useState<Mensalidade | null>(null)
-
-  const filtered = rows.filter((r) =>
-    r.titulo.toLowerCase().includes(search.toLowerCase()) ||
-    r.paciente.toLowerCase().includes(search.toLowerCase()) ||
-    r.profissional.toLowerCase().includes(search.toLowerCase())
-  )
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const pageRows   = filtered.slice((page - 1) * pageSize, page * pageSize)
-
-  function handleAdd(m: Mensalidade) {
-    setRows((prev) => [...prev, m])
-    setModalAdd(false)
-  }
-  function handleEdit(updated: Mensalidade) {
-    setRows((prev) => prev.map((r) => r.id === updated.id ? updated : r))
-    setEditRow(null)
-  }
-  function handleDelete(id: number) {
-    setRows((prev) => prev.filter((r) => r.id !== id))
-  }
-
-  const totalRecebido = rows.reduce((s, r) => s + r.recebido, 0)
-  const aReceber      = rows.reduce((s, r) => s + (r.total - r.recebido), 0)
-
-  const statusMap: Record<MensalidadeStatus, string> = {
-    'Pago':      'text-[#22C55E]',
-    'Em Aberto': 'text-[#EF4444]',
-    'Atrasado':  'text-[#F59E0B]',
-  }
-
-  return (
-    <>
-    {modalAdd && <ModalAdicionarMensalidade onClose={() => setModalAdd(false)} onSave={handleAdd} />}
-    {editRow  && <ModalEditarMensalidade row={editRow} onClose={() => setEditRow(null)} onSave={handleEdit} />}
-
-    <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
-      {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b border-[var(--d2b-border)]">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-base font-bold text-[var(--d2b-text-primary)]">Mensalidades</h2>
-            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Controle o recebimento mensal de seus pacientes e de outras contas da sua clínica.</p>
-          </div>
-          <button onClick={() => setModalAdd(true)} className={BTN_PRIMARY + ' flex items-center gap-1.5'}>
-            <Plus size={14} /> Adicionar
-          </button>
-        </div>
-        <div className="flex items-center gap-2 mt-4">
-          <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)]" />
-            <input type="text" placeholder="Pesquisar" value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-              className={INP + ' pl-8 w-48'} />
-          </div>
-          <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
-            <Filter size={13} /> Filtrar
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-main)]">
-              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left w-24">AÇÕES</th>
-              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">NOME</th>
-              {['PROFISSIONAL', 'PACIENTE', 'DATA'].map((h) => (
-                <th key={h} className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-left">
-                  <button className="flex items-center gap-1 hover:text-[var(--d2b-text-secondary)] transition-colors">
-                    {h} <ChevronDown size={10} />
-                  </button>
-                </th>
-              ))}
-              <th className="px-4 py-3 text-[10px] font-semibold text-[var(--d2b-text-muted)] uppercase tracking-widest text-right">PAGAMENTO</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pageRows.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[var(--d2b-text-muted)]">Nenhuma mensalidade encontrada.</td>
-              </tr>
-            ) : pageRows.map((r) => (
-              <tr key={r.id} className="border-b border-[var(--d2b-border)] hover:bg-[var(--d2b-hover)] transition-colors">
-                {/* Ações */}
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setEditRow(r)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--d2b-border-strong)] text-[#7C4DFF] hover:bg-[var(--d2b-hover)] transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button onClick={() => handleDelete(r.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full border border-[rgba(239,68,68,0.30)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                    </button>
-                  </div>
-                </td>
-                {/* Nome */}
-                <td className="px-4 py-4 font-semibold text-[var(--d2b-text-primary)]">{r.titulo}</td>
-                {/* Profissional */}
-                <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.profissional}</td>
-                {/* Paciente */}
-                <td className="px-4 py-4 text-[var(--d2b-text-secondary)]">{r.paciente}</td>
-                {/* Data */}
-                <td className="px-4 py-4">
-                  <p className="text-[var(--d2b-text-secondary)]">{r.data}</p>
-                  <p className="text-xs text-[#7C4DFF] mt-0.5">Parcela {r.parcela}</p>
-                </td>
-                {/* Pagamento */}
-                <td className="px-4 py-4 text-right">
-                  <p className="text-sm font-medium text-[var(--d2b-text-primary)]">
-                    R$ {r.recebido.toFixed(2).replace('.', ',')} de R$ {r.total.toFixed(2).replace('.', ',')}
-                  </p>
-                  <p className={`text-xs flex items-center gap-1 justify-end mt-0.5 ${statusMap[r.status]}`}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path fill="white" d="M12 8v4M12 16h.01" strokeWidth="2"/>
-                    </svg>
-                    {r.status}
-                  </p>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Footer */}
-      <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
-        <button className={BTN_GHOST + ' flex items-center gap-1.5'}>
-          <Upload size={13} /> Exportar Dados
-        </button>
-        <div className="flex items-center gap-6">
-          <div className="text-right">
-            <p className="text-xs text-[var(--d2b-text-secondary)]">
-              Total Recebido: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {totalRecebido.toFixed(2).replace('.', ',')}</span>
-            </p>
-            <p className="text-xs text-[var(--d2b-text-secondary)]">
-              A receber: <span className="font-semibold text-[var(--d2b-text-primary)]">R$ {aReceber.toFixed(2).replace('.', ',')}</span>
-            </p>
-          </div>
-          {/* Pagination */}
-          <div className="flex items-center gap-1">
-            {(['«','‹','›','»'] as const).map((sym, i) => {
-              const acts = [() => setPage(1), () => setPage((p) => Math.max(1,p-1)), () => setPage((p) => Math.min(totalPages,p+1)), () => setPage(totalPages)]
-              return (
-                <button key={sym} onClick={acts[i]}
-                  className="w-7 h-7 flex items-center justify-center rounded text-sm text-[var(--d2b-text-secondary)] hover:bg-[var(--d2b-hover)] hover:text-[var(--d2b-text-primary)] transition-colors">
-                  {sym}
-                </button>
-              )
-            })}
-            <span className="w-7 h-7 flex items-center justify-center rounded bg-[#7C4DFF] text-white text-xs font-semibold">{page}</span>
-            <div className="relative ml-1">
-              <button onClick={() => setPSOOpen((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 border border-[var(--d2b-border-strong)] rounded text-xs text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">
-                {pageSize} <ChevronDown size={11} />
-              </button>
-              {pageSizeOpen && (
-                <div className="absolute bottom-full mb-1 right-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg shadow-xl overflow-hidden z-20">
-                  {[5,10,20,50].map((n) => (
-                    <button key={n} onClick={() => { setPageSize(n); setPage(1); setPSOOpen(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--d2b-hover)] transition-colors ${pageSize===n?'text-[#7C4DFF] font-semibold':'text-[var(--d2b-text-primary)]'}`}>
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </>
-  )
-}
-
-
 // ─── Sub-tab nav ──────────────────────────────────────────────────────────────
 type SubTabDef = { id: SubTab; label: string; Icon: LucideIcon }
 
@@ -1497,7 +1457,7 @@ export function FinanceiroView({ empresaId }: { empresaId: string | null }) {
     switch (subTab) {
       case 'dashboard':    return <TabDashboard empresaId={empresaId} />
       case 'receber':      return <TabContasReceber empresaId={empresaId} />
-      case 'mensalidades': return <TabMensalidades />
+      case 'mensalidades': return <TabMensalidades empresaId={empresaId} />
       case 'pagar':        return <TabContasPagar empresaId={empresaId} />
     }
   })()

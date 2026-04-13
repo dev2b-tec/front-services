@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Filter, Plus, Upload, ChevronDown, X, Check } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { Search, Filter, Plus, Upload, ChevronDown, X, Check, Printer, FileText, FileSpreadsheet, FileDown } from 'lucide-react'
 
 // ─── Shared styles (dark theme) ───────────────────────────────────────────────
 const INP =
@@ -14,6 +15,30 @@ const JOIN = (base: string, extra: string) => `${base} ${extra}`
 function fmtBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
+function defaultPeriodo(): string {
+  const now = new Date()
+  const day = now.getDay()
+  const start = new Date(now); start.setDate(now.getDate() - day + (day === 0 ? -6 : 1))
+  const end   = new Date(start); end.setDate(start.getDate() + 6)
+  const fmt = (d: Date) => d.toLocaleDateString('pt-BR')
+  return `${fmt(start)} - ${fmt(end)}`
+}
+function parsePeriodo(p: string): { inicio: Date | null; fim: Date | null } {
+  const parts = p.split(' - ').map((s) => s.trim())
+  if (parts.length !== 2) return { inicio: null, fim: null }
+  const parse = (s: string) => {
+    const [d, m, y] = s.split('/').map(Number)
+    if (!d || !m || !y) return null
+    return new Date(y, m - 1, d)
+  }
+  return { inicio: parse(parts[0]), fim: parse(parts[1]) }
+}
+function parseBRDate(s: string): Date | null {
+  const [d, m, y] = s.split('/').map(Number)
+  if (!d || !m || !y) return null
+  return new Date(y, m - 1, d)
+}
+const METODO_OPTIONS = ['Todos', 'PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'DINHEIRO', 'BOLETO', 'TRANSFERENCIA']
 function maskBRL(raw: string): string {
   const digits = raw.replace(/\D/g, '')
   if (!digits) return ''
@@ -76,18 +101,21 @@ function ModalAdicionar({
   onClose: () => void
   onSaved: () => void
 }) {
-  const [titulo,    setTitulo]    = useState('')
+  const [titulo,     setTitulo]     = useState('')
   const [pacienteId, setPacienteId] = useState('')
   const [usuarioId,  setUsuarioId]  = useState('')
-  const [data,      setData]      = useState('')
-  const [parcelas,  setParcelas]  = useState('1')
-  const [valor,     setValor]     = useState('')
-  const [erros,     setErros]     = useState<Record<string, string>>({})
-  const [saving,    setSaving]    = useState(false)
+  const [data,       setData]       = useState('')
+  const [parcelas,   setParcelas]   = useState('1')
+  const [valor,      setValor]      = useState('')
+  const [erros,      setErros]      = useState<Record<string, string>>({})
+  const [saving,     setSaving]     = useState(false)
 
   const n = parseInt(parcelas) || 0
   const total = parseBRL(valor)
   const valorParcela = n > 0 && total > 0 ? total / n : 0
+
+  const FLD = 'w-full border border-[#D8D0ED] rounded-md px-3 py-2.5 text-sm text-[#2D1B5A] placeholder:text-[#B0A0CC] focus:outline-none focus:border-[#7C4DFF] transition-colors bg-white'
+  const LF  = 'absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF] leading-none'
 
   async function handleSave() {
     const e: Record<string, string> = {}
@@ -126,126 +154,123 @@ function ModalAdicionar({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)]">
-          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Adicionar Mensalidade</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
-            <X size={15} />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8F5]">
+          <h3 className="text-base font-bold text-[#2D1B5A]">Adicionar Mensalidade</h3>
+          <button onClick={onClose} className="text-[#9E8BBF] hover:text-[#2D1B5A] transition-colors">
+            <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-6 py-5 space-y-5">
           {/* Título */}
-          <div>
-            <label className={LBL}>Título da Conta <span className="text-[#7C4DFF]">*</span></label>
+          <div className="relative">
+            <label className={LF}>Título da Conta<span className="text-[#7C4DFF]">*</span></label>
             <input
               value={titulo}
               onChange={(e) => { setTitulo(e.target.value); setErros((p) => ({ ...p, titulo: '' })) }}
-              className={JOIN(INP, erros.titulo ? 'border-red-500' : '')}
+              className={FLD + (erros.titulo ? ' border-red-400' : '')}
               placeholder="Ex: Plano Mensal"
             />
             {erros.titulo && <p className="text-xs text-red-400 mt-1">{erros.titulo}</p>}
           </div>
 
           {/* Paciente + Profissional */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Paciente</label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className={LF}>Selecione um paciente</label>
               <div className="relative">
                 <select
                   value={pacienteId}
                   onChange={(e) => setPacienteId(e.target.value)}
-                  className={JOIN(INP, 'appearance-none pr-8 cursor-pointer')}
+                  className={FLD + ' appearance-none pr-8 cursor-pointer'}
                 >
-                  <option value="">Selecione um paciente</option>
+                  <option value="">Busque pelo paciente</option>
                   {pacientes.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
               </div>
             </div>
-            <div>
-              <label className={LBL}>Profissional</label>
+            <div className="relative">
+              <label className={LF}>Profissional</label>
               <div className="relative">
                 <select
                   value={usuarioId}
                   onChange={(e) => setUsuarioId(e.target.value)}
-                  className={JOIN(INP, 'appearance-none pr-8 cursor-pointer')}
+                  className={FLD + ' appearance-none pr-8 cursor-pointer'}
                 >
                   <option value="">Selecione um profissional</option>
                   {profissionais.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
               </div>
             </div>
           </div>
 
           {/* Data + Parcelas */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Data 1º Vencimento <span className="text-[#7C4DFF]">*</span></label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className={LF}>Data do Recebimento<span className="text-[#7C4DFF]">*</span></label>
               <input
                 type="date"
                 value={data}
                 onChange={(e) => { setData(e.target.value); setErros((p) => ({ ...p, data: '' })) }}
-                className={JOIN(INP, erros.data ? 'border-red-500' : '')}
+                className={FLD + (erros.data ? ' border-red-400' : '')}
               />
               {erros.data && <p className="text-xs text-red-400 mt-1">{erros.data}</p>}
             </div>
-            <div>
-              <label className={LBL}>Número de Parcelas <span className="text-[#7C4DFF]">*</span></label>
+            <div className="relative">
+              <label className={LF}>Número de Parcelas<span className="text-[#7C4DFF]">*</span></label>
               <input
                 type="number"
                 min={1}
                 value={parcelas}
                 onChange={(e) => { setParcelas(e.target.value); setErros((p) => ({ ...p, parcelas: '' })) }}
-                className={JOIN(INP, erros.parcelas ? 'border-red-500' : '')}
+                className={FLD + (erros.parcelas ? ' border-red-400' : '')}
               />
               {erros.parcelas && <p className="text-xs text-red-400 mt-1">{erros.parcelas}</p>}
             </div>
           </div>
 
           {/* Valor */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Valor Total <span className="text-[#7C4DFF]">*</span></label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="R$ 0,00"
-                value={valor}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/\D/g, '')
-                  setValor(digits ? maskBRL(e.target.value) : '')
-                  setErros((p) => ({ ...p, valor: '' }))
-                }}
-                className={JOIN(INP, erros.valor ? 'border-red-500' : '')}
-              />
-              {erros.valor && <p className="text-xs text-red-400 mt-1">{erros.valor}</p>}
-            </div>
-            <div />
+          <div className="relative w-1/2">
+            <label className={LF}>Valor<span className="text-[#7C4DFF]">*</span></label>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={valor}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, '')
+                setValor(digits ? maskBRL(e.target.value) : '')
+                setErros((p) => ({ ...p, valor: '' }))
+              }}
+              className={FLD + (erros.valor ? ' border-red-400' : '')}
+            />
+            {erros.valor && <p className="text-xs text-red-400 mt-1">{erros.valor}</p>}
           </div>
 
-          {/* Parcela preview */}
+          {/* Preview */}
           {n > 0 && total > 0 && (
-            <p className="text-sm font-semibold text-[var(--d2b-text-secondary)]">
+            <p className="text-sm font-semibold text-[#6B4FA8]">
               {n} {n === 1 ? 'parcela de' : 'parcelas mensais de'}{' '}
-              <span className="text-[#7C4DFF]">{fmtBRL(valorParcela)}</span>
+              {fmtBRL(valorParcela)}
             </p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[var(--d2b-border-strong)] hover:text-[var(--d2b-text-primary)] transition-colors">
+        <div className="px-6 py-4 border-t border-[#EDE8F5] flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#9E8BBF] hover:bg-[#F3F0FA] transition-colors">
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors"
+            className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors"
           >
             {saving ? 'Salvando…' : 'Salvar'}
           </button>
@@ -275,6 +300,9 @@ function ModalEditar({
 
   const METODOS = ['Dinheiro','Pix','Cartão de Crédito','Cartão de Débito','Transferência','Outros']
 
+  const FLD = 'w-full border border-[#D8D0ED] rounded-md px-3 py-2.5 text-sm text-[#2D1B5A] placeholder:text-[#B0A0CC] focus:outline-none focus:border-[#7C4DFF] transition-colors bg-white'
+  const LF  = 'absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-[#9E8BBF] leading-none'
+
   async function handleSave() {
     setSaving(true)
     try {
@@ -301,125 +329,125 @@ function ModalEditar({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-2xl shadow-2xl w-full max-w-xl mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--d2b-border)]">
-          <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Mensalidade</h3>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
-            <X size={15} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8F5]">
+          <h3 className="text-base font-bold text-[#2D1B5A]">Alterar informações da conta</h3>
+          <button onClick={onClose} className="text-[#9E8BBF] hover:text-[#2D1B5A] transition-colors">
+            <X size={18} />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-6 py-5 space-y-5">
           {/* Título */}
-          <div>
-            <label className={LBL}>Título</label>
-            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className={INP} />
+          <div className="relative">
+            <label className={LF}>Título da Conta<span className="text-[#7C4DFF]">*</span></label>
+            <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className={FLD} />
           </div>
 
-          {/* Paciente + Profissional */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Paciente</label>
+          {/* Paciente (read-only) + Profissional */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className={LF}>Paciente</label>
               <input
                 value={row.pacienteNome || '—'}
                 readOnly
-                className={JOIN(INP, 'opacity-50 cursor-not-allowed')}
+                className={FLD + ' bg-[#F3F0FA] text-[#9E8BBF] cursor-not-allowed'}
               />
             </div>
-            <div>
-              <label className={LBL}>Profissional</label>
+            <div className="relative">
+              <label className={LF}>Profissional<span className="text-[#7C4DFF]">*</span></label>
               <div className="relative">
                 <select
                   value={usuarioId}
                   onChange={(e) => setUsuarioId(e.target.value)}
-                  className={JOIN(INP, 'appearance-none pr-8 cursor-pointer')}
+                  className={FLD + ' appearance-none pr-8 cursor-pointer'}
                 >
                   <option value="">Nenhum</option>
                   {profissionais.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
               </div>
             </div>
           </div>
 
-          {/* Valor + Status */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Valor da Parcela</label>
+          {/* Valor Parcela + Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className={LF}>Valor da Parcela</label>
               <input
                 value={valor}
                 onChange={(e) => setValor(maskBRL(e.target.value) || e.target.value)}
-                className={INP}
+                className={FLD}
               />
             </div>
-            <div>
-              <label className={LBL}>Status</label>
+            <div className="relative">
+              <label className={LF}>Status</label>
               <div className="relative">
                 <select value={status} onChange={(e) => setStatus(e.target.value)}
-                  className={JOIN(INP, 'appearance-none pr-8 cursor-pointer')}>
-                  {['EM_ABERTO','PAGO','ATRASADO','CANCELADO'].map((s) => (
+                  className={FLD + ' appearance-none pr-8 cursor-pointer'}>
+                  {(['EM_ABERTO','PAGO','ATRASADO','CANCELADO'] as const).map((s) => (
                     <option key={s} value={s}>{s === 'EM_ABERTO' ? 'Em Aberto' : s.charAt(0) + s.slice(1).toLowerCase()}</option>
                   ))}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
               </div>
             </div>
           </div>
 
-          {/* Valor recebido + Quitar */}
+          {/* Valor Recebido + Quitar */}
           <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <label className={LBL}>Valor Recebido</label>
+            <div className="relative flex-1">
+              <label className={LF}>Valor Recebido<span className="text-[#7C4DFF]">*</span></label>
               <input
                 type="text"
                 inputMode="numeric"
                 value={recebido}
                 onChange={(e) => setRecebido(maskBRL(e.target.value) || e.target.value)}
-                className={INP}
+                className={FLD}
               />
             </div>
             <button
               onClick={quitar}
-              className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[#14B8A6] hover:bg-[#0D9488] transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-bold text-white bg-[#14B8A6] hover:bg-[#0D9488] transition-colors whitespace-nowrap"
             >
               <Check size={13} /> Quitar
             </button>
           </div>
 
           {/* Data pagamento + Método */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LBL}>Data do Pagamento</label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className={LF}>Data do Pagamento</label>
               <input
                 type="date"
                 value={dataPag}
                 onChange={(e) => setDataPag(e.target.value)}
-                className={INP}
+                className={FLD}
               />
             </div>
-            <div>
-              <label className={LBL}>Método de Pagamento</label>
+            <div className="relative">
+              <label className={LF}>Método de Pagamento</label>
               <div className="relative">
                 <select value={metodo} onChange={(e) => setMetodo(e.target.value)}
-                  className={JOIN(INP, 'appearance-none pr-8 cursor-pointer')}>
+                  className={FLD + ' appearance-none pr-8 cursor-pointer'}>
                   <option value="">Selecione</option>
                   {METODOS.map((m) => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
+                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E8BBF] pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[var(--d2b-border-strong)] hover:text-[var(--d2b-text-primary)] transition-colors">
+        <div className="px-6 py-4 border-t border-[#EDE8F5] flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-medium text-[#9E8BBF] hover:bg-[#F3F0FA] transition-colors">
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors"
+            className="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-60 transition-colors"
           >
             {saving ? 'Salvando…' : 'Salvar'}
           </button>
@@ -562,6 +590,40 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
   const [modalAdd,     setModalAdd]     = useState(false)
   const [editRow,      setEditRow]      = useState<Movimento | null>(null)
   const [delRow,       setDelRow]       = useState<Movimento | null>(null)
+  const [showExport,   setShowExport]   = useState(false)
+  const exportRef                        = useRef<HTMLDivElement>(null)
+
+  // ── Filter state
+  const [filtroOpen,      setFiltroOpen]      = useState(false)
+  const [filtroBtnRect,   setFiltroBtnRect]   = useState<DOMRect | null>(null)
+  const filtroBtnRef                          = useRef<HTMLButtonElement>(null)
+  const [periodoFiltro,   setPeriodoFiltro]   = useState(defaultPeriodo)
+  const [profFiltro,      setProfFiltro]      = useState('')
+  const [pagamentoFiltro, setPagamentoFiltro] = useState('')
+  const [pacienteFiltro,  setPacienteFiltro]  = useState('')
+  // applied copies
+  const [appliedPeriodo,   setAppliedPeriodo]   = useState('')
+  const [appliedProf,      setAppliedProf]      = useState('')
+  const [appliedPagamento, setAppliedPagamento] = useState('')
+  const [appliedPaciente,  setAppliedPaciente]  = useState('')
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setShowExport(false)
+      if (filtroBtnRef.current && !filtroBtnRef.current.contains(e.target as Node)) setFiltroOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
+
+  function exportar(tipo: 'pdf' | 'excel' | 'csv' | 'imprimir') {
+    if (!empresaId) return
+    window.open(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/relatorios/mensalidades/${tipo}?empresaId=${empresaId}`,
+      '_blank'
+    )
+    setShowExport(false)
+  }
 
   const load = useCallback(async () => {
     if (!empresaId) return
@@ -603,20 +665,54 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
   useEffect(() => {
     if (!empresaId) return
     const base = process.env.NEXT_PUBLIC_API_URL
-    Promise.all([
-      fetch(`${base}/api/v1/usuarios/empresa/${empresaId}`).then((r) => r.ok ? r.json() : []),
-      fetch(`${base}/api/v1/pacientes/empresa/${empresaId}`).then((r) => r.ok ? r.json() : []),
-    ]).then(([profs, pacs]) => {
-      setProfissionais((profs as Array<{ id: string; nomeCompleto?: string; nome?: string }>).map((u) => ({ id: u.id, nome: u.nomeCompleto ?? u.nome ?? u.id })))
-      setPacientes((pacs as Array<{ id: string; nomeCompleto?: string; nome?: string }>).map((p) => ({ id: p.id, nome: p.nomeCompleto ?? p.nome ?? p.id })))
-    }).catch(() => {})
+    fetch(`${base}/api/v1/pacientes/empresa/${empresaId}`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((pacs: Array<{ id: string; nomeCompleto?: string; nome?: string }>) => {
+        setPacientes(pacs.map((p) => ({ id: p.id, nome: p.nomeCompleto ?? p.nome ?? p.id })))
+      }).catch(() => {})
   }, [empresaId])
 
-  const filtered = rows.filter((r) =>
-    r.titulo.toLowerCase().includes(search.toLowerCase()) ||
-    r.pacienteNome.toLowerCase().includes(search.toLowerCase()) ||
-    r.usuarioNome.toLowerCase().includes(search.toLowerCase())
-  )
+  useEffect(() => {
+    if (!empresaId) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/empresa/${empresaId}`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((users: Array<{ id: string; nome?: string }>) => {
+        setProfissionais(users.map((u) => ({ id: u.id, nome: u.nome ?? u.id })))
+      }).catch(() => {})
+  }, [empresaId])
+
+  function aplicarFiltro() {
+    setAppliedPeriodo(periodoFiltro)
+    setAppliedProf(profFiltro)
+    setAppliedPagamento(pagamentoFiltro)
+    setAppliedPaciente(pacienteFiltro)
+    setFiltroOpen(false)
+  }
+  function limparFiltro() {
+    const dp = defaultPeriodo()
+    setPeriodoFiltro(dp); setAppliedPeriodo('')
+    setProfFiltro('');    setAppliedProf('')
+    setPagamentoFiltro(''); setAppliedPagamento('')
+    setPacienteFiltro(''); setAppliedPaciente('')
+    setFiltroOpen(false)
+  }
+
+  const { inicio, fim } = parsePeriodo(appliedPeriodo)
+
+  const filtered = rows.filter((r) => {
+    const q = search.toLowerCase()
+    if (q && !r.titulo.toLowerCase().includes(q) && !r.pacienteNome.toLowerCase().includes(q) && !r.usuarioNome.toLowerCase().includes(q)) return false
+    if (appliedProf && r.usuarioNome !== appliedProf) return false
+    if (appliedPaciente && !r.pacienteNome.toLowerCase().includes(appliedPaciente.toLowerCase())) return false
+    if (appliedPagamento && r.metodoPagamento !== appliedPagamento) return false
+    if (inicio || fim) {
+      const d = parseBRDate(r.dataVencimento)
+      if (!d) return false
+      if (inicio && d < inicio) return false
+      if (fim) { const fimInc = new Date(fim); fimInc.setHours(23, 59, 59); if (d > fimInc) return false }
+    }
+    return true
+  })
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const pageRows   = filtered.slice((page - 1) * pageSize, page * pageSize)
 
@@ -683,9 +779,67 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
                 className="bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-lg pl-8 pr-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[#3D2A5A] focus:outline-none focus:border-[#7C4DFF] transition-colors w-48"
               />
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-lg hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
+            <button
+              ref={filtroBtnRef}
+              onClick={() => { setFiltroBtnRect(filtroBtnRef.current?.getBoundingClientRect() ?? null); setFiltroOpen(v => !v) }}
+              className={'flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border rounded-lg transition-colors ' + (filtroOpen ? 'border-[#7C4DFF] text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)] border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)]')}
+            >
               <Filter size={13} /> Filtrar
             </button>
+
+            {/* Filter popover – portal so overflow-hidden never clips it */}
+            {filtroOpen && filtroBtnRect && createPortal(
+              <div
+                style={{ position: 'fixed', top: filtroBtnRect.bottom + 8, left: filtroBtnRect.left, zIndex: 9999 }}
+                className="w-72 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 space-y-4">
+                  {/* Período */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Período</label>
+                    <input type="text" value={periodoFiltro} onChange={(e) => setPeriodoFiltro(e.target.value)}
+                      placeholder="DD/MM/AAAA - DD/MM/AAAA"
+                      className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors" />
+                  </div>
+                  {/* Profissional */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Profissional</label>
+                    <div className="relative">
+                      <select value={profFiltro} onChange={(e) => setProfFiltro(e.target.value)}
+                        className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors appearance-none pr-8 cursor-pointer">
+                        <option value="">Todos os profissionais</option>
+                        {profissionais.map((p) => <option key={p.id} value={p.nome}>{p.nome}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+                  {/* Pagamento */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Pagamento</label>
+                    <div className="relative">
+                      <select value={pagamentoFiltro} onChange={(e) => setPagamentoFiltro(e.target.value)}
+                        className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors appearance-none pr-8 cursor-pointer">
+                        {METODO_OPTIONS.map((m) => <option key={m} value={m === 'Todos' ? '' : m}>{m}</option>)}
+                      </select>
+                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                    </div>
+                  </div>
+                  {/* Paciente */}
+                  <div className="relative">
+                    <label className="absolute -top-2 left-3 z-10 bg-[var(--d2b-bg-elevated)] px-1 text-[10px] font-medium text-[var(--d2b-text-secondary)] leading-none">Paciente</label>
+                    <input type="text" value={pacienteFiltro} onChange={(e) => setPacienteFiltro(e.target.value)}
+                      placeholder="Busque pelo paciente"
+                      className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] transition-colors" />
+                  </div>
+                </div>
+                <div className="px-4 pb-4 flex justify-between gap-2">
+                  <button onClick={limparFiltro} className="flex-1 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-xs font-semibold text-[var(--d2b-text-secondary)] hover:border-[#7C4DFF] transition-colors">Limpar Filtros</button>
+                  <button onClick={aplicarFiltro} className="flex-1 py-2 rounded-lg bg-[#7C4DFF] text-xs font-bold text-white hover:bg-[#5B21B6] transition-colors">Aplicar</button>
+                </div>
+              </div>,
+              document.body
+            )}
           </div>
         </div>
 
@@ -770,9 +924,30 @@ export function TabMensalidades({ empresaId }: { empresaId: string | null }) {
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-[var(--d2b-border)] flex items-center justify-between flex-wrap gap-3">
-          <button className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
-            <Upload size={13} /> Exportar Dados
-          </button>
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExport((v) => !v)}
+              className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors"
+            >
+              <Upload size={13} /> Exportar Dados <ChevronDown size={11} />
+            </button>
+            {showExport && (
+              <div className="absolute bottom-full mb-1 left-0 w-44 rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] shadow-lg z-50 overflow-hidden">
+                <button onClick={() => exportar('excel')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileSpreadsheet size={14} /> Excel (.xlsx)
+                </button>
+                <button onClick={() => exportar('csv')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileText size={14} /> CSV (.csv)
+                </button>
+                <button onClick={() => exportar('pdf')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <FileDown size={14} /> PDF
+                </button>
+                <button onClick={() => exportar('imprimir')} className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors">
+                  <Printer size={14} /> Imprimir
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-6">
             <div className="text-right">
               <p className="text-xs text-[var(--d2b-text-secondary)]">

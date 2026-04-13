@@ -23,6 +23,7 @@ export default async function DashboardPage() {
   const keycloakId = session?.keycloakId
 
   let data: DashboardData = EMPTY
+  let empresaId: string | null = null
 
   if (keycloakId) {
     try {
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
       )
       if (userRes.ok) {
         const usuario = await userRes.json()
-        const empresaId: string | null = usuario.empresaId ?? null
+        empresaId = usuario.empresaId ?? null
         if (empresaId) {
           const dashRes = await fetch(
             `${process.env.API_URL}/api/v1/dashboard/empresa/${empresaId}`,
@@ -53,5 +54,5 @@ export default async function DashboardPage() {
     }
   }
 
-  return <DashboardView data={data} />
+  return <DashboardView data={data} empresaId={empresaId} />
 }

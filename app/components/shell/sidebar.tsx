@@ -17,6 +17,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
+import { useMenuAtivo } from '@/hooks/use-menu-ativo'
 
 // ─── Logo DEV2B ─────────────────────────────────────────────────────────────
 
@@ -65,9 +66,25 @@ function Logo({ collapsed }: { collapsed: boolean }) {
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
 
+/** Extrai a chave do menu a partir do href (ex: /dashboard/clientes → 'clientes') */
+function getChave(href: string): string {
+  const parts = href.replace(/\/$/, '').split('/')
+  return parts[parts.length - 1] || 'dashboard'
+}
+
 export function Sidebar() {
   const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const pathname = usePathname()
+  const { isAtivo } = useMenuAtivo()
+
+  // Filtra os navGroups conforme status do banco.
+  // Grupos cujos todos os itens estão desligados (ex: Logística) são ocultados inteiramente.
+  const visibleGroups = navGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => isAtivo(getChave(item.href))),
+    }))
+    .filter(group => group.items.length > 0)
 
   const isActive = (href: string) =>
     href === '/dashboard' ? pathname === href : pathname.startsWith(href)
@@ -114,7 +131,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4">
-        {navGroups.map((group, gi) => (
+        {visibleGroups.map((group, gi) => (
           <div key={gi}>
             {/* Título do grupo */}
             {group.title && !collapsed && (

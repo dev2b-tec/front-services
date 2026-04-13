@@ -6,6 +6,9 @@ import {
   ChevronsLeft, ChevronsRight, Pencil, Trash2, X, Printer,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { SeletorEspecialidade, ESPECIALIDADES, type EspecialidadeValue } from './seletor-especialidade'
+import { BotoesIAAudio } from './botoes-ia-audio'
+import { BotaoComTooltip } from './botao-com-tooltip'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -230,6 +233,66 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
   const [modeloOpen, setModeloOpen] = useState(false)
   const [modelo, setModelo] = useState('Padrão')
   const [saving, setSaving] = useState(false)
+  const [resumindoHistorico, setResumindoHistorico] = useState(false)
+
+  async function resumirHistorico() {
+    setResumindoHistorico(true)
+    try {
+      // 1. Buscar evoluções do paciente
+      const evolRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/evolucoes/paciente/${pacienteId}`)
+      if (!evolRes.ok) throw new Error('Erro ao buscar evoluções')
+      const evolucoes = await evolRes.json()
+
+      if (!evolucoes || evolucoes.length === 0) {
+        toast({ title: 'Paciente sem evoluções registradas', variant: 'destructive' })
+        return
+      }
+
+      // 2. Montar contexto com todas as evoluções
+      const contexto = evolucoes.map((ev: EvolucaoApi, idx: number) => {
+        const partes: string[] = []
+        if (ev.comentariosGerais) partes.push(`Comentários: ${ev.comentariosGerais}`)
+        if (ev.conduta) partes.push(`Conduta: ${ev.conduta}`)
+        if (ev.examesRealizados) partes.push(`Exames: ${ev.examesRealizados}`)
+        if (ev.prescricao) partes.push(`Prescrição: ${ev.prescricao}`)
+        if (ev.resumoAi) partes.push(`Resumo anterior: ${ev.resumoAi}`)
+        return `Evolução ${idx + 1} (${ev.data}):\n${partes.join('\n')}`
+      }).join('\n\n')
+
+      // 3. Gerar resumo com IA
+      const iaRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/evolucoes/ia/gerar-resumo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          comentariosGerais: contexto,
+          conduta: '',
+          examesRealizados: '',
+          prescricao: '',
+          empresaId,
+          usuarioId,
+        }),
+      })
+
+      if (!iaRes.ok) throw new Error('Erro ao gerar resumo')
+      const data = await iaRes.json()
+      const resumo = data.resumo ?? ''
+
+      if (resumo) {
+        setConteudos((prev) => ({ ...prev, resumoAi: resumo }))
+        setAbaAtiva('Resumo AI')
+        toast({ title: 'Histórico resumido!', description: `${evolucoes.length} evoluções analisadas.` })
+      }
+    } catch {
+      toast({ title: 'Erro ao resumir histórico', variant: 'destructive' })
+    } finally {
+      setResumindoHistorico(false)
+    }
+  }
+
+  // IA - Especialidade
+  const [especialidade, setEspecialidade] = useState<EspecialidadeValue>('PADRAO')
+  const empresaId = '00000000-0000-0000-0000-000000000000' // TODO: pegar do contexto
+  const usuarioId = '00000000-0000-0000-0000-000000000000' // TODO: pegar do contexto
 
   // Abas customizadas
   const [abasCustom, setAbasCustom] = useState<{ id: number; titulo: string; conteudo: string }[]>([])
@@ -545,10 +608,12 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                   <>
                     <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">* Os resumos gerados por IA podem conter erros. Antes de salvá-lo, verifique e edite o conteúdo se necessário</p>
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)]">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                        Resumo gravado
-                      </div>
+                      <BotaoComTooltip tooltip="Os resumos gerados por IA podem conter erros. Antes de salvá-lo, verifique e edite o conteúdo se necessário">
+                        <div className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)]">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                          Resumo gravado
+                        </div>
+                      </BotaoComTooltip>
                       <div className="relative">
                         <button onClick={() => setModeloOpen((v) => !v)}
                           className="flex items-center gap-1 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-lg px-2.5 py-1 text-xs text-[var(--d2b-text-primary)] hover:border-[#7C4DFF] transition-colors">
@@ -556,21 +621,27 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
                         </button>
                         {modeloOpen && (
                           <div className="absolute z-30 top-full mt-1 left-0 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
-                            {['Padrão', 'Clínico', 'Resumido'].map((m) => (
+                            {['Padrão', 'Médico', 'Nutricionista', 'Ginecologista', 'Pediatra', 'Ortopedista', 'Cardiologista', 'Oftalmologista', 'Psicanalista', 'Terapeuta', 'Dermatologia', 'Psicólogo', 'Fisioterapia', 'Endocrinologia', 'Gastroenterologia', 'Geriatria'].map((m) => (
                               <button key={m} onClick={() => { setModelo(m); setModeloOpen(false) }}
                                 className={`w-full text-left px-4 py-2 text-xs transition-colors ${modelo === m ? 'text-[#7C4DFF] bg-[var(--d2b-hover)]' : 'text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)]'}`}>{m}</button>
                             ))}
                           </div>
                         )}
                       </div>
-                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] bg-[var(--d2b-hover)] px-3 py-1.5 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                        Relato
-                      </button>
-                      <button className="flex items-center gap-1.5 text-xs font-semibold text-[#7C4DFF] border border-[var(--d2b-border-strong)] bg-[var(--d2b-hover)] px-3 py-1.5 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                        Atendimento
-                      </button>
+                      <BotoesIAAudio
+                        especialidade={(ESPECIALIDADES.find((e) => e.label === modelo)?.value ?? 'PADRAO') as EspecialidadeValue}
+                        empresaId={empresaId}
+                        usuarioId={usuarioId}
+                        onTextoGerado={(texto, tipo) => {
+                          if (tipo === 'relato') {
+                            setConteudo('Comentários Gerais', texto)
+                            setAbaAtiva('Comentários Gerais')
+                          } else {
+                            setConteudo('Conduta', texto)
+                            setAbaAtiva('Conduta')
+                          }
+                        }}
+                      />
                       <div className="ml-auto text-xs text-[var(--d2b-text-muted)]">
                         <span className="font-medium text-[var(--d2b-text-secondary)]">Créditos:</span> Relatos disponíveis: 5 / 5 &nbsp; Atendimentos disponíveis: 5 / 5
                       </div>
@@ -584,8 +655,16 @@ export function NovaEvolucaoModal({ pacienteId, evolucao, onClose, onSaved }: No
 
         {/* Footer */}
         <div className="flex items-center justify-between px-7 py-5 border-t border-[var(--d2b-border)] flex-shrink-0">
-          <button className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-2 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors">
-            ✦ Resumir Histórico
+          <button
+            onClick={resumirHistorico}
+            disabled={resumindoHistorico}
+            className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-2 rounded-lg hover:bg-[var(--d2b-hover)] transition-colors disabled:opacity-50"
+          >
+            {resumindoHistorico ? (
+              <><span className="w-3 h-3 border-2 border-[#7C4DFF] border-t-transparent rounded-full animate-spin inline-block" /> Resumindo...</>
+            ) : (
+              <>&#10022; Resumir Histórico</>
+            )}
           </button>
           <div className="flex items-center gap-3">
             <button onClick={onClose} className="px-4 py-2 text-sm text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">

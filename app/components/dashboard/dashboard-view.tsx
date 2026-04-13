@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, type ReactNode } from 'react'
+import { useState, useRef, useEffect, useMemo, type ReactNode } from 'react'
 import {
   Plus, MoreHorizontal, Printer, ChevronDown, Filter,
   CheckCircle2, TrendingUp, CheckSquare, X, Ban,
@@ -19,6 +19,7 @@ interface Agendamento {
   id: string
   pacienteNome: string
   usuarioNome: string
+  usuarioId?: string
   inicio: string
   fim: string
   status: string
@@ -157,11 +158,49 @@ function PieCard({ title, data, legend }: { title: string; data: PieSlice[]; leg
 }
 
 // ─── Main component ────────────────────────────────────────────
-export function DashboardView({ data }: { data: DashboardData }) {
+export function DashboardView({ data, empresaId }: { data: DashboardData; empresaId?: string | null }) {
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [mostraInput, setMostraInput] = useState(false)
   const [novaTarefa, setNovaTarefa] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // ── Filtro profissionais ──────────────────────────────────────
+  const [profFiltroOpen, setProfFiltroOpen] = useState(false)
+  const [selectedProfId, setSelectedProfId]   = useState<string | null>(null)
+  const [selectedProfNome, setSelectedProfNome] = useState<string | null>(null)
+  const profFiltroRef = useRef<HTMLDivElement>(null)
+
+  // unique profissionais from agendamentos
+  const profissionais = useMemo(() => {
+    const map = new Map<string, string>()
+    data.agendamentosHoje.forEach((a) => {
+      if (a.usuarioId && a.usuarioNome) map.set(a.usuarioId, a.usuarioNome)
+    })
+    return Array.from(map.entries()).map(([id, nome]) => ({ id, nome }))
+  }, [data.agendamentosHoje])
+
+  const agendamentosFiltrados = selectedProfId
+    ? data.agendamentosHoje.filter((a) => a.usuarioId === selectedProfId)
+    : data.agendamentosHoje
+
+  // close dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (profFiltroRef.current && !profFiltroRef.current.contains(e.target as Node)) {
+        setProfFiltroOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  function handlePrint() {
+    if (!empresaId) return
+    const url = new URL('/api/relatorio/dashboard', window.location.origin)
+    url.searchParams.set('empresaId', empresaId)
+    if (selectedProfId) url.searchParams.set('usuarioId', selectedProfId)
+    window.open(url.toString(), '_blank')
+  }
 
   useEffect(() => {
     if (mostraInput) inputRef.current?.focus()
@@ -215,24 +254,63 @@ export function DashboardView({ data }: { data: DashboardData }) {
             <div>
               <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Atividades do Dia</p>
               <p className="text-xs text-[var(--d2b-text-muted)]">
-                {data.agendamentosHoje.length} {data.agendamentosHoje.length === 1 ? 'Evento' : 'Eventos'}
+                {agendamentosFiltrados.length} {agendamentosFiltrados.length === 1 ? 'Evento' : 'Eventos'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-md px-3 py-1.5 hover:border-[#7C4DFF] transition-colors">
-                Todos profissionais <ChevronDown size={12} />
-              </button>
-              <button className="p-1.5 rounded-md bg-[#7C4DFF] text-white hover:bg-[#5B21B6] transition-colors">
+              {/* Dropdown filtro profissionais */}
+              <div className="relative" ref={profFiltroRef}>
+                <button
+                  onClick={() => setProfFiltroOpen((v) => !v)}
+                  className={`flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] bg-[var(--d2b-bg-elevated)] border rounded-md px-3 py-1.5 hover:border-[#7C4DFF] transition-colors ${
+                    selectedProfId ? 'border-[#7C4DFF] text-[#7C4DFF]' : 'border-[var(--d2b-border)]'
+                  }`}
+                >
+                  {selectedProfNome ?? 'Todos profissionais'} <ChevronDown size={12} />
+                </button>
+                {profFiltroOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[200px] bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] rounded-lg shadow-lg overflow-hidden">
+                    <button
+                      onClick={() => { setSelectedProfId(null); setSelectedProfNome(null); setProfFiltroOpen(false) }}
+                      className={`w-full text-left px-4 py-2.5 text-xs hover:bg-[var(--d2b-bg-elevated)] transition-colors ${
+                        !selectedProfId ? 'font-semibold text-[#7C4DFF]' : 'text-[var(--d2b-text-primary)]'
+                      }`}
+                    >
+                      Todos profissionais
+                    </button>
+                    {profissionais.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => { setSelectedProfId(p.id); setSelectedProfNome(p.nome); setProfFiltroOpen(false) }}
+                        className={`w-full text-left px-4 py-2.5 text-xs hover:bg-[var(--d2b-bg-elevated)] transition-colors border-t border-[var(--d2b-border)] ${
+                          selectedProfId === p.id ? 'font-semibold text-[#7C4DFF]' : 'text-[var(--d2b-text-primary)]'
+                        }`}
+                      >
+                        {p.nome}
+                      </button>
+                    ))}
+                    {profissionais.length === 0 && (
+                      <p className="px-4 py-2.5 text-xs text-[var(--d2b-text-muted)]">Nenhum profissional</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handlePrint}
+                disabled={!empresaId}
+                title="Imprimir relatório"
+                className="p-1.5 rounded-md bg-[#7C4DFF] text-white hover:bg-[#5B21B6] disabled:opacity-40 transition-colors"
+              >
                 <Printer size={14} />
               </button>
             </div>
           </div>
           <LegendaStatus />
           <div className="flex flex-col gap-0 mt-1">
-            {data.agendamentosHoje.length === 0 ? (
+            {agendamentosFiltrados.length === 0 ? (
               <p className="text-xs text-[var(--d2b-text-muted)] py-4 text-center">Nenhum agendamento para hoje</p>
             ) : (
-              data.agendamentosHoje.map((a) => (
+              agendamentosFiltrados.map((a) => (
                 <div key={a.id} className="flex items-start gap-3 py-2.5 border-b border-[var(--d2b-border)] last:border-0">
                   <span className="text-xs text-[var(--d2b-text-secondary)] w-10 flex-shrink-0 mt-0.5">{horaStr(a.inicio)}</span>
                   <span className="text-red-400 flex-shrink-0 mt-0.5">

@@ -22,6 +22,7 @@
   --d2b-topbar-bg:        rgba(18, 3, 40, 0.80);
   --d2b-shadow:           rgba(0, 0, 0, 0.40);
   --d2b-overlay:          rgba(0, 0, 0, 0.60);
+  --d2b-mic-icon:         #F5F0FF;
 }
 
 /* Light mode */
@@ -42,6 +43,7 @@ html[data-theme="light"] {
   --d2b-topbar-bg:        rgba(255, 255, 255, 0.95);
   --d2b-shadow:           rgba(0, 0, 0, 0.08);
   --d2b-overlay:          rgba(0, 0, 0, 0.40);
+  --d2b-mic-icon:         #7C4DFF;
 }
 
 :root {

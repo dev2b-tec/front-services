@@ -20,6 +20,24 @@ function ContaUsuario({
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [buscandoCep, setBuscandoCep] = useState(false)
+
+  async function handleCepBlur() {
+    const cepLimpo = (data.cep ?? '').replace(/\D/g, '')
+    if (cepLimpo.length !== 8) return
+    setBuscandoCep(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cep/${cepLimpo}`)
+      if (res.ok) {
+        const d = await res.json()
+        if (d.logradouro) onChange('logradouro', d.logradouro)
+        if (d.bairro) onChange('bairro', d.bairro)
+        if (d.localidade) onChange('cidade', d.localidade)
+      }
+    } finally {
+      setBuscandoCep(false)
+    }
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -73,9 +91,10 @@ function ContaUsuario({
         onChange={(v) => onChange('nome', v)}
       />
       <CepInput
-        label="CEP"
+        label={buscandoCep ? 'CEP (buscando...)' : 'CEP'}
         value={data.cep ?? ''}
         onChange={(v) => onChange('cep', v)}
+        onBlur={handleCepBlur}
       />
       <div className="grid grid-cols-[5.5rem_1fr] gap-3">
         <FInput
@@ -158,6 +177,24 @@ function ContaEmpresa({
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [buscandoCepClinica, setBuscandoCepClinica] = useState(false)
+
+  async function handleCepClinicaBlur() {
+    const cepLimpo = (data.cep ?? '').replace(/\D/g, '')
+    if (cepLimpo.length !== 8) return
+    setBuscandoCepClinica(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/cep/${cepLimpo}`)
+      if (res.ok) {
+        const d = await res.json()
+        if (d.logradouro) onChange('logradouro', d.logradouro)
+        if (d.bairro) onChange('bairro', d.bairro)
+        if (d.localidade) onChange('cidade', d.localidade)
+      }
+    } finally {
+      setBuscandoCepClinica(false)
+    }
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -215,9 +252,10 @@ function ContaEmpresa({
         onChange={(v) => onChange('telefoneComercial', v)}
       />
       <CepInput
-        label="CEP"
+        label={buscandoCepClinica ? 'CEP (buscando...)' : 'CEP'}
         value={data.cep ?? ''}
         onChange={(v) => onChange('cep', v)}
+        onBlur={handleCepClinicaBlur}
       />
       <FInput
         label="Logradouro"

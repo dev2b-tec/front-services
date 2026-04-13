@@ -2,7 +2,60 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { Check } from 'lucide-react'
+import { Check, CalendarIcon } from 'lucide-react'
+import { format, parse, isValid } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { AvatarImage } from '@/components/configuracoes/avatar-image'
+
+// ── DatePickerInput ─────────────────────────────────────────────────────────
+// value / onChange usam formato YYYY-MM-DD (compatível com o restante da view)
+function DatePickerInput({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string
+  onChange: (v: string) => void
+  disabled?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const parsed = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined
+  const selected = parsed && isValid(parsed) ? parsed : undefined
+
+  return (
+    <Popover open={open && !disabled} onOpenChange={v => { if (!disabled) setOpen(v) }}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={disabled}
+          className={`w-full flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-left focus:outline-none focus:border-purple-400 transition-all ${disabled ? 'bg-blue-50 cursor-default' : 'bg-white hover:border-purple-300'}`}
+        >
+          <span className={selected ? 'text-gray-800' : 'text-gray-400'}>
+            {selected ? format(selected, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
+          </span>
+          <CalendarIcon size={16} className="text-gray-400 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={day => {
+            if (day) { onChange(format(day, 'yyyy-MM-dd')); setOpen(false) }
+          }}
+          locale={ptBR}
+          captionLayout="dropdown"
+          fromYear={1920}
+          toYear={new Date().getFullYear()}
+          defaultMonth={selected ?? new Date(1990, 0)}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export interface ProfissionalData {
   id: string
@@ -232,14 +285,16 @@ export default function ProfissionalAgendamentoView({
 
           {/* Prof info */}
           <div className="flex items-center gap-3 mb-4">
-            {usuario.fotoUrl ? (
-              <Image src={usuario.fotoUrl} alt={usuario.nome} width={52} height={52}
-                className="rounded-full object-cover w-[52px] h-[52px] border-2 border-purple-100 shrink-0" />
-            ) : (
-              <div className="w-[52px] h-[52px] rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xl font-bold shrink-0">
-                {usuario.nome.charAt(0)}
-              </div>
-            )}
+            <div className="w-[52px] h-[52px] rounded-full overflow-hidden border-2 border-purple-100 shrink-0 bg-purple-100 flex items-center justify-center">
+              <AvatarImage
+                userId={usuario.id}
+                fotoUrl={usuario.fotoUrl}
+                size={52}
+                fallbackIcon={
+                  <span className="text-purple-600 text-xl font-bold">{usuario.nome.charAt(0)}</span>
+                }
+              />
+            </div>
             <span className="font-bold text-gray-900 text-sm leading-tight uppercase">{usuario.nome}</span>
           </div>
 
@@ -420,7 +475,7 @@ export default function ProfissionalAgendamentoView({
                     <div className="flex gap-2 mb-3">
                       <div className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-2.5 bg-white shrink-0">
                         <span className="text-base">🇧🇷</span>
-                        <span className="text-xs text-gray-500 ml-1">Brasil</span>
+                        <span className="text-xs text-gray-500 ml-1">+55</span>
                       </div>
                       <FloatInput label="Número de Telefone*" value={telefone}
                         onChange={v => setTelefone(maskCelular(v))}
@@ -432,10 +487,11 @@ export default function ProfissionalAgendamentoView({
                       <label className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-medium text-gray-400 leading-none">
                         Data de nascimento*
                       </label>
-                      <input type="date" value={dataNascimento}
-                        readOnly={pacienteEncontrado !== false}
-                        onChange={e => setDataNasc(e.target.value)}
-                        className={`w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-purple-400 transition-all ${pacienteEncontrado !== false ? 'bg-blue-50' : ''}`} />
+                      <DatePickerInput
+                        value={dataNascimento}
+                        onChange={setDataNasc}
+                        disabled={pacienteEncontrado !== false}
+                      />
                     </div>
 
                     {/* Extra fields after search */}

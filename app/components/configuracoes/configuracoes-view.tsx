@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   User, Calendar, Mail, ShoppingCart, Layers,
   LayoutGrid, Building2, ClipboardCheck, FileText, Lock,
@@ -1487,7 +1488,8 @@ export function ConfiguracoesView({
   initialUsuario?: UsuarioData | null
   initialEmpresa?: EmpresaData | null
 }) {
-  const [active, setActive] = useState('conta')
+  const searchParams = useSearchParams()
+  const [active, setActive] = useState(() => searchParams.get('tab') ?? 'conta')
 
   const content = (() => {
     switch (active) {

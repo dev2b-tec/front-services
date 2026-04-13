@@ -19,6 +19,12 @@ import {
   DollarSign,
   Megaphone,
   MessageSquare,
+  Package,
+  Warehouse,
+  ShoppingBag,
+  Briefcase,
+  Landmark,
+  Lightbulb,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -41,7 +47,7 @@ export type NavGroup = {
  */
 export const navGroups: NavGroup[] = [
   {
-    // Sem título = primeiro grupo, sem separador
+    title: 'Início',
     items: [
       {
         label: 'Dashboard',
@@ -53,16 +59,16 @@ export const navGroups: NavGroup[] = [
         href: '/dashboard/calendario',
         icon: Calendar,
       },
-      {
-        label: 'Avisos',
-        href: '/dashboard/avisos',
-        icon: Bell,
-      },
     ],
   },
   {
     title: 'Operações',
     items: [
+      {
+        label: 'Cadastros',
+        href: '/dashboard/cadastros',
+        icon: Package,
+      },
       {
         label: 'Clientes',
         href: '/dashboard/clientes',
@@ -76,17 +82,27 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Omnichannel',
+    title: 'Comunicação',
     items: [
+      {
+        label: 'Avisos',
+        href: '/dashboard/avisos',
+        icon: Bell,
+      },
       {
         label: 'Chat',
         href: '/dashboard/chat',
         icon: MessageSquare,
       },
+      {
+        label: 'Marketing',
+        href: '/dashboard/marketing',
+        icon: Megaphone,
+      },
     ],
   },
   {
-    title: 'Financeiro',
+    title: 'Faturamento',
     items: [
       {
         label: 'Financeiro',
@@ -94,9 +110,39 @@ export const navGroups: NavGroup[] = [
         icon: DollarSign,
       },
       {
-        label: 'Marketing',
-        href: '/dashboard/marketing',
-        icon: Megaphone,
+        label: 'Finanças',
+        href: '/dashboard/financas',
+        icon: Landmark,
+      },
+      {
+        label: 'Vendas',
+        href: '/dashboard/vendas',
+        icon: ShoppingBag,
+      },
+    ],
+  },
+  {
+    title: 'Logística',
+    items: [
+      {
+        label: 'Suprimentos',
+        href: '/dashboard/suprimentos',
+        icon: Warehouse,
+      },
+      {
+        label: 'Serviços',
+        href: '/dashboard/servicos',
+        icon: Briefcase,
+      },
+    ],
+  },
+  {
+    title: 'Ideias',
+    items: [
+      {
+        label: 'Canal de Ideias',
+        href: '/dashboard/ideias',
+        icon: Lightbulb,
       },
     ],
   },
