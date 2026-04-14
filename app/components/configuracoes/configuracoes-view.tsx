@@ -6,7 +6,7 @@ import {
   User, Calendar, Mail, ShoppingCart, Layers,
   LayoutGrid, Building2, ClipboardCheck, FileText, Lock,
   ChevronDown, HelpCircle, Check, MessageSquare,
-  Search, Plus, Pencil, Trash2, Pin, X, AlertTriangle,
+  Search, Plus, Pencil, Trash2, Pin, X, AlertTriangle, Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 import { INP, LBG, BTN_GHOST, BTN_PRIMARY, Toggle, Cbx, PhoneInput, SectionFooter } from './shared'
@@ -21,6 +21,7 @@ import { TabCreditos as TabCreditosNova } from './tab-creditos'
 import { TabMensagens as TabMensagensNova } from './tab-mensagens'
 import { TabNfse as TabNfseNova } from './tab-nfse'
 import { TabWhatsapp } from './tab-whatsapp'
+import { TabAssinatura } from './tab-assinatura'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
 // ─── Tab navigation ───────────────────────────────────────────────────────────
@@ -38,6 +39,7 @@ const TABS: TabDef[] = [
   { id: 'nfse',      label: 'NFS-e',     Icon: FileText, iconColor: '#F97316' },
   { id: 'senhas',    label: 'Senhas',    Icon: Lock },
   { id: 'whatsapp',  label: 'WhatsApp',  Icon: MessageSquare, iconColor: '#4ADE80' },
+  { id: 'assinatura', label: 'Assinatura', Icon: Sparkles, iconColor: '#7C4DFF' },
 ]
 
 // ─── TAB: AGENDA ──────────────────────────────────────────────────────────────
@@ -1503,7 +1505,8 @@ export function ConfiguracoesView({
       case 'anamneses':  return <TabAnamnesesNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
       case 'nfse':       return <TabNfseNova initialEmpresa={initialEmpresa} />
       case 'senhas':     return <TabSenhasNova initialUsuario={initialUsuario} />
-      case 'whatsapp':   return <TabWhatsapp initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'whatsapp':    return <TabWhatsapp initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'assinatura':  return <TabAssinatura initialUsuario={initialUsuario} />
       default: {
         const tab = TABS.find((t) => t.id === active)
         return <TabPlaceholder label={tab?.label ?? ''} />

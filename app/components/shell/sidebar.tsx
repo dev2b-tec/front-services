@@ -226,7 +226,7 @@ export function Sidebar() {
           </button>
         ) : (
           <div className="px-2 py-1.5">
-            <p className="text-[10px]" style={{ color: 'var(--d2b-text-muted)' }}>DEV2B v1.0.0</p>
+            <p className="text-[10px]" style={{ color: 'var(--d2b-text-muted)' }}>DEV2B-AGENDA v1.0.0</p>
           </div>
         )}
       </div>
