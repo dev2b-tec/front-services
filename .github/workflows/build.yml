@@ -12,6 +12,9 @@ jobs:
       app_name: front-services
       context: app
       dockerfile_path: Dockerfile
+      build_args: |
+        NEXT_PUBLIC_API_URL=https://agenda-api.dev2b.tec.br
+        NEXT_PUBLIC_WHATS_API_URL=https://whats-api.dev2b.tec.br
     secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
