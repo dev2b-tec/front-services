@@ -25,6 +25,21 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
+// --- Masks ------------------------------------------------------------------
+function maskCpf(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 11)
+  if (d.length <= 3) return d
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
+}
+
+function maskCep(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 8)
+  if (d.length <= 5) return d
+  return `${d.slice(0, 5)}-${d.slice(5)}`
+}
+
 // --- Types -----------------------------------------------------------------
 type Cliente = {
   id: string
@@ -522,12 +537,12 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
           <div className="grid grid-cols-2 gap-4">
             <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => { setRg(e.target.value); setChanged(true) }} /></FloatingField>
-            <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => { setCpf(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="CPF"><input className={INPUT} value={cpf} placeholder="000.000.000-00" inputMode="numeric" onChange={(e) => { setCpf(maskCpf(e.target.value)); setChanged(true) }} /></FloatingField>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <FloatingField label="Email"><input type="email" className={INPUT} value={email} onChange={(e) => { setEmail(e.target.value); setChanged(true) }} /></FloatingField>
-            <FloatingField label="CEP"><input className={INPUT} value={cep} onChange={(e) => { setCep(e.target.value); setChanged(true) }} /></FloatingField>
+            <FloatingField label="CEP"><input className={INPUT} value={cep} placeholder="00000-000" inputMode="numeric" onChange={(e) => { setCep(maskCep(e.target.value)); setChanged(true) }} /></FloatingField>
           </div>
 
           <div className="grid grid-cols-[1fr_5.5rem_8rem] gap-4">
@@ -566,7 +581,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
                 <DateField label="Data de nascimento" value={dataNascimentoResp} onChange={mark(setDataNascimentoResp)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FloatingField label="CPF do responsável"><input className={INPUT} value={cpfResponsavel} onChange={(e) => { setCpfResponsavel(e.target.value); setChanged(true) }} /></FloatingField>
+                <FloatingField label="CPF do responsável"><input className={INPUT} value={cpfResponsavel} placeholder="000.000.000-00" inputMode="numeric" onChange={(e) => { setCpfResponsavel(maskCpf(e.target.value)); setChanged(true) }} /></FloatingField>
                 <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={mark(setTelefoneResponsavel)} />
               </div>
             </div>
@@ -1374,16 +1389,17 @@ function CriarClienteModal({
           <Section title="Informações Pessoais" open={infosPessoais} onToggle={() => setInfosPessoais((v) => !v)}>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="RG"><input className={INPUT} value={rg} onChange={(e) => setRg(e.target.value)} /></FloatingField>
-              <FloatingField label="CPF"><input className={INPUT} value={cpf} onChange={(e) => setCpf(e.target.value)} /></FloatingField>
+              <FloatingField label="CPF"><input className={INPUT} value={cpf} placeholder="000.000.000-00" inputMode="numeric" onChange={(e) => setCpf(maskCpf(e.target.value))} /></FloatingField>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="CEP">
                 <input
                   className={INPUT}
                   value={cep}
-                  onChange={(e) => setCep(e.target.value)}
+                  placeholder={buscandoCep ? 'Buscando…' : '00000-000'}
+                  inputMode="numeric"
+                  onChange={(e) => { setCep(maskCep(e.target.value)) }}
                   onBlur={handleCepBlur}
-                  placeholder={buscandoCep ? 'Buscando…' : ''}
                 />
               </FloatingField>
               <FloatingField label="Email"><input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} /></FloatingField>
@@ -1410,7 +1426,7 @@ function CriarClienteModal({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="CPF do responsável">
-                <input className={INPUT} value={cpfResponsavel} onChange={(e) => setCpfResponsavel(e.target.value)} />
+                <input className={INPUT} value={cpfResponsavel} placeholder="000.000.000-00" inputMode="numeric" onChange={(e) => setCpfResponsavel(maskCpf(e.target.value))} />
               </FloatingField>
               <PhoneField label="Telefone do responsável" value={telefoneResponsavel} onChange={setTelefoneResponsavel} />
             </div>

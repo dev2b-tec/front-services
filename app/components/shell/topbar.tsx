@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Menu, Bell, LogOut, User, Sun, Moon, Clock, Video, HelpCircle, Info, Plus, Copy, ExternalLink, Settings } from 'lucide-react'
+import { Menu, Bell, LogOut, User, Sun, Moon, Clock, Video, HelpCircle, Info, Plus, Copy, ExternalLink, Settings, Sparkles, CalendarDays } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
+import { ModalAssinatura } from '@/components/assinatura/modal-assinatura'
 
 function usePageTitle() {
   const pathname = usePathname()
@@ -16,7 +17,7 @@ function usePageTitle() {
       if (item.href !== '/dashboard' && pathname.startsWith(item.href)) return item.label
     }
   }
-  return 'DEV2B'
+  return 'DEV2B-AGENDA'
 }
 
 // Define os CSS vars direto no style do <html> — garante prioridade absoluta
@@ -66,6 +67,8 @@ export function Topbar() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [fotoUrl, setFotoUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [empresaId, setEmpresaId] = useState<string | null>(null)
+  const [assinaturaOpen, setAssinaturaOpen] = useState(false)
 
   const initials = session?.user?.name
     ? session.user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
@@ -88,6 +91,7 @@ export function Topbar() {
         if (!res.ok) return
         const u = await res.json()
         setUserId(u.id)
+        if (u.empresaId) setEmpresaId(u.empresaId)
         if (u.fotoUrl) {
           const fRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${u.id}/foto-url`)
           if (fRes.ok) {
@@ -177,6 +181,7 @@ export function Topbar() {
   }
 
   return (
+    <>
     <header
       className="sticky top-0 z-30 flex items-center gap-3 h-14 px-4 backdrop-blur-md border-b"
       style={{ background: 'var(--d2b-topbar-bg)', borderColor: 'var(--d2b-border)' }}
@@ -195,6 +200,17 @@ export function Topbar() {
       </h1>
 
       {/* HelpCircle removido a pedido */}
+
+      {/* Botão Assine um plano */}
+      <button
+        onClick={() => setAssinaturaOpen(true)}
+        className="flex-shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
+        style={{ background: 'linear-gradient(135deg, #7C4DFF, #C084FC)' }}
+        aria-label="Assinar plano"
+      >
+        <CalendarDays size={13} />
+        Assine um plano
+      </button>
 
       {/* Relógio / Links de Auto Agendamento */}
       <button
@@ -409,5 +425,13 @@ export function Topbar() {
         )}
       </div>
     </header>
+
+    <ModalAssinatura
+      open={assinaturaOpen}
+      onClose={() => setAssinaturaOpen(false)}
+      empresaId={empresaId ?? undefined}
+      usuarioId={userId ?? undefined}
+    />
+    </>
   )
 }
