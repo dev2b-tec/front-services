@@ -6,6 +6,7 @@ import {
   ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight,
   AlertTriangle, X,
 } from 'lucide-react'
+import { MensagemEditor } from '@/components/configuracoes/mensagem-editor'
 import {
   Dialog,
   DialogContent,
@@ -126,31 +127,12 @@ export function EditarMensagemModal({
           {loading ? (
             <div className="flex items-center justify-center py-8 text-xs text-[var(--d2b-text-secondary)]">Carregando...</div>
           ) : (
-          <div className="relative rounded-md border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] focus-within:border-[#7C4DFF] transition-colors overflow-hidden">
-            <textarea
-              rows={6}
-              value={msg}
-              onChange={(e) => setMsg(e.target.value)}
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-transparent caret-[#F5F0FF] placeholder:text-[var(--d2b-text-muted)] focus:outline-none resize-none relative z-10"
-              spellCheck={false}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
-              style={{ lineHeight: '1.5rem' }}
-            >
-              <MessagePreview text={msg} />
-            </div>
-          </div>
+            <MensagemEditor value={msg} onChange={setMsg} minHeight={150} />
           )}
 
-          <p className="text-xs text-[var(--d2b-text-muted)]">
-            Adicione variáveis inserindo hastag(#) no campo de texto onde desejar. Elas serão substituídas automaticamente com seus valores no momento de criação do documento:
-          </p>
-
-          <div className="flex items-start gap-2 rounded-md bg-[rgba(234,179,8,0.08)] border border-[rgba(234,179,8,0.25)] px-3 py-2.5">
-            <AlertTriangle size={14} className="text-[#EAB308] shrink-0 mt-0.5" />
-            <p className="text-xs text-[#EAB308]">
+          <div className="flex items-start gap-2 rounded-md px-3 py-2.5" style={{ background: 'rgba(124,77,255,0.08)', border: '1px solid rgba(124,77,255,0.25)' }}>
+            <AlertTriangle size={14} className="shrink-0 mt-0.5" style={{ color: '#7C4DFF' }} />
+            <p className="text-xs" style={{ color: '#7C4DFF' }}>
               Este padrão de mensagem será aplicado apenas às mensagens manuais. O disparo automático tem um padrão não editável.
             </p>
           </div>
@@ -160,7 +142,7 @@ export function EditarMensagemModal({
           <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
-          <button onClick={handleSalvar} disabled={saving || loading} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 transition-colors">
+          <button onClick={handleSalvar} disabled={saving || loading || !msg.replace(/<[^>]*>/g, '').trim()} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 transition-colors">
             {saving ? 'Salvando…' : 'Salvar'}
           </button>
         </div>
@@ -170,8 +152,37 @@ export function EditarMensagemModal({
 }
 
 // ─── ProgramarDisparosModal ───────────────────────────────────────────────────
-export function ProgramarDisparosModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [ativo, setAtivo] = useState(false)
+export function ProgramarDisparosModal({
+  open, onClose, usuarioId, initialAtivo, onSaved,
+}: {
+  open: boolean
+  onClose: () => void
+  usuarioId?: string | null
+  initialAtivo?: boolean
+  onSaved?: (ativo: boolean) => void
+}) {
+  const [ativo, setAtivo] = useState(initialAtivo ?? false)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => { setAtivo(initialAtivo ?? false) }, [initialAtivo, open])
+
+  async function handleSalvar() {
+    if (!usuarioId) { onClose(); return }
+    setSaving(true)
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/configuracoes-mensagens/usuario/${usuarioId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ envioSmsAutomatico: ativo }),
+        }
+      )
+      onSaved?.(ativo)
+    } catch {}
+    setSaving(false)
+    onClose()
+  }
 
   return (
     <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
@@ -184,23 +195,26 @@ export function ProgramarDisparosModal({ open, onClose }: { open: boolean; onClo
           <button onClick={onClose} className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-lg leading-none">✕</button>
         </DialogHeader>
 
-        <div className="px-6 py-5 flex items-center justify-between">
-          <span className="text-sm text-[var(--d2b-text-secondary)]">Ativar Disparo Automático</span>
-          <button
-            type="button"
-            onClick={() => setAtivo((p) => !p)}
-            className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${ativo ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-bg-elevated)]'}`}
-          >
-            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${ativo ? 'translate-x-5' : 'translate-x-0.5'}`} />
-          </button>
-        </div>
+        <label className="flex items-center gap-3 px-6 py-5 p-3 rounded-lg cursor-pointer">
+          <div className="relative flex items-center shrink-0">
+            <input
+              type="checkbox"
+              checked={ativo}
+              onChange={(e) => setAtivo(e.target.checked)}
+              className="peer sr-only"
+            />
+            <div className="w-10 h-5 bg-[#CBD5E1] rounded-full peer-checked:bg-[#7C4DFF] transition-colors" />
+            <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${ativo ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </div>
+          <span className="text-sm text-[var(--d2b-text-primary)]">Ativar Disparo Automático</span>
+        </label>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--d2b-border)]">
           <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Cancelar
           </button>
-          <button onClick={onClose} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors">
-            Salvar
+          <button onClick={handleSalvar} disabled={saving} className="px-5 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 transition-colors">
+            {saving ? 'Salvando...' : 'Salvar'}
           </button>
         </div>
       </DialogContent>
@@ -243,13 +257,15 @@ function PageBtn({ onClick, disabled, children }: { onClick: () => void; disable
 
 // ─── AvisosTable ─────────────────────────────────────────────────────────────
 export function AvisosTable({
-  rows, tabKey, disparosAtivados, onRowClick, empresaId,
+  rows, tabKey, disparosAtivados, onDisparoChange, onRowClick, empresaId, usuarioId,
 }: {
   rows: AvisoRow[]
   tabKey: Exclude<TabKey, 'aniversarios'>
   disparosAtivados?: boolean
+  onDisparoChange?: (ativo: boolean) => void
   onRowClick?: (ag: ApiAgendamento) => void
   empresaId?: string | null
+  usuarioId?: string | null
 }) {
   const [search, setSearch]           = useState('')
   const [prof, setProf]               = useState('Todos os profissionais')
@@ -400,7 +416,13 @@ export function AvisosTable({
       </div>
 
       <EditarMensagemModal open={editarOpen} onClose={() => setEditarOpen(false)} tabKey={tabKey} empresaId={empresaId} />
-      <ProgramarDisparosModal open={programarOpen} onClose={() => setProgramarOpen(false)} />
+      <ProgramarDisparosModal
+        open={programarOpen}
+        onClose={() => setProgramarOpen(false)}
+        usuarioId={usuarioId}
+        initialAtivo={disparosAtivados}
+        onSaved={(ativo) => { onDisparoChange?.(ativo); setProgramarOpen(false) }}
+      />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { auth } from '@/lib/auth'
-import { ClientesView, type PacienteApi } from '@/components/clientes/clientes-view'
+import { ClientesView, type PacienteApi, type ProfissionalItem } from '@/components/clientes/clientes-view'
 
 export default async function ClientesPage() {
   const session = await auth()
@@ -8,6 +8,9 @@ export default async function ClientesPage() {
 
   let empresaId: string | null = null
   let pacientes: PacienteApi[] = []
+  let profissionais: ProfissionalItem[] = []
+  let usuarioId: string | undefined
+  let usuarioNome: string | undefined
 
   if (keycloakId) {
     try {
@@ -23,12 +26,18 @@ export default async function ClientesPage() {
       if (res.ok) {
         const usuario = await res.json()
         empresaId = usuario.empresaId ?? null
+        usuarioId = usuario.id ?? undefined
+        usuarioNome = usuario.nome ?? undefined
         if (empresaId) {
-          const pRes = await fetch(
-            `${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}`,
-            { cache: 'no-store' }
-          )
+          const [pRes, uRes] = await Promise.all([
+            fetch(`${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}`, { cache: 'no-store' }),
+            fetch(`${process.env.API_URL}/api/v1/usuarios/empresa/${empresaId}`, { cache: 'no-store' }),
+          ])
           if (pRes.ok) pacientes = await pRes.json()
+          if (uRes.ok) {
+            const lista = await uRes.json()
+            profissionais = lista.map((u: { id: string; nome: string }) => ({ id: u.id, nome: u.nome }))
+          }
         }
       }
     } catch {
@@ -38,7 +47,7 @@ export default async function ClientesPage() {
 
   return (
     <Suspense>
-      <ClientesView initialPacientes={pacientes} empresaId={empresaId} />
+      <ClientesView initialPacientes={pacientes} empresaId={empresaId} profissionais={profissionais} usuarioId={usuarioId} usuarioNome={usuarioNome} />
     </Suspense>
   )
 }

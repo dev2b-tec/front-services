@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, type ReactNode } from 'react'
 import {
   Plus, MoreHorizontal, Printer, ChevronDown, Filter,
-  CheckCircle2, TrendingUp, CheckSquare, X, Ban,
+  CheckCircle2, TrendingUp, CheckSquare, X, Ban, CalendarDays, User2,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -164,7 +164,7 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
   const [novaTarefa, setNovaTarefa] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // ── Filtro profissionais ──────────────────────────────────────
+  // ── Filtro profissionais (Atividades do Dia) ─────────────────
   const [profFiltroOpen, setProfFiltroOpen] = useState(false)
   const [selectedProfId, setSelectedProfId]   = useState<string | null>(null)
   const [selectedProfNome, setSelectedProfNome] = useState<string | null>(null)
@@ -193,6 +193,70 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  // ── Filtro Relatórios Gerenciais ──────────────────────────────
+  const [filtroOpen, setFiltroOpen] = useState(false)
+  const filtroRef = useRef<HTMLDivElement>(null)
+
+  // data de hoje e 30 dias atrás como defaults
+  const hoje = new Date()
+  const trintaDiasAtras = new Date(hoje)
+  trintaDiasAtras.setDate(hoje.getDate() - 30)
+  const toISO = (d: Date) => d.toISOString().split('T')[0]
+
+  const [filtroDataInicio, setFiltroDataInicio] = useState(toISO(trintaDiasAtras))
+  const [filtroDataFim, setFiltroDataFim]       = useState(toISO(hoje))
+  const [filtroRelProfId, setFiltroRelProfId]   = useState('')
+  const [filtroAtivo, setFiltroAtivo]           = useState(false)
+  const [filtrando, setFiltrando]               = useState(false)
+  const [displayData, setDisplayData]           = useState<DashboardData>(data)
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (filtroRef.current && !filtroRef.current.contains(e.target as Node)) {
+        setFiltroOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  async function handleAplicarFiltro() {
+    if (!empresaId) return
+    setFiltrando(true)
+    try {
+      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/dashboard/empresa/${empresaId}`)
+      if (filtroDataInicio) url.searchParams.set('dataInicio', filtroDataInicio)
+      if (filtroDataFim)    url.searchParams.set('dataFim', filtroDataFim)
+      if (filtroRelProfId)  url.searchParams.set('usuarioId', filtroRelProfId)
+
+      const res = await fetch(url.toString())
+      if (res.ok) {
+        const novo = await res.json()
+        setDisplayData(novo)
+        setFiltroAtivo(true)
+        setFiltroOpen(false)
+      }
+    } catch (err) {
+      console.error('Erro ao filtrar:', err)
+    } finally {
+      setFiltrando(false)
+    }
+  }
+
+  function handleLimparFiltro() {
+    setFiltroDataInicio(toISO(trintaDiasAtras))
+    setFiltroDataFim(toISO(hoje))
+    setFiltroRelProfId('')
+    setDisplayData(data)
+    setFiltroAtivo(false)
+    setFiltroOpen(false)
+  }
+
+  // label do período ativo
+  const periodoLabel = filtroAtivo
+    ? `${filtroDataInicio.split('-').reverse().join('/')} – ${filtroDataFim.split('-').reverse().join('/')}`
+    : 'últimos 30 dias'
 
   function handlePrint() {
     if (!empresaId) return
@@ -402,12 +466,97 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
         <div className="flex items-start justify-between flex-wrap gap-2">
           <div>
             <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Relatórios Gerenciais</p>
-            <p className="text-xs text-[var(--d2b-text-secondary)]">Métricas dos últimos 30 dias.</p>
+            <p className="text-xs text-[var(--d2b-text-secondary)]">Métricas: {periodoLabel}.</p>
           </div>
-          <button className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-md px-3 py-1.5 hover:border-[#7C4DFF] transition-colors">
-            <Filter size={12} />
-            Filtrar dados
-          </button>
+
+          {/* ── Popover Filtrar dados ── */}
+          <div className="relative" ref={filtroRef}>
+            <button
+              onClick={() => setFiltroOpen((v) => !v)}
+              className={`flex items-center gap-1.5 text-xs bg-[var(--d2b-bg-elevated)] border rounded-md px-3 py-1.5 hover:border-[#7C4DFF] transition-colors ${
+                filtroAtivo
+                  ? 'border-[#7C4DFF] text-[#7C4DFF] font-semibold'
+                  : 'border-[var(--d2b-border)] text-[var(--d2b-text-secondary)]'
+              }`}
+            >
+              <Filter size={12} />
+              Filtrar dados
+              {filtroAtivo && (
+                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-[#7C4DFF] inline-block" />
+              )}
+            </button>
+
+            {filtroOpen && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl p-4 space-y-4">
+                <p className="text-xs font-semibold text-[var(--d2b-text-primary)]">Filtrar Relatórios</p>
+
+                {/* Data início */}
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--d2b-text-secondary)]">
+                    <CalendarDays size={12} />
+                    Data início
+                  </label>
+                  <input
+                    type="date"
+                    value={filtroDataInicio}
+                    onChange={(e) => setFiltroDataInicio(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                  />
+                </div>
+
+                {/* Data fim */}
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--d2b-text-secondary)]">
+                    <CalendarDays size={12} />
+                    Data fim
+                  </label>
+                  <input
+                    type="date"
+                    value={filtroDataFim}
+                    onChange={(e) => setFiltroDataFim(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                  />
+                </div>
+
+                {/* Profissional */}
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--d2b-text-secondary)]">
+                    <User2 size={12} />
+                    Profissional
+                  </label>
+                  <select
+                    value={filtroRelProfId}
+                    onChange={(e) => setFiltroRelProfId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-main)] text-sm text-[var(--d2b-text-primary)] focus:outline-none focus:border-[#7C4DFF] transition-colors"
+                  >
+                    <option value="">Todos os profissionais</option>
+                    {profissionais.map((p) => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Ações */}
+                <div className="flex items-center gap-2 pt-1 border-t border-[var(--d2b-border)]">
+                  <button
+                    onClick={handleAplicarFiltro}
+                    disabled={filtrando}
+                    className="flex-1 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {filtrando ? 'Filtrando...' : 'Aplicar'}
+                  </button>
+                  {filtroAtivo && (
+                    <button
+                      onClick={handleLimparFiltro}
+                      className="px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] text-[var(--d2b-text-secondary)] text-xs font-medium hover:border-[#7C4DFF] hover:text-[#7C4DFF] transition-colors"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* KPI cards */}
@@ -418,7 +567,7 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
               <p className="text-xs text-[#7C4DFF] hover:underline cursor-pointer mt-1">Ver relatório completo</p>
             </div>
             <span className="text-sm font-bold px-3 py-1 rounded-lg bg-[rgba(16,185,129,0.18)] text-[#10B981]">
-              {fmtBRL(data.totalRecebido)}
+              {fmtBRL(displayData.totalRecebido)}
             </span>
           </div>
           <div className="bg-[var(--d2b-bg-elevated)] rounded-lg p-4 flex items-center justify-between border border-[var(--d2b-border)]">
@@ -427,7 +576,7 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
               <p className="text-xs text-[#7C4DFF] hover:underline cursor-pointer mt-1">Ver relatório completo</p>
             </div>
             <span className="text-sm font-bold px-3 py-1 rounded-lg bg-[rgba(239,68,68,0.18)] text-[#EF4444]">
-              {fmtBRL(data.totalAReceber)}
+              {fmtBRL(displayData.totalAReceber)}
             </span>
           </div>
         </div>
@@ -435,9 +584,9 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
         {/* Area Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <p className="text-[11px] text-[#10B981] mb-2">Recebidos: {fmtBRL(data.totalRecebido)}</p>
+            <p className="text-[11px] text-[#10B981] mb-2">Recebidos: {fmtBRL(displayData.totalRecebido)}</p>
             <ResponsiveContainer width="100%" height={120}>
-              <AreaChart data={data.chartFinanceiro}>
+              <AreaChart data={displayData.chartFinanceiro}>
                 <defs>
                   <linearGradient id="gRec" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
@@ -451,9 +600,9 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
             </ResponsiveContainer>
           </div>
           <div>
-            <p className="text-[11px] text-red-500 mb-2">A receber: {fmtBRL(data.totalAReceber)}</p>
+            <p className="text-[11px] text-red-500 mb-2">A receber: {fmtBRL(displayData.totalAReceber)}</p>
             <ResponsiveContainer width="100%" height={120}>
-              <AreaChart data={data.chartFinanceiro}>
+              <AreaChart data={displayData.chartFinanceiro}>
                 <defs>
                   <linearGradient id="gArec" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#EF4444" stopOpacity={0.2} />
@@ -471,14 +620,14 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
         {/* Stats + Sessions line chart */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-2 border-t border-[var(--d2b-border)]">
           <div className="flex flex-col gap-2">
-            <StatRow icon={<TrendingUp size={14} />}  label="Evoluções Criadas"    value={Number(data.evolucoesCriadas)}    valueColor="#7C4DFF" />
-            <StatRow icon={<CheckSquare size={14} />} label="Sessões Atendidas"    value={Number(data.sessoesAtendidas)}    valueColor="#10B981" />
-            <StatRow icon={<X size={14} />}           label="Sessões Desmarcadas"  value={Number(data.sessoesDesmarcadas)}  valueColor="#EF4444" />
-            <StatRow icon={<Ban size={14} />}         label="Faltas"               value={Number(data.faltas)}              valueColor="#6B7280" />
+            <StatRow icon={<TrendingUp size={14} />}  label="Evoluções Criadas"    value={Number(displayData.evolucoesCriadas)}    valueColor="#7C4DFF" />
+            <StatRow icon={<CheckSquare size={14} />} label="Sessões Atendidas"    value={Number(displayData.sessoesAtendidas)}    valueColor="#10B981" />
+            <StatRow icon={<X size={14} />}           label="Sessões Desmarcadas"  value={Number(displayData.sessoesDesmarcadas)}  valueColor="#EF4444" />
+            <StatRow icon={<Ban size={14} />}         label="Faltas"               value={Number(displayData.faltas)}              valueColor="#6B7280" />
           </div>
           <div>
             <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={data.chartSessoes}>
+              <LineChart data={displayData.chartSessoes}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,77,255,0.10)" />
                 <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#6B4E8A' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 9, fill: '#6B4E8A' }} axisLine={false} tickLine={false} />
@@ -495,13 +644,13 @@ export function DashboardView({ data, empresaId }: { data: DashboardData; empres
         {/* DRE */}
         <div className="border-t border-[var(--d2b-border)] pt-5">
           <p className="text-sm font-semibold text-[var(--d2b-text-primary)] mb-1">DRE - Demonstração de Resultados</p>
-          <p className="text-xs text-[var(--d2b-text-secondary)] mb-4">Resumo financeiro dos últimos 30 dias.</p>
+          <p className="text-xs text-[var(--d2b-text-secondary)] mb-4">Resumo financeiro: {periodoLabel}.</p>
           <div className="max-w-sm mx-auto border border-[var(--d2b-border)] rounded-xl bg-[var(--d2b-bg-elevated)] p-4">
             <DRERow label="Receita Bruta"         bold />
-            <DRERow label="Recebimentos"          value={fmtBRL(data.totalRecebido)} indent />
-            <DRERow label="A Receber (pendente)"  value={fmtBRL(data.totalAReceber)} indent negative />
+            <DRERow label="Recebimentos"          value={fmtBRL(displayData.totalRecebido)} indent />
+            <DRERow label="A Receber (pendente)"  value={fmtBRL(displayData.totalAReceber)} indent negative />
             <DRERow label="Resultado"             bold />
-            <DRERow label="(=) Saldo"             value={fmtBRL(data.totalRecebido - data.totalAReceber)} indent negative={data.totalRecebido - data.totalAReceber < 0} />
+            <DRERow label="(=) Saldo"             value={fmtBRL(displayData.totalRecebido - displayData.totalAReceber)} indent negative={displayData.totalRecebido - displayData.totalAReceber < 0} />
           </div>
         </div>
       </div>

@@ -1,8 +1,17 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Providers } from '@/components/providers'
 import './globals.css'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 📊 Google Analytics — ID da propriedade GA4
+// Para trocar a propriedade: altere apenas GA_ID abaixo.
+// O componente <GoogleAnalytics> injeta o script gtag.js automaticamente
+// em todas as páginas, de forma otimizada (carrega após a página interativa).
+// ─────────────────────────────────────────────────────────────────────────────
+const GA_ID = 'G-23KCEFL8J5'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,7 +55,10 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        {/* Vercel Analytics — métricas de performance */}
         <Analytics />
+        {/* Google Analytics GA4 — rastreamento de usuários e eventos */}
+        <GoogleAnalytics gaId={GA_ID} />
       </body>
     </html>
   )

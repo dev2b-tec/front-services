@@ -130,7 +130,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4">
+      <nav data-tour="d2b-sidebar-nav" className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4">
         {visibleGroups.map((group, gi) => (
           <div key={gi}>
             {/* Título do grupo */}

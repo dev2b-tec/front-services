@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
+import { trackClienteCadastrado } from '@/lib/analytics'
 import { TabEvolucoes } from '@/components/clientes/tab-evolucoes'
 import { TabLinhaTempo as TabLinhaDoTempo } from '@/components/clientes/tab-linha-do-tempo'
 import { TabAnamnese } from '@/components/clientes/tab-anamnese'
@@ -16,7 +17,7 @@ import {
   ChevronsLeft, ChevronsRight, ArrowLeft,
   User, LayoutGrid, ClipboardList, Activity,
   DollarSign, FileText, X, Clock, Eye,
-  MessageCircle, Zap, Send, Lock, Printer, Settings,
+  MessageCircle, Zap, Send, Lock, Printer, Settings, Loader2,
 } from 'lucide-react'
 import {
   Dialog,
@@ -76,6 +77,8 @@ const MOCK_AGENDAMENTOS: Agendamento[] = [
 ]
 
 // --- API Types ---------------------------------------------------------------
+export type ProfissionalItem = { id: string; nome: string }
+
 export type PacienteApi = {
   id: string
   empresaId?: string
@@ -103,6 +106,8 @@ export type PacienteApi = {
   telefoneResponsavel?: string | null
   statusPagamento: string | null
   sessoes: number
+  usuarioId?: string | null
+  usuarioNome?: string | null
 }
 
 function statusLabel(s: string | null | undefined): string {
@@ -615,14 +620,88 @@ function TabEmConstrucao({ label }: { label: string }) {
 }
 
 // --- Notas Compartilhadas (painel lateral direito) --------------------------
-type Nota = { id: number; texto: string; autor: string; data: string }
+type NotaApi = {
+  id: string
+  pacienteId: string
+  autorId: string
+  autorNome: string
+  titulo: string
+  texto: string
+  cor: string
+  criadoEm: string
+}
 
-const FORMATO_OPCOES = ['Parágrafo', 'Título 1', 'Título 2', 'Título 3']
+const PALETA_CORES = [
+  { hex: '#FEF9C3', label: 'Amarelo'  },
+  { hex: '#DCFCE7', label: 'Verde'    },
+  { hex: '#FEE2E2', label: 'Vermelho' },
+  { hex: '#DBEAFE', label: 'Azul'     },
+  { hex: '#F3E8FF', label: 'Roxo'     },
+  { hex: '#FFE4E6', label: 'Rosa'     },
+  { hex: '#FED7AA', label: 'Laranja'  },
+  { hex: '#F1F5F9', label: 'Cinza'    },
+]
 
-function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
-  const [notas] = useState<Nota[]>([])
+function NotasCompartilhadasPanel({ onClose, pacienteId, usuarioId, usuarioNome }: {
+  onClose: () => void
+  pacienteId: string
+  usuarioId: string
+  usuarioNome: string
+}) {
+  const [notas, setNotas] = useState<NotaApi[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [titulo, setTitulo] = useState('')
   const [texto, setTexto] = useState('')
-  const [formato, setFormato] = useState('Parágrafo')
+  const [cor, setCor] = useState(PALETA_CORES[0].hex)
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true)
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/notas-compartilhadas/paciente/${pacienteId}`)
+        if (res.ok) setNotas(await res.json())
+      } catch { /* offline */ } finally { setLoading(false) }
+    }
+    load()
+  }, [pacienteId])
+
+  async function salvar() {
+    if (!texto.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/notas-compartilhadas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pacienteId, autorId: usuarioId, autorNome: usuarioNome, titulo, texto, cor }),
+      })
+      if (res.ok) {
+        const nova: NotaApi = await res.json()
+        setNotas((prev) => [nova, ...prev])
+        setTitulo('')
+        setTexto('')
+        setCor(PALETA_CORES[0].hex)
+      }
+    } catch { /* offline */ } finally { setSaving(false) }
+  }
+
+  async function excluir(id: string) {
+    setDeletingId(id)
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/notas-compartilhadas/${id}?autorId=${usuarioId}`,
+        { method: 'DELETE' }
+      )
+      if (res.ok) setNotas((prev) => prev.filter((n) => n.id !== id))
+    } catch { /* offline */ } finally { setDeletingId(null) }
+  }
+
+  function formatDate(iso: string) {
+    try {
+      return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    } catch { return iso }
+  }
 
   return (
     <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] h-full">
@@ -630,7 +709,17 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--d2b-border)] flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Notas Compartilhadas</span>
-          <button className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors" title="Atualizar">
+          <button
+            onClick={async () => {
+              setLoading(true)
+              try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/notas-compartilhadas/paciente/${pacienteId}`)
+                if (res.ok) setNotas(await res.json())
+              } catch { /* offline */ } finally { setLoading(false) }
+            }}
+            className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors"
+            title="Atualizar"
+          >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
             </svg>
@@ -643,16 +732,41 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
 
       {/* Notas list */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {notas.length === 0 ? (
+        {loading ? (
+          <p className="text-xs text-[var(--d2b-text-muted)] text-center mt-8">Carregando...</p>
+        ) : notas.length === 0 ? (
           <p className="text-xs text-[var(--d2b-text-muted)] text-center mt-8">
             Não existem notas compartilhadas para este paciente...
           </p>
         ) : (
           <div className="space-y-3">
             {notas.map((n) => (
-              <div key={n.id} className="bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 py-2.5">
-                <p className="text-sm text-[var(--d2b-text-primary)] whitespace-pre-wrap">{n.texto}</p>
-                <p className="text-[10px] text-[var(--d2b-text-muted)] mt-1.5">{n.autor}° {n.data}</p>
+              <div
+                key={n.id}
+                className="rounded-lg px-3 py-2.5 shadow-sm"
+                style={{ background: n.cor, border: `1.5px solid ${n.cor}` }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    {n.titulo && (
+                      <p className="text-sm font-semibold text-[#111827] truncate mb-0.5">{n.titulo}</p>
+                    )}
+                    <p className="text-sm text-[#374151] whitespace-pre-wrap break-words">{n.texto}</p>
+                  </div>
+                  {n.autorId === usuarioId && (
+                    <button
+                      onClick={() => excluir(n.id)}
+                      disabled={deletingId === n.id}
+                      className="flex-shrink-0 p-1 rounded hover:bg-black/10 transition-colors disabled:opacity-40"
+                      title="Excluir nota"
+                    >
+                      {deletingId === n.id
+                        ? <Loader2 size={12} className="animate-spin text-[#374151]" />
+                        : <Trash2 size={12} className="text-[#374151]" />}
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-[#6B7280] mt-1.5">{n.autorNome} · {formatDate(n.criadoEm)}</p>
               </div>
             ))}
           </div>
@@ -661,38 +775,15 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
 
       {/* Editor */}
       <div className="border-t border-[var(--d2b-border)] flex-shrink-0">
-        {/* Toolbar */}
-        <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--d2b-border)] flex-wrap">
-          <div className="relative">
-            <select
-              value={formato}
-              onChange={(e) => setFormato(e.target.value)}
-              className="appearance-none h-7 pl-2 pr-6 rounded text-xs bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-[var(--d2b-text-secondary)] focus:outline-none cursor-pointer"
-            >
-              {FORMATO_OPCOES.map((o) => <option key={o}>{o}</option>)}
-            </select>
-            <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
-          </div>
-          {[['B','font-bold'],['I','italic'],['U','underline']].map(([l, cls]) => (
-            <button key={l} className={`w-6 h-6 rounded text-xs ${cls} text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center`}>{l}</button>
-          ))}
-          <div className="w-px h-4 bg-[var(--d2b-hover)] mx-0.5" />
-          {/* Align */}
-          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
-          </button>
-          {/* Ordered list */}
-          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><path d="M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-          </button>
-          {/* Unordered list */}
-          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
-          </button>
-          {/* Table */}
-          <button className="w-6 h-6 rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-          </button>
+        {/* Título */}
+        <div className="px-3 pt-3">
+          <input
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Título da nota (opcional)"
+            className="w-full bg-transparent text-sm font-semibold text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none border-b border-[var(--d2b-border)] pb-1.5 mb-2"
+          />
         </div>
 
         {/* Textarea */}
@@ -700,16 +791,36 @@ function NotasCompartilhadasPanel({ onClose }: { onClose: () => void }) {
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           placeholder="Escreva uma nota..."
-          rows={4}
-          className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none resize-none"
+          rows={3}
+          className="w-full bg-transparent px-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none resize-none"
         />
 
-        {/* Send */}
-        <div className="flex justify-end px-3 pb-3">
+        {/* Paleta + enviar */}
+        <div className="flex items-center justify-between px-3 pb-3">
+          {/* Paleta de cores */}
+          <div className="flex items-center gap-1.5">
+            {PALETA_CORES.map((c) => (
+              <button
+                key={c.hex}
+                onClick={() => setCor(c.hex)}
+                title={c.label}
+                className="w-5 h-5 rounded-full border-2 transition-transform hover:scale-110"
+                style={{
+                  background: c.hex,
+                  borderColor: cor === c.hex ? '#7C4DFF' : 'transparent',
+                  boxShadow: cor === c.hex ? '0 0 0 1px #7C4DFF' : 'none',
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Salvar */}
           <button
-            disabled={!texto.trim()}
-            className="px-5 py-1.5 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            onClick={salvar}
+            disabled={!texto.trim() || saving}
+            className="px-4 py-1.5 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-40 disabled:pointer-events-none transition-colors flex items-center gap-1.5"
           >
+            {saving && <Loader2 size={12} className="animate-spin" />}
             Enviar
           </button>
         </div>
@@ -730,7 +841,7 @@ const TABS: { id: Tab; label: string; icon: ReactNode; badge?: ReactNode }[] = [
   { id: 'documentos',  label: 'Documentos',     icon: <FileText size={18} /> },
 ]
 
-function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { cliente: PacienteApi; onBack: () => void; empresaId: string | null; initialTab?: Tab }) {
+function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId, usuarioNome }: { cliente: PacienteApi; onBack: () => void; empresaId: string | null; initialTab?: Tab; usuarioId?: string; usuarioNome?: string }) {
   const [tab, setTab] = useState<Tab>(initialTab ?? 'dados')
   const [notasOpen, setNotasOpen] = useState(false)
   const [compartilharOpen, setCompartilharOpen] = useState(false)
@@ -908,7 +1019,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab }: { client
             {tab === 'financeiro' && <TabFinanceiro pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
             {tab === 'documentos' && <TabDocumentos pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
           </div>
-          {notasOpen && <NotasCompartilhadasPanel onClose={() => setNotasOpen(false)} />}
+          {notasOpen && <NotasCompartilhadasPanel onClose={() => setNotasOpen(false)} pacienteId={cliente.id} usuarioId={usuarioId ?? ''} usuarioNome={usuarioNome ?? ''} />}
           {compartilharOpen && <CompartilharAcessoPanel onClose={() => setCompartilharOpen(false)} />}
         </div>
       </div>
@@ -1344,6 +1455,7 @@ function CriarClienteModal({
       onCreated(criado)
       resetForm()
       onClose()
+      trackClienteCadastrado(empresaId)
       toast({ title: 'Paciente cadastrado com sucesso!' })
     } catch {
       toast({ title: 'Erro ao cadastrar paciente. Verifique os dados e tente novamente.', variant: 'destructive' })
@@ -1444,7 +1556,7 @@ function CriarClienteModal({
 }
 
 // --- Main View ----------------------------------------------------------------
-export function ClientesView({ initialPacientes, empresaId }: { initialPacientes: PacienteApi[]; empresaId: string | null }) {
+export function ClientesView({ initialPacientes, empresaId, profissionais = [], usuarioId, usuarioNome }: { initialPacientes: PacienteApi[]; empresaId: string | null; profissionais?: ProfissionalItem[]; usuarioId?: string; usuarioNome?: string }) {
   const searchParams = useSearchParams()
   const pacienteIdParam = searchParams.get('pacienteId')
   const tabParam = (searchParams.get('tab') as Tab | null) ?? 'dados'
@@ -1452,6 +1564,8 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
   const [pacientes, setPacientes] = useState<PacienteApi[]>(initialPacientes)
   const [modalOpen, setModalOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterProfissional, setFilterProfissional] = useState('')
   const [mostrarArquivados, setMostrarArquivados] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [page, setPage] = useState(1)
@@ -1460,43 +1574,58 @@ export function ClientesView({ initialPacientes, empresaId }: { initialPacientes
   )
 
   if (selectedCliente) {
-    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} />
+    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} usuarioId={usuarioId} usuarioNome={usuarioNome} />
   }
 
-  const filtered = pacientes.filter((c) => c.nome.toLowerCase().includes(search.toLowerCase()))
+  const filtered = pacientes.filter((c) => {
+    if (!c.nome.toLowerCase().includes(search.toLowerCase())) return false
+    if (filterStatus && statusLabel(c.statusPagamento) !== filterStatus) return false
+    if (filterProfissional && c.usuarioId !== filterProfissional) return false
+    return true
+  })
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage))
 
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Pacientes da Clínica</h2>
-          <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie pacientes atendidos pela clínica.</p>
+          <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Clientes</h2>
+          <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie os clientes da clínica.</p>
         </div>
-        <button onClick={() => setModalOpen(true)}
+        <button data-tour="d2b-clientes-novo" onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors">
-          <Plus size={14} /> Novo paciente
+          <Plus size={14} /> Novo cliente
         </button>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 h-9 focus-within:border-[#7C4DFF] transition-colors">
+        <div data-tour="d2b-clientes-busca" className="flex items-center gap-2 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-lg px-3 h-9 focus-within:border-[#7C4DFF] transition-colors">
           <Search size={14} className="text-[var(--d2b-text-secondary)] shrink-0" />
           <input type="text" placeholder="Pesquisar" value={search} onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] outline-none w-44" />
         </div>
         <div className="relative">
-          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
-            <option value="">Selecione um status de pagamen...</option>
+          <select
+            value={filterStatus}
+            onChange={(e) => { setFilterStatus(e.target.value); setPage(1) }}
+            className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
+            <option value="">Todos os status</option>
             <option>Em Aberto</option>
             <option>Quitado</option>
+            <option>Pendente</option>
           </select>
           <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
         <div className="relative">
-          <select className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
+          <select
+            value={filterProfissional}
+            onChange={(e) => { setFilterProfissional(e.target.value); setPage(1) }}
+            className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
             <option value="">Todos profissionais</option>
+            {profissionais.map((p) => (
+              <option key={p.id} value={p.id}>{p.nome}</option>
+            ))}
           </select>
           <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
