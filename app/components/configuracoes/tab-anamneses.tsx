@@ -14,6 +14,7 @@ import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/pag
 interface TabAnamnesesProps {
   initialUsuario?: UsuarioData | null
   initialEmpresa?: EmpresaData | null
+  initialAnamneseId?: string | null
 }
 
 interface Pergunta {
@@ -31,7 +32,7 @@ interface Anamnese {
   perguntas: Pergunta[]
 }
 
-export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesProps) {
+export function TabAnamneses({ initialUsuario, initialEmpresa, initialAnamneseId }: TabAnamnesesProps) {
   const { toast } = useToast()
   const [anamneses, setAnamneses] = useState<Anamnese[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,7 +61,10 @@ export function TabAnamneses({ initialUsuario, initialEmpresa }: TabAnamnesesPro
 
   useEffect(() => {
     if (anamneses.length > 0 && !anamneseSelecionada) {
-      setAnamneseSelecionada(anamneses[0])
+      const preSelected = initialAnamneseId
+        ? anamneses.find((a) => a.id === initialAnamneseId) ?? anamneses[0]
+        : anamneses[0]
+      setAnamneseSelecionada(preSelected)
     }
   }, [anamneses])
 

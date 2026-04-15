@@ -1494,6 +1494,7 @@ export function ConfiguracoesView({
 }) {
   const searchParams = useSearchParams()
   const [active, setActive] = useState(() => searchParams.get('tab') ?? 'conta')
+  const initialAnamneseId = searchParams.get('anamnese')
 
   const content = (() => {
     switch (active) {
@@ -1504,7 +1505,7 @@ export function ConfiguracoesView({
       case 'servicos':   return <TabServicosNova initialEmpresa={initialEmpresa} />
       case 'salas':      return <TabSalasNova initialEmpresa={initialEmpresa} />
       case 'unidades':   return <TabUnidadesNova initialEmpresa={initialEmpresa} />
-      case 'anamneses':  return <TabAnamnesesNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'anamneses':  return <TabAnamnesesNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} initialAnamneseId={initialAnamneseId} />
       case 'nfse':       return <TabNfseNova initialEmpresa={initialEmpresa} />
       case 'senhas':     return <TabSenhasNova initialUsuario={initialUsuario} />
       case 'whatsapp':    return <TabWhatsapp initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
