@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { ChevronDown, Settings, FileText, Pencil, Printer, Send, X, RefreshCw, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { ChevronDown, Settings, FileText, Pencil, Printer, Send, X, RefreshCw, AlertCircle, Link, MessageCircle, Check } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -106,12 +107,25 @@ function EditarMensagemModal({ onClose }: { onClose: () => void }) {
 
 export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; empresaId: string | null }) {
   const { toast } = useToast()
+  const router = useRouter()
 
   const [modelos, setModelos] = useState<AnamneseModelo[]>([])
   const [modeloSelecionado, setModeloSelecionado] = useState<AnamneseModelo | null>(null)
   const [modeloDropOpen, setModeloDropOpen] = useState(false)
   const [acoesOpen, setAcoesOpen] = useState(false)
   const [editarMensagemOpen, setEditarMensagemOpen] = useState(false)
+  const [envioOpen, setEnvioOpen] = useState(false)
+  const [linkCopiado, setLinkCopiado] = useState(false)
+  const envioRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!envioOpen) return
+    function handleClick(e: MouseEvent) {
+      if (envioRef.current && !envioRef.current.contains(e.target as Node)) setEnvioOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [envioOpen])
   const [carregando, setCarregando] = useState(true)
   const [salvando, setSalvando] = useState(false)
 
@@ -260,7 +274,11 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
             {acoesOpen && (
               <div className="absolute z-30 right-0 mt-1 w-48 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
                 <button
-                  onClick={() => setAcoesOpen(false)}
+                  onClick={() => {
+                    setAcoesOpen(false)
+                    const id = modeloSelecionado?.id
+                    router.push(`/dashboard/configuracoes?tab=anamneses${id ? `&anamnese=${id}` : ''}`)
+                  }}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-left"
                 >
                   <Pencil size={13} className="text-[var(--d2b-text-secondary)]" /> Editar Questionário
@@ -311,9 +329,43 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
           <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] text-[#7C4DFF] hover:border-[#7C4DFF] transition-colors" title="Imprimir">
             <Printer size={15} />
           </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#0D9488] hover:bg-[#0F766E] transition-colors" title="Enviar">
-            <Send size={13} className="text-white" />
-          </button>
+          <div className="relative" ref={envioRef}>
+            <button
+              onClick={() => setEnvioOpen((v) => !v)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#0D9488] hover:bg-[#0F766E] transition-colors"
+              title="Enviar"
+              disabled={!modeloSelecionado || !empresaId}
+            >
+              <Send size={13} className="text-white" />
+            </button>
+            {envioOpen && (
+              <div className="absolute z-30 right-0 mt-1 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-xl overflow-hidden">
+                <button
+                  onClick={() => {
+                    if (!empresaId || !modeloSelecionado) return
+                    const link = `https://app.dev2b.tec.br/sites/anamninese/${empresaId}/${pacienteId}/${modeloSelecionado.id}`
+                    navigator.clipboard.writeText(link).then(() => {
+                      setLinkCopiado(true)
+                      setTimeout(() => { setLinkCopiado(false); setEnvioOpen(false) }, 1800)
+                    })
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-left"
+                >
+                  {linkCopiado
+                    ? <><Check size={13} className="text-[#0D9488]" /> Link copiado!</>
+                    : <><Link size={13} className="text-[var(--d2b-text-secondary)]" /> Compartilhar link</>}
+                </button>
+                <button
+                  onClick={() => setEnvioOpen(false)}
+                  disabled
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--d2b-text-muted)] cursor-not-allowed text-left opacity-50"
+                >
+                  <MessageCircle size={13} /> Enviar por WhatsApp
+                  <span className="ml-auto text-[10px] bg-[var(--d2b-hover)] px-1.5 py-0.5 rounded text-[var(--d2b-text-muted)]">Em breve</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Questions */}
@@ -323,7 +375,7 @@ export function TabAnamnese({ pacienteId, empresaId }: { pacienteId: string; emp
           perguntas.map((pergunta, i) => {
             const resp = respostas[pergunta.id] ?? { opcao: 'NENHUM', texto: '' }
             const showSim = pergunta.tipoResposta === 'SIM_NAO' || pergunta.tipoResposta === 'AMBOS'
-            const showTexto = pergunta.tipoResposta === 'TEXTO' || pergunta.tipoResposta === 'AMBOS'
+            const showTexto = pergunta.tipoResposta === 'CAMPO_ABERTO' || pergunta.tipoResposta === 'TEXTO' || pergunta.tipoResposta === 'AMBOS'
 
             return (
               <div key={pergunta.id} className="space-y-2">
