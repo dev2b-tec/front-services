@@ -71,12 +71,21 @@ const TAB_META: {
 ]
 
 // --- AvisosView --------------------------------------------------------------
-export function AvisosView({ empresaId }: { empresaId: string | null }) {
+export function AvisosView({ empresaId, usuarioId }: { empresaId: string | null; usuarioId: string | null }) {
   const [activeTab, setActiveTab] = useState<TabKey>('confirmacao')
   const [agendamentos, setAgendamentos] = useState<ApiAgendamento[]>([])
   const [pacientes, setPacientes] = useState<PacienteBasico[]>([])
   const [carregando, setCarregando] = useState(false)
   const [agendamentoModal, setAgendamentoModal] = useState<ApiAgendamento | null>(null)
+  const [disparoAtivo, setDisparoAtivo] = useState(false)
+
+  useEffect(() => {
+    if (!usuarioId) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/configuracoes-mensagens/usuario/${usuarioId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data) setDisparoAtivo(data.envioSmsAutomatico ?? false) })
+      .catch(() => {})
+  }, [usuarioId])
 
   useEffect(() => {
     if (!empresaId) return
@@ -260,9 +269,11 @@ export function AvisosView({ empresaId }: { empresaId: string | null }) {
           <AvisosTable
             rows={rowsByTab[activeTab as Exclude<TabKey, 'aniversarios'>]}
             tabKey={activeTab as Exclude<TabKey, 'aniversarios'>}
-            disparosAtivados={activeTab === 'confirmacao' && confirmacaoRows.length > 0 ? true : undefined}
+            disparosAtivados={disparoAtivo}
+            onDisparoChange={setDisparoAtivo}
             onRowClick={setAgendamentoModal}
             empresaId={empresaId}
+            usuarioId={usuarioId}
           />
         )}
       </div>

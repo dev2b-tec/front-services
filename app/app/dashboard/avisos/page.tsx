@@ -6,6 +6,7 @@ export default async function AvisosPage() {
   const keycloakId = session?.keycloakId
 
   let empresaId: string | null = null
+  let usuarioId: string | null = null
 
   if (keycloakId) {
     try {
@@ -21,11 +22,12 @@ export default async function AvisosPage() {
       if (res.ok) {
         const usuario = await res.json()
         empresaId = usuario.empresaId ?? null
+        usuarioId = usuario.id ?? null
       }
     } catch {
       // backend offline
     }
   }
 
-  return <AvisosView empresaId={empresaId} />
+  return <AvisosView empresaId={empresaId} usuarioId={usuarioId} />
 }

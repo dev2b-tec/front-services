@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { MessageSquare, Settings, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { MessageSquare, Settings, Loader2, HelpCircle } from 'lucide-react'
+import { MensagemEditor } from './mensagem-editor'
 import { useToast } from '@/hooks/use-toast'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
@@ -68,6 +69,49 @@ const TIPOS: { tipo: TipoMensagem; label: string; desc: string }[] = [
   },
 ]
 
+// --- Tooltip ------------------------------------------------------------------
+
+function Tooltip({ text }: { text: string }) {
+  const [visible, setVisible] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!visible) return
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setVisible(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [visible])
+
+  return (
+    <div ref={ref} className="relative inline-flex items-center">
+      <button
+        type="button"
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        onClick={() => setVisible(v => !v)}
+        className="flex items-center justify-center rounded-full text-[var(--d2b-text-muted)] hover:text-[#7C4DFF] transition-colors"
+        aria-label="Informação"
+      >
+        <HelpCircle size={14} />
+      </button>
+      {visible && (
+        <div
+          className="absolute left-5 top-1/2 -translate-y-1/2 z-50 w-64 rounded-lg px-3 py-2.5 text-xs leading-relaxed shadow-lg pointer-events-none"
+          style={{
+            background: 'var(--d2b-bg-elevated)',
+            border: '1px solid var(--d2b-border-strong)',
+            color: 'var(--d2b-text-primary)',
+          }}
+        >
+          {text}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // --- Component ----------------------------------------------------------------
 
 export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensProps) {
@@ -81,6 +125,14 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   const [loadingConfig, setLoadingConfig] = useState(true)
   const [savingConfig, setSavingConfig] = useState(false)
   const [numeroWhatsapp, setNumeroWhatsapp] = useState('')
+
+  function maskPhone(v: string) {
+    const d = v.replace(/\D/g, '').slice(0, 11)
+    if (d.length <= 2) return d
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+  }
   const [permitirProf, setPermitirProf] = useState(false)
   const [envioAuto, setEnvioAuto] = useState(false)
   const [riscoFalta, setRiscoFalta] = useState(false)
@@ -252,7 +304,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
       {subTab === 'configuracoes' && (
         <div className="space-y-5 max-w-xl">
           {/* Número */}
-          <div className="space-y-2">
+          <div data-tour="d2b-msg-numero" className="space-y-2">
             <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
               Número de WhatsApp da Clínica
             </label>
@@ -263,15 +315,16 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
               <input
                 type="text"
                 value={numeroWhatsapp}
-                onChange={(e) => setNumeroWhatsapp(e.target.value)}
+                onChange={(e) => setNumeroWhatsapp(maskPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
+                inputMode="numeric"
                 className="flex-1 px-3 py-2 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] text-[var(--d2b-text-primary)] text-sm placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF]"
               />
             </div>
           </div>
 
           {/* Permissões */}
-          <label className="flex items-start gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
+          <label data-tour="d2b-msg-permitir" className="flex items-start gap-3 p-3 rounded-lg border border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-surface)] cursor-pointer hover:border-[#7C4DFF] transition-colors">
             <div className="relative flex items-center shrink-0 mt-0.5">
               <input
                 type="checkbox"
@@ -288,34 +341,31 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
           </label>
 
           {/* Disparo automático */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
-              Envio de SMS Automático
+          <div data-tour="d2b-msg-envio" className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
+                Envio Automático via WhatsApp
+              </label>
+              <Tooltip text="Esta configuração só funcionará se o WhatsApp estiver integrado e configurado no sistema." />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${envioAuto && !riscoFalta ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)]'}`}
+                onClick={() => { setEnvioAuto(true); setRiscoFalta(false) }}>
+                {(envioAuto && !riscoFalta) && <span className="w-2 h-2 rounded-full bg-[#7C4DFF]" />}
+              </span>
+              <span className="text-sm text-[var(--d2b-text-primary)]" onClick={() => { setEnvioAuto(true); setRiscoFalta(false) }}>Ativar Disparo Automático</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="sms"
-                checked={envioAuto && !riscoFalta}
-                onChange={() => { setEnvioAuto(true); setRiscoFalta(false) }}
-                className="w-4 h-4 accent-[#7C4DFF]"
-              />
-              <span className="text-sm text-[var(--d2b-text-primary)]">Ativar Disparo Automático</span>
-            </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="sms"
-                checked={riscoFalta}
-                onChange={() => { setEnvioAuto(false); setRiscoFalta(true) }}
-                className="w-4 h-4 accent-[#7C4DFF]"
-              />
-              <span className="text-sm text-[var(--d2b-text-primary)]">Enviar somente com risco de falta</span>
+              <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${riscoFalta ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)]'}`}
+                onClick={() => { setEnvioAuto(false); setRiscoFalta(true) }}>
+                {riscoFalta && <span className="w-2 h-2 rounded-full bg-[#7C4DFF]" />}
+              </span>
+              <span className="text-sm text-[var(--d2b-text-primary)]" onClick={() => { setEnvioAuto(false); setRiscoFalta(true) }}>Enviar somente com risco de falta</span>
             </label>
           </div>
 
           {/* Horário */}
-          <div className="space-y-2">
+          <div data-tour="d2b-msg-horario" className="space-y-2">
             <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
               Disparar em:
             </label>
@@ -333,6 +383,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
 
           <div className="flex justify-end pt-2">
             <button
+              data-tour="d2b-msg-salvar"
               onClick={handleSalvarConfig}
               disabled={savingConfig}
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 text-white text-sm font-semibold transition-colors"
@@ -349,10 +400,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
         <div className="space-y-5 max-w-xl">
           <div>
             <p className="text-xs text-[var(--d2b-text-secondary)]">
-              Configure os textos dos avisos automáticos. Use variáveis como{' '}
-              <span className="text-[#EF4444]">#nome_paciente#</span>,{' '}
-              <span className="text-[#EF4444]">#nome_profissional#</span>,{' '}
-              <span className="text-[#EF4444]">#data_e_hora_agendamento#</span>.
+              Configure os textos dos avisos automáticos. Use os botões de variável na barra do editor para inserir campos dinâmicos.
             </p>
           </div>
 
@@ -384,24 +432,22 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
                 <p className="text-xs text-[var(--d2b-text-muted)]">{tipoInfo.desc}</p>
               </div>
 
-              {/* Textarea */}
+              {/* Editor */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-[var(--d2b-text-secondary)] uppercase tracking-wide">
                   Texto da Mensagem
                 </label>
-                <textarea
+                <MensagemEditor
                   value={draftText}
-                  onChange={(e) => setDraftText(e.target.value)}
-                  rows={7}
-                  placeholder="Digite o texto da mensagem..."
-                  className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-lg px-3 py-2.5 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+                  onChange={setDraftText}
+                  minHeight={180}
                 />
               </div>
 
               <div className="flex justify-end">
                 <button
                   onClick={handleSalvarMensagem}
-                  disabled={savingMsg || !draftText.trim()}
+                  disabled={savingMsg || !draftText.replace(/<[^>]*>/g, '').trim()}
                   className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 text-white text-sm font-semibold transition-colors"
                 >
                   {savingMsg && <Loader2 size={13} className="animate-spin" />}

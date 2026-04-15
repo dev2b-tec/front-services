@@ -8,6 +8,8 @@ import { useSession } from 'next-auth/react'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
 import { ModalAssinatura } from '@/components/assinatura/modal-assinatura'
+import { useTour } from '@/hooks/use-tour'
+import { trackCliqueAssinarPlano } from '@/lib/analytics'
 
 function usePageTitle() {
   const pathname = usePathname()
@@ -48,6 +50,22 @@ function applyThemeVars(dark: boolean) {
     r.setProperty('--d2b-input-bg',     '#FFFFFF')
     r.setProperty('--d2b-topbar-bg',    'rgba(255,255,255,0.95)')
   }
+}
+
+// ── Tour trigger button ───────────────────────────────────────────────────────
+function TourButton() {
+  const { startTour } = useTour()
+  return (
+    <button
+      onClick={startTour}
+      className="flex-shrink-0 p-2 rounded-lg transition-colors hover:bg-[var(--d2b-hover)]"
+      style={{ color: 'var(--d2b-text-secondary)' }}
+      aria-label="Tour guiado"
+      title="Tour guiado"
+    >
+      <HelpCircle size={18} />
+    </button>
+  )
 }
 
 export function Topbar() {
@@ -183,6 +201,7 @@ export function Topbar() {
   return (
     <>
     <header
+      data-tour="d2b-topbar"
       className="sticky top-0 z-30 flex items-center gap-3 h-14 px-4 backdrop-blur-md border-b"
       style={{ background: 'var(--d2b-topbar-bg)', borderColor: 'var(--d2b-border)' }}
     >
@@ -203,9 +222,9 @@ export function Topbar() {
 
       {/* Botão Assine um plano */}
       <button
-        onClick={() => setAssinaturaOpen(true)}
-        className="flex-shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
-        style={{ background: 'linear-gradient(135deg, #7C4DFF, #C084FC)' }}
+        data-tour="d2b-btn-assinar"
+        onClick={() => { setAssinaturaOpen(true); trackCliqueAssinarPlano() }}
+        className="flex-shrink-0 hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors"
         aria-label="Assinar plano"
       >
         <CalendarDays size={13} />
@@ -341,6 +360,9 @@ export function Topbar() {
         </div>,
         document.body
       )}
+
+      {/* Tour button */}
+      <TourButton />
 
       <button
         onClick={toggleTheme}
