@@ -1123,9 +1123,7 @@ export function CalendarioView({
   const filtroCalBtnRef = useRef<HTMLButtonElement>(null)
   const [filtrosRect, setFiltrosRect] = useState<DOMRect | null>(null)
   const [filtroTab, setFiltroTab] = useState<'calendario' | 'cores'>('calendario')
-  const [filtros, setFiltros]           = useState<Record<string, boolean>>(
-    Object.fromEntries(FILTROS_CORES.map((f) => [f, true]))
-  )
+  const [filtroCorAtivo, setFiltroCorAtivo] = useState<string>('')
   // Filtros do Calendário
   const [filtroEspecialidade, setFiltroEspecialidade] = useState('')
   const [filtroConvenio, setFiltroConvenio]           = useState('')
@@ -1567,7 +1565,7 @@ export function CalendarioView({
                     {FILTROS_CORES.map((f) => (
                       <div key={f} className="flex items-center justify-between px-4 py-2.5 hover:bg-[var(--d2b-hover)] transition-colors">
                         <span className="flex-1 min-w-0 pr-4 text-sm text-[var(--d2b-text-secondary)] leading-snug">{f}</span>
-                        <Toggle on={filtros[f] ?? false} set={(v) => setFiltros((p) => ({ ...p, [f]: v }))} />
+                        <Toggle on={filtroCorAtivo === f} set={(v) => setFiltroCorAtivo(v ? f : '')} />
                       </div>
                     ))}
                   </div>
