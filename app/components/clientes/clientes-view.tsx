@@ -225,6 +225,32 @@ function Section({ title, open, onToggle, children }: { title: string; open: boo
   )
 }
 
+function formatTelefone(tel: string | undefined | null): string {
+  if (!tel) return '—'
+  const digits = tel.replace(/\D/g, '')
+  // com DDI +55: 5511999999999 (13 dígitos) ou 55119999-9999 (12 dígitos)
+  if (digits.length === 13 && digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4)
+    const parte1 = digits.slice(4, 9)
+    const parte2 = digits.slice(9)
+    return `+55 (${ddd}) ${parte1}-${parte2}`
+  }
+  if (digits.length === 12 && digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4)
+    const parte1 = digits.slice(4, 8)
+    const parte2 = digits.slice(8)
+    return `+55 (${ddd}) ${parte1}-${parte2}`
+  }
+  // sem DDI: 11999999999 (11 dígitos) ou 1199999999 (10 dígitos)
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  }
+  return tel
+}
+
 function StatusBadge({ status }: { status: string }) {
   const label = statusLabel(status)
   if (label === '—') {
@@ -1673,7 +1699,7 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
                 className="text-sm font-semibold text-[var(--d2b-text-primary)] truncate text-left hover:text-[#C084FC] transition-colors">
                 {c.nome}
               </button>
-              <span className="text-sm text-[var(--d2b-text-secondary)]">{c.telefone ?? ''}</span>
+              <span className="text-sm text-[var(--d2b-text-secondary)]">{formatTelefone(c.telefone)}</span>
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.sessoes}</span>
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.grupo ?? '—'}</span>
               <StatusBadge status={c.statusPagamento} />

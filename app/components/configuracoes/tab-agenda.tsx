@@ -21,6 +21,7 @@ interface AgendaData {
   recursoDesativadoFila: boolean
   bloquearEdicaoEvolucao: boolean
   recursoDesativadoEvolucao: boolean
+  exibirProjecao: boolean
   
   segAbertura: string
   segFechamento: string
@@ -72,6 +73,7 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
     recursoDesativadoFila: false,
     bloquearEdicaoEvolucao: false,
     recursoDesativadoEvolucao: false,
+    exibirProjecao: false,
     
     segAbertura: '08:00',
     segFechamento: '22:00',
@@ -152,6 +154,7 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
           recursoDesativadoFila: data.recursoDesativadoFila || false,
           bloquearEdicaoEvolucao: data.bloquearEdicaoEvolucao || false,
           recursoDesativadoEvolucao: data.recursoDesativadoEvolucao || false,
+          exibirProjecao: data.exibirProjecao || false,
           
           segAbertura: data.segAbertura || '08:00',
           segFechamento: data.segFechamento || '22:00',
@@ -397,6 +400,23 @@ export function TabAgenda({ initialUsuario, initialEmpresa }: TabAgendaProps) {
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
               agenda.recursoDesativadoEvolucao ? 'translate-x-5' : 'translate-x-1'
+            }`} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-[var(--d2b-text-primary)]">Exibir Projeção Financeira</span>
+            <HelpCircle size={14} className="text-[var(--d2b-text-muted)]" />
+          </div>
+          <button
+            onClick={() => setAgenda(prev => ({ ...prev, exibirProjecao: !prev.exibirProjecao }))}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              agenda.exibirProjecao ? 'bg-[#7C4DFF]' : 'bg-[var(--d2b-hover)]'
+            }`}
+          >
+            <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+              agenda.exibirProjecao ? 'translate-x-5' : 'translate-x-1'
             }`} />
           </button>
         </div>

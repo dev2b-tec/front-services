@@ -15,6 +15,25 @@ import {
 } from '@/components/ui/dialog'
 import { type ApiAgendamento } from '@/components/calendario/calendario-view'
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function formatTelefone(tel: string | undefined | null): string {
+  if (!tel) return '—'
+  const digits = tel.replace(/\D/g, '')
+  if (digits.length === 13 && digits.startsWith('55')) {
+    return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`
+  }
+  if (digits.length === 12 && digits.startsWith('55')) {
+    return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 8)}-${digits.slice(8)}`
+  }
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  }
+  return tel
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type TabKey = 'confirmacao' | 'remarcacao' | 'cobranca' | 'agradecimentos' | 'aniversarios'
 
@@ -366,12 +385,12 @@ export function AvisosTable({
             >
               <div className="px-4 py-3">
                 <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-[rgba(20,184,166,0.15)] text-[#14B8A6] border border-[rgba(20,184,166,0.30)] hover:bg-[rgba(20,184,166,0.25)] transition-colors whitespace-nowrap">
-                  📱 Enviar
+                  Enviar
                 </button>
               </div>
               <div className="px-4 py-3">
                 <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">{row.paciente}</p>
-                <p className="text-xs text-[var(--d2b-text-muted)]">{row.telefone}</p>
+                <p className="text-xs text-[var(--d2b-text-muted)]">{formatTelefone(row.telefone)}</p>
               </div>
               <div className="px-4 py-3">
                 <p className="text-sm text-[var(--d2b-text-secondary)]">{row.profissional}</p>
