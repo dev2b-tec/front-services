@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   applicationName: 'DEV2B',
   keywords: ['saas', 'gestão', 'negócios', 'crm', 'financeiro', 'dev2b'],
   icons: {
-    icon: '/favicon.ico',
+    icon: '/icon.png',
   },
 }
 

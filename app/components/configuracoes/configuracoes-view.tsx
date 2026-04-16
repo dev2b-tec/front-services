@@ -6,7 +6,7 @@ import {
   User, Calendar, Mail, ShoppingCart, Layers,
   LayoutGrid, Building2, ClipboardCheck, FileText, Lock,
   ChevronDown, HelpCircle, Check, MessageSquare,
-  Search, Plus, Pencil, Trash2, Pin, X, AlertTriangle, Sparkles, Highlighter,
+  Search, Plus, Pencil, Trash2, Pin, X, AlertTriangle, Sparkles, Highlighter, Puzzle, Server, Bot,
   type LucideIcon,
 } from 'lucide-react'
 import { INP, LBG, BTN_GHOST, BTN_PRIMARY, Toggle, Cbx, PhoneInput, SectionFooter } from './shared'
@@ -23,15 +23,27 @@ import { TabNfse as TabNfseNova } from './tab-nfse'
 import { TabWhatsapp } from './tab-whatsapp'
 import { TabAssinatura } from './tab-assinatura'
 import { TabMarcadores } from './tab-marcadores'
+import { TabIntegracoes } from './tab-integracoes'
+import { TabSmtp } from './tab-smtp'
+import { TabChatbot } from './tab-chatbot'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
 // ─── Tab navigation ───────────────────────────────────────────────────────────
-type TabDef = { id: string; label: string; Icon: LucideIcon; iconColor?: string }
+type SubTabDef = { id: string; label: string; Icon: LucideIcon; iconColor?: string }
+type TabDef = { id: string; label: string; Icon: LucideIcon; iconColor?: string; children?: SubTabDef[] }
 
 const TABS: TabDef[] = [
   { id: 'conta',     label: 'Conta',     Icon: User },
   { id: 'agenda',    label: 'Agenda',    Icon: Calendar },
-  { id: 'mensagens', label: 'Mensagens', Icon: Mail },
+  {
+    id: 'mensagens-group', label: 'Mensagens', Icon: Mail,
+    children: [
+      { id: 'mensagens', label: 'Mensagens',  Icon: Mail },
+      { id: 'whatsapp',  label: 'WhatsApp',   Icon: MessageSquare, iconColor: '#4ADE80' },
+      { id: 'chatbot',   label: 'Chatbot',    Icon: Bot },
+      { id: 'smtp',      label: 'SMTP',       Icon: Server },
+    ],
+  },
   { id: 'creditos',  label: 'Créditos',  Icon: ShoppingCart },
   { id: 'servicos',  label: 'Serviços',  Icon: Layers },
   { id: 'salas',     label: 'Salas',     Icon: LayoutGrid },
@@ -39,9 +51,9 @@ const TABS: TabDef[] = [
   { id: 'anamneses', label: 'Anamneses', Icon: ClipboardCheck },
   { id: 'nfse',      label: 'NFS-e',     Icon: FileText, iconColor: '#F97316' },
   { id: 'senhas',    label: 'Senhas',    Icon: Lock },
-  { id: 'whatsapp',   label: 'WhatsApp',   Icon: MessageSquare, iconColor: '#4ADE80' },
-  { id: 'assinatura', label: 'Assinatura', Icon: Sparkles,     iconColor: '#7C4DFF' },
-  { id: 'marcadores', label: 'Marcadores', Icon: Highlighter },
+  { id: 'assinatura',    label: 'Assinatura',    Icon: Sparkles,      iconColor: '#7C4DFF' },
+  { id: 'marcadores',    label: 'Marcadores',    Icon: Highlighter },
+  { id: 'integracoes',   label: 'Integrações',   Icon: Puzzle },
 ]
 
 // ─── TAB: AGENDA ──────────────────────────────────────────────────────────────
@@ -1501,6 +1513,8 @@ export function ConfiguracoesView({
       case 'conta':      return <TabConta initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
       case 'agenda':     return <TabAgendaNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
       case 'mensagens':  return <TabMensagensNova initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
+      case 'smtp':       return <TabSmtp initialEmpresa={initialEmpresa} />
+      case 'chatbot':    return <TabChatbot initialEmpresa={initialEmpresa} />
       case 'creditos':   return <TabCreditosNova initialUsuario={initialUsuario} />
       case 'servicos':   return <TabServicosNova initialEmpresa={initialEmpresa} />
       case 'salas':      return <TabSalasNova initialEmpresa={initialEmpresa} />
@@ -1510,7 +1524,8 @@ export function ConfiguracoesView({
       case 'senhas':     return <TabSenhasNova initialUsuario={initialUsuario} />
       case 'whatsapp':    return <TabWhatsapp initialUsuario={initialUsuario} initialEmpresa={initialEmpresa} />
       case 'assinatura':  return <TabAssinatura initialUsuario={initialUsuario} />
-      case 'marcadores':  return <TabMarcadores initialEmpresa={initialEmpresa} />
+      case 'marcadores':    return <TabMarcadores initialEmpresa={initialEmpresa} />
+      case 'integracoes':   return <TabIntegracoes initialEmpresa={initialEmpresa} />
       default: {
         const tab = TABS.find((t) => t.id === active)
         return <TabPlaceholder label={tab?.label ?? ''} />
@@ -1521,23 +1536,21 @@ export function ConfiguracoesView({
   return (
     <div className="flex h-full min-h-0">
 
-      {/* ── Painel lateral de ícones ── */}
+      {/* ── Painel lateral de ícones (nível 1) ── */}
       <aside className="flex flex-col w-[72px] shrink-0 border-r border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] py-3 gap-0.5 overflow-y-auto">
-        {TABS.map(({ id, label, Icon, iconColor }) => {
-          const isActive = active === id
-          const clr = iconColor ?? (isActive ? '#7C4DFF' : '#6B4E8A')
+        {TABS.map(({ id, label, Icon, iconColor, children }) => {
+          const isGroupActive = children ? children.some((c) => c.id === active) : active === id
+          const clr = iconColor ?? (isGroupActive ? '#7C4DFF' : '#6B4E8A')
           return (
             <button
               key={id}
-              onClick={() => setActive(id)}
+              onClick={() => setActive(children ? children[0].id : id)}
               title={label}
               className={`flex flex-col items-center gap-1 py-3 mx-2 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-[var(--d2b-hover)]'
-                  : 'hover:bg-[var(--d2b-hover)]'
+                isGroupActive ? 'bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'
               }`}
             >
-              <Icon size={20} color={clr} strokeWidth={isActive ? 2.5 : 1.5} />
+              <Icon size={20} color={clr} strokeWidth={isGroupActive ? 2.5 : 1.5} />
               <span className="text-[9px] font-medium leading-tight text-center" style={{ color: clr }}>
                 {label}
               </span>
@@ -1545,6 +1558,35 @@ export function ConfiguracoesView({
           )
         })}
       </aside>
+
+      {/* ── Painel lateral de sub-itens (nível 2) ── */}
+      {(() => {
+        const activeTab = TABS.find((t) => t.children?.some((c) => c.id === active))
+        if (!activeTab?.children) return null
+        return (
+          <aside className="flex flex-col w-[72px] shrink-0 border-r border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] py-3 gap-0.5 overflow-y-auto">
+            {activeTab.children.map((child) => {
+              const isChildActive = active === child.id
+              const clr = child.iconColor ?? (isChildActive ? '#7C4DFF' : '#6B4E8A')
+              return (
+                <button
+                  key={child.id}
+                  onClick={() => setActive(child.id)}
+                  title={child.label}
+                  className={`flex flex-col items-center gap-1 py-3 mx-2 rounded-xl transition-all ${
+                    isChildActive ? 'bg-[var(--d2b-hover)]' : 'hover:bg-[var(--d2b-hover)]'
+                  }`}
+                >
+                  <child.Icon size={20} color={clr} strokeWidth={isChildActive ? 2.5 : 1.5} />
+                  <span className="text-[9px] font-medium leading-tight text-center" style={{ color: clr }}>
+                    {child.label}
+                  </span>
+                </button>
+              )
+            })}
+          </aside>
+        )
+      })()}
 
       {/* ── Conteúdo da aba ── */}
       <div className="flex-1 overflow-y-auto p-8">

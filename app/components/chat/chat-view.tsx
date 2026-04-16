@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type StatusConversa = 'ATIVA' | 'EM_ATENDIMENTO' | 'AGUARDANDO' | 'FINALIZADA'
+type StatusConversa = 'ATIVA' | 'EM_ATENDIMENTO' | 'AGUARDANDO' | 'EM_ESPERA' | 'EM_CHATBOT' | 'FINALIZADA'
 
 interface Conversa {
   id: string
@@ -48,6 +48,8 @@ const STATUS_LABEL: Record<StatusConversa, string> = {
   ATIVA: 'Ativa',
   EM_ATENDIMENTO: 'Em atendimento',
   AGUARDANDO: 'Aguardando',
+  EM_ESPERA: 'Em espera',
+  EM_CHATBOT: 'Chatbot',
   FINALIZADA: 'Finalizada',
 }
 
@@ -55,6 +57,8 @@ const STATUS_COLOR: Record<StatusConversa, string> = {
   ATIVA: '#22C55E',
   EM_ATENDIMENTO: '#38BDF8',
   AGUARDANDO: '#F59E0B',
+  EM_ESPERA: '#A78BFA',
+  EM_CHATBOT: '#F97316',
   FINALIZADA: 'var(--d2b-text-muted)',
 }
 
@@ -174,8 +178,9 @@ export function ChatView({ empresaId, initialConversas }: Props) {
   const [conversas, setConversas] = useState<Conversa[]>([])
   const [loading, setLoading] = useState(false)
   const [busca, setBusca] = useState('')
-  const [somenteAtivas, setSomenteAtivas] = useState(false)
-  const [selecionada, setSelecionada] = useState<Conversa | null>(null)
+  type AbaKey = 'chatbot' | 'espera' | 'ativa'
+  const [aba, setAba] = useState<AbaKey>('ativa')
+  const [selecionada, setSelecionada] = useState<Record<AbaKey, Conversa | null>>({ chatbot: null, espera: null, ativa: null })
   const [finalizando, setFinalizando] = useState(false)
   const [instanciaId, setInstanciaId] = useState<string | null>(null)
 
@@ -209,7 +214,11 @@ export function ChatView({ empresaId, initialConversas }: Props) {
   useEffect(() => {
     if (!conversaIdParam || conversas.length === 0) return
     const found = conversas.find((c) => c.id === conversaIdParam)
-    if (found) setSelecionada(found)
+    if (found) {
+      const abaAlvo: AbaKey = found.status === 'EM_CHATBOT' ? 'chatbot' : found.status === 'EM_ESPERA' ? 'espera' : 'ativa'
+      setAba(abaAlvo)
+      setSelecionada(prev => ({ ...prev, [abaAlvo]: found }))
+    }
   }, [conversaIdParam, conversas])
 
   // ── Finalizar conversa ────────────────────────────────────────────────────
@@ -225,7 +234,13 @@ export function ChatView({ empresaId, initialConversas }: Props) {
         setConversas((prev) =>
           prev.map((c) => (c.id === id ? { ...c, status: 'FINALIZADA' } : c))
         )
-        setSelecionada((prev) => (prev?.id === id ? { ...prev, status: 'FINALIZADA' } : prev))
+        setSelecionada(prev => {
+          const upd = { ...prev }
+          ;(Object.keys(upd) as AbaKey[]).forEach(k => {
+            if (upd[k]?.id === id) upd[k] = { ...upd[k]!, status: 'FINALIZADA' }
+          })
+          return upd
+        })
         toast({ title: 'Conversa finalizada.' })
       } else {
         toast({ title: 'Erro ao finalizar conversa.', variant: 'destructive' })
@@ -237,10 +252,14 @@ export function ChatView({ empresaId, initialConversas }: Props) {
     }
   }, [toast])
 
-  // ── Filtro por busca + ativas ─────────────────────────────────────────────
-  const ATIVAS: StatusConversa[] = ['ATIVA', 'EM_ATENDIMENTO', 'AGUARDANDO']
+  // ── Filtro por aba + busca ──────────────────────────────────────────────
+  const ABA_STATUS: Record<AbaKey, StatusConversa[]> = {
+    chatbot: ['EM_CHATBOT'],
+    espera:  ['EM_ESPERA'],
+    ativa:   ['ATIVA', 'EM_ATENDIMENTO', 'AGUARDANDO'],
+  }
   const filtradas = conversas.filter((c) => {
-    if (somenteAtivas && !ATIVAS.includes(c.status)) return false
+    if (!ABA_STATUS[aba].includes(c.status)) return false
     if (!busca) return true
     const q = busca.toLowerCase()
     return (
@@ -248,6 +267,9 @@ export function ChatView({ empresaId, initialConversas }: Props) {
       (c.nome ?? '').toLowerCase().includes(q)
     )
   })
+  const contagem = (a: AbaKey) =>
+    conversas.filter((c) => ABA_STATUS[a].includes(c.status)).length
+  const convAtual = selecionada[aba]
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -271,7 +293,7 @@ export function ChatView({ empresaId, initialConversas }: Props) {
           </div>
 
           {/* Busca */}
-          <div className="relative">
+          <div className="relative mb-3">
             <Search
               size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -285,26 +307,40 @@ export function ChatView({ empresaId, initialConversas }: Props) {
             />
           </div>
 
-          {/* Toggle ativas */}
-          <button
-            onClick={() => setSomenteAtivas((v) => !v)}
-            className="mt-2 flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors w-fit"
-            style={somenteAtivas ? {
-              background: 'rgba(34,197,94,0.12)',
-              border: '1px solid rgba(34,197,94,0.35)',
-              color: '#22C55E',
-            } : {
-              background: 'transparent',
-              border: '1px solid var(--d2b-border-strong)',
-              color: 'var(--d2b-text-muted)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ background: somenteAtivas ? '#22C55E' : 'var(--d2b-text-muted)' }}
-            />
-            Apenas ativas
-          </button>
+          {/* Abas */}
+          <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--d2b-border)' }}>
+            {([ 
+              { key: 'chatbot', label: 'Chatbot',  color: '#F97316' },
+              { key: 'espera',  label: 'Em espera', color: '#A78BFA' },
+              { key: 'ativa',   label: 'Ativas',    color: '#22C55E' },
+            ] as const).map(({ key, label, color }) => {
+              const cnt = contagem(key)
+              const active = aba === key
+              return (
+                <button
+                  key={key}
+                  onClick={() => setAba(key)}
+                  className="flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium transition-colors"
+                  style={{
+                    background: active ? `${color}20` : 'transparent',
+                    color: active ? color : 'var(--d2b-text-muted)',
+                    borderRight: key !== 'ativa' ? '1px solid var(--d2b-border)' : undefined,
+                  }}
+                >
+                  <span>{label}</span>
+                  <span
+                    className="text-[10px] font-bold mt-0.5 leading-none rounded-full px-1.5 py-0.5"
+                    style={{
+                      background: active ? `${color}30` : 'var(--d2b-bg-elevated)',
+                      color: active ? color : 'var(--d2b-text-muted)',
+                    }}
+                  >
+                    {cnt}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Lista */}
@@ -329,13 +365,13 @@ export function ChatView({ empresaId, initialConversas }: Props) {
             filtradas.map((c) => (
               <button
                 key={c.id}
-                onClick={() => setSelecionada(c)}
+                onClick={() => setSelecionada(prev => ({ ...prev, [aba]: c }))}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--d2b-hover)]"
                 style={{
                   background:
-                    selecionada?.id === c.id ? 'var(--d2b-active)' : 'transparent',
+                    selecionada[aba]?.id === c.id ? 'var(--d2b-active)' : 'transparent',
                   borderLeft:
-                    selecionada?.id === c.id ? '3px solid var(--d2b-brand)' : '3px solid transparent',
+                    selecionada[aba]?.id === c.id ? '3px solid var(--d2b-brand)' : '3px solid transparent',
                 }}
               >
                 {/* Avatar */}
@@ -382,22 +418,22 @@ export function ChatView({ empresaId, initialConversas }: Props) {
 
       {/* ══ Coluna direita — detalhe + chat ══════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {selecionada ? (
+        {convAtual ? (
           <>
             {/* Dados da conversa + botão finalizar */}
             <DetalhesConversa
-              conversa={selecionada}
+              conversa={convAtual}
               onFinalizar={finalizar}
               finalizando={finalizando}
-              onFechar={() => setSelecionada(null)}
+              onFechar={() => setSelecionada(prev => ({ ...prev, [aba]: null }))}
             />
 
             {/* Janela de chat */}
             <div className="flex-1 min-h-0">
               <ChatWindow
-                conversaId={selecionada.id}
-                instanciaId={instanciaId ?? selecionada.empresaId}
-                telefone={selecionada.telefone}
+                conversaId={convAtual.id}
+                instanciaId={instanciaId ?? convAtual.empresaId}
+                telefone={convAtual.telefone}
               />
             </div>
           </>

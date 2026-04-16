@@ -17,15 +17,22 @@ interface Marcador {
 }
 
 const TIPOS_MARCADOR = [
-  { value: 'CONSULTA',      label: 'Consulta' },
-  { value: 'RETORNO',       label: 'Retorno' },
-  { value: 'PROCEDIMENTO',  label: 'Procedimento' },
-  { value: 'AVALIACAO',     label: 'Avaliação' },
-  { value: 'BLOQUEIO',      label: 'Bloqueio' },
-  { value: 'ENCAIXE',       label: 'Encaixe' },
-  { value: 'CIRURGIA',      label: 'Cirurgia' },
-  { value: 'EXAME',         label: 'Exame' },
-  { value: 'OUTROS',        label: 'Outros' },
+  { value: 'CONSULTA',            label: 'Consulta' },
+  { value: 'RETORNO',             label: 'Retorno' },
+  { value: 'PROCEDIMENTO',        label: 'Procedimento' },
+  { value: 'AVALIACAO',           label: 'Avaliação' },
+  { value: 'BLOQUEIO',            label: 'Bloqueio' },
+  { value: 'ENCAIXE',             label: 'Encaixe' },
+  { value: 'CIRURGIA',            label: 'Cirurgia' },
+  { value: 'EXAME',               label: 'Exame' },
+  { value: 'OUTROS',              label: 'Outros' },
+  { value: 'ALTO_RISCO_FALTA',    label: 'Alto Risco de Falta' },
+  { value: 'CONVENIO',            label: 'Convênio' },
+  { value: 'INADIMPLENTE',        label: 'Inadimplente' },
+  { value: 'PRIMEIRO_ATENDIMENTO', label: 'Primeiro Atendimento' },
+  { value: 'ANIVERSARIANTE',      label: 'Aniversário' },
+  { value: 'SALA',                label: 'Sala' },
+  { value: 'PROFISSIONAL',        label: 'Profissional' },
 ]
 
 // 12 cores básicas — caixa de lápis de cor

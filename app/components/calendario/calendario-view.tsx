@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
@@ -33,6 +33,7 @@ export interface AgendaConfig {
   sexAbertura?: string; sexFechamento?: string
   sabAbertura?: string; sabFechamento?: string
   domAbertura?: string; domFechamento?: string
+  exibirProjecao?: boolean
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -84,6 +85,9 @@ export type ApiAgendamento = {
   wherebyHostUrl?: string | null
   wherebyViewerUrl?: string | null
   atendimentoRemoto?: boolean | null
+  pacientePlano?: string | null
+  pacienteSessoes?: number | null
+  pacienteDataNascimento?: string | null
 }
 
 type Appointment = {
@@ -106,6 +110,13 @@ type PacienteInfo = {
   telefone: string | null
   plano: string | null
   numeroCarteirinha: string | null
+}
+
+interface Marcador {
+  id: string
+  tipo: string
+  cor: string
+  empresaId: string
 }
 
 type ServiceLine = {
@@ -420,7 +431,9 @@ export function NovoAgendamentoModal({
   const [inicio,     setInicio]     = useState(defaults.inicio)
   const [fim,        setFim]        = useState(defaults.fim)
   const [sala,       setSala]       = useState('')
-  const [recorrente, setRecorrente] = useState(false)
+  const [recorrente,    setRecorrente]    = useState(false)
+  const [recorrenteAte, setRecorrenteAte] = useState('')
+  const [recorrenciaTipo, setRecorrenciaTipo] = useState<'DIARIO' | 'SEMANAL' | 'MENSAL'>('SEMANAL')
   const [atendimentoRemoto, setAtendimentoRemoto] = useState(false)
   const [status,     setStatus]     = useState('Aguardando')
   const [salas,      setSalas]      = useState<{ id: string; nome: string }[]>([])
@@ -563,6 +576,8 @@ export function NovoAgendamentoModal({
     const body: Record<string, unknown> = {
       inicio: datetimeLocalToISO(inicio), fim: datetimeLocalToISO(fim),
       sala: sala || null, recorrente, atendimentoRemoto, observacoes: observacoes || null,
+      recorrenteAte: (recorrente && recorrenteAte) ? recorrenteAte : null,
+      recorrenciaTipo: recorrente ? recorrenciaTipo : null,
       servicos: servicosBody,
       valorTotal, valorRecebido: parseFloat(valorRecebido) || 0,
       dataPagamento: dataPagamento || null, metodoPagamento: metodoPagamento || null,
@@ -853,9 +868,38 @@ export function NovoAgendamentoModal({
                     value={sala} onChange={setSala} onClear={() => setSala('')} disabled={salas.length === 0} />
                 </div>
                 {!isEditing && (
-                  <div className="flex items-center gap-3">
-                    <Toggle on={recorrente} set={setRecorrente} />
-                    <span className="text-sm text-[var(--d2b-text-secondary)]">É um evento recorrente?</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Toggle on={recorrente} set={setRecorrente} />
+                      <span className="text-sm text-[var(--d2b-text-secondary)]">É um evento recorrente?</span>
+                    </div>
+                    {recorrente && (
+                      <div className="grid grid-cols-2 gap-3 ml-10">
+                        <FloatingField label="Repetir até" required>
+                          <input
+                            type="date"
+                            value={recorrenteAte}
+                            onChange={(e) => setRecorrenteAte(e.target.value)}
+                            min={inicio ? inicio.split('T')[0] : undefined}
+                            className={INP}
+                          />
+                        </FloatingField>
+                        <FloatingField label="Frequência" required>
+                          <div className="relative">
+                            <select
+                              value={recorrenciaTipo}
+                              onChange={(e) => setRecorrenciaTipo(e.target.value as 'DIARIO' | 'SEMANAL' | 'MENSAL')}
+                              className={INP + ' appearance-none pr-8'}
+                            >
+                              <option value="SEMANAL">Semanal</option>
+                              <option value="DIARIO">Diário</option>
+                              <option value="MENSAL">Mensal</option>
+                            </select>
+                            <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
+                          </div>
+                        </FloatingField>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex items-center gap-3">
@@ -1135,6 +1179,9 @@ export function CalendarioView({
   const [now, setNow]               = useState(new Date())
 
   const [appointments, setAppointments]               = useState<Appointment[]>([])
+  const [marcadores, setMarcadores]                     = useState<Marcador[]>([])
+  const [historicoRisco, setHistoricoRisco]             = useState<ApiAgendamento[]>([])
+  const [inadimplenteIds, setInadimplenteIds]           = useState<Set<string>>(new Set())
   const [selectedAgendamento, setSelectedAgendamento] = useState<ApiAgendamento | undefined>()
   const [selectedProfissional, setSelectedProfissional] = useState('')
   const [profDropdownOpen, setProfDropdownOpen]         = useState(false)
@@ -1193,6 +1240,44 @@ export function CalendarioView({
   }, [empresaId, weekBase, viewMode])
 
   useEffect(() => { fetchAppointments() }, [fetchAppointments])
+
+  // ── Fetch marcadores da empresa (único, sem depências extras) ────────────
+  useEffect(() => {
+    if (!empresaId) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/marcadores/empresa/${empresaId}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setMarcadores)
+      .catch(() => {})
+  }, [empresaId])
+
+  // ── Buscar histórico de 12 meses ao ativar filtro Alto Risco ─────────
+  useEffect(() => {
+    if (filtroCorAtivo !== 'Alto Risco de Falta' || !empresaId) return
+    const fim   = new Date(); fim.setHours(23, 59, 59, 999)
+    const inicio = new Date(fim); inicio.setFullYear(inicio.getFullYear() - 1); inicio.setHours(0, 0, 0, 0)
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/agendamentos/empresa/${empresaId}?inicio=${inicio.toISOString()}&fim=${fim.toISOString()}`,
+      { cache: 'no-store' }
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setHistoricoRisco)
+      .catch(() => {})
+  }, [filtroCorAtivo, empresaId])
+
+  // ── Buscar inadimplentes ao ativar filtro Inadimplentes ───────────────
+  useEffect(() => {
+    if (filtroCorAtivo !== 'Inadimplentes' || !empresaId) {
+      setInadimplenteIds(new Set())
+      return
+    }
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/movimentos-financeiros/empresa/${empresaId}/inadimplentes`,
+      { cache: 'no-store' }
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then((ids: string[]) => setInadimplenteIds(new Set(ids)))
+      .catch(() => {})
+  }, [filtroCorAtivo, empresaId])
 
   // ── Navigation ──────────────────────────────────────────────────────────
   const today    = new Date()
@@ -1274,6 +1359,148 @@ export function CalendarioView({
   const visibleAppointments = selectedProfissional
     ? appointments.filter((a) => a.usuarioNome === selectedProfissional)
     : appointments
+
+  // ── Projeção financeira ───────────────────────────────────────────────────
+  const exibirProjecao = agendaConfig?.exibirProjecao === true
+  const projecao = useMemo(() => {
+    if (!exibirProjecao) return null
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+    // Fim da janela: mesmo que a janela de fetch
+    let windowEnd: Date
+    if (viewMode === 'Dia') {
+      windowEnd = new Date(weekBase); windowEnd.setHours(23, 59, 59, 999)
+    } else if (viewMode === 'Mês') {
+      windowEnd = new Date(weekBase.getFullYear(), weekBase.getMonth() + 1, 0)
+      windowEnd.setHours(23, 59, 59, 999)
+    } else {
+      const days = weekDays
+      windowEnd = new Date(days[days.length - 1]); windowEnd.setHours(23, 59, 59, 999)
+    }
+    let aguardando = 0
+    let atendido = 0
+    for (const a of visibleAppointments) {
+      if (a.raw.tipo === 'BLOQUEIO') continue
+      const apptDate = new Date(a.raw.inicio)
+      if (apptDate < todayStart || apptDate > windowEnd) continue
+      const statusLower = (a.raw.status ?? '').toLowerCase()
+      if (statusLower === 'aguardando' || statusLower === 'confirmado') {
+        aguardando += a.raw.valorTotal ?? 0
+      } else if (statusLower === 'atendido') {
+        atendido += a.raw.valorRecebido ?? 0
+      }
+    }
+    return { aguardando, atendido }
+  }, [exibirProjecao, visibleAppointments, viewMode, weekBase, weekDays])
+
+  // ── Alto Risco de Falta (baseia-se no histórico de 12 meses) ─────────
+  const altoRiscoPacienteIds = useMemo(() => {
+    if (filtroCorAtivo !== 'Alto Risco de Falta') return new Set<string>()
+    const byPaciente = new Map<string, ApiAgendamento[]>()
+    for (const a of historicoRisco) {
+      if (!a.pacienteId) continue
+      const arr = byPaciente.get(a.pacienteId) ?? []
+      arr.push(a)
+      byPaciente.set(a.pacienteId, arr)
+    }
+    const ids = new Set<string>()
+    byPaciente.forEach((appts, pacienteId) => {
+      // considera apenas agendamentos concluídos (com status de desfecho)
+      const concluidos = appts.filter((a) =>
+        ['Faltou', 'Atendido', 'Cancelado'].includes(a.status)
+      )
+      if (concluidos.length === 0) return
+      const sorted = [...concluidos].sort(
+        (x, y) => new Date(x.inicio).getTime() - new Date(y.inicio).getTime()
+      )
+      const last = sorted[sorted.length - 1]
+      if (last.status !== 'Faltou') return
+      const taxa = concluidos.filter((a) => a.status === 'Faltou').length / concluidos.length
+      if (taxa > 0.4) ids.add(pacienteId)
+    })
+    return ids
+  }, [historicoRisco, filtroCorAtivo])
+
+  const marcadorAltoRisco = marcadores.find((m) => m.tipo === 'ALTO_RISCO_FALTA')
+  const corAltoRisco = marcadorAltoRisco?.cor ?? '#EF4444'
+
+  const marcadorConvenio = marcadores.find((m) => m.tipo === 'CONVENIO')
+  const corConvenio = marcadorConvenio?.cor ?? '#3B82F6'
+
+  const marcadorInadimplente = marcadores.find((m) => m.tipo === 'INADIMPLENTE')
+  const corInadimplente = marcadorInadimplente?.cor ?? '#F97316'
+
+  const marcadorPrimeiroAtendimento = marcadores.find((m) => m.tipo === 'PRIMEIRO_ATENDIMENTO')
+  const corPrimeiroAtendimento = marcadorPrimeiroAtendimento?.cor ?? '#22C55E'
+
+  const marcadorAniversariante = marcadores.find((m) => m.tipo === 'ANIVERSARIANTE')
+  const corAniversariante = marcadorAniversariante?.cor ?? '#EC4899'
+
+  const marcadorSala = marcadores.find((m) => m.tipo === 'SALA')
+  const corSala = marcadorSala?.cor ?? '#06B6D4'
+
+  const marcadorProfissional = marcadores.find((m) => m.tipo === 'PROFISSIONAL')
+  const corProfissional = marcadorProfissional?.cor ?? '#8B5CF6'
+
+  const hoje = new Date()
+  const hojeMonth = hoje.getMonth() + 1 // 1-based
+  const hojeDay   = hoje.getDate()
+
+  /** Verifica se pacienteDataNascimento (YYYY-MM-DD) cai hoje (mesmo dia/mês) */
+  function isAniversariante(dob: string | null | undefined): boolean {
+    if (!dob) return false
+    const [, mm, dd] = dob.split('-').map(Number)
+    return mm === hojeMonth && dd === hojeDay
+  }
+
+  /** Retorna bg/border para um evento, considerando todos os filtros de cor */
+  function corEvento(appt: Appointment): { bg: string; border: string } {
+    if (
+      filtroCorAtivo === 'Alto Risco de Falta' &&
+      appt.raw.pacienteId &&
+      altoRiscoPacienteIds.has(appt.raw.pacienteId)
+    ) {
+      return { bg: `${corAltoRisco}1A`, border: `${corAltoRisco}55` }
+    }
+    if (
+      filtroCorAtivo === 'Convênio' &&
+      appt.raw.pacientePlano &&
+      appt.raw.pacientePlano.trim().toUpperCase() !== 'PARTICULAR'
+    ) {
+      return { bg: `${corConvenio}1A`, border: `${corConvenio}55` }
+    }
+    if (
+      filtroCorAtivo === 'Inadimplentes' &&
+      appt.raw.pacienteId &&
+      inadimplenteIds.has(appt.raw.pacienteId)
+    ) {
+      return { bg: `${corInadimplente}1A`, border: `${corInadimplente}55` }
+    }
+    if (
+      filtroCorAtivo === 'Primeiro Atendimento' &&
+      appt.raw.pacienteSessoes === 0
+    ) {
+      return { bg: `${corPrimeiroAtendimento}1A`, border: `${corPrimeiroAtendimento}55` }
+    }
+    if (
+      filtroCorAtivo === 'Aniversário' &&
+      isAniversariante(appt.raw.pacienteDataNascimento)
+    ) {
+      return { bg: `${corAniversariante}1A`, border: `${corAniversariante}55` }
+    }
+    if (
+      filtroCorAtivo === 'Sala' &&
+      appt.raw.sala
+    ) {
+      return { bg: `${corSala}1A`, border: `${corSala}55` }
+    }
+    if (
+      filtroCorAtivo === 'Profissional' &&
+      appt.raw.usuarioNome
+    ) {
+      return { bg: `${corProfissional}1A`, border: `${corProfissional}55` }
+    }
+    return COR_BG[appt.cor] ?? COR_BG.purple
+  }
 
   const closeAll = () => { setFiltrosOpen(false); setSettingsOpen(false); setProfDropdownOpen(false) }
 
@@ -1691,7 +1918,14 @@ export function CalendarioView({
                           )
                         }
 
-                        const { bg, border } = COR_BG[appt.cor] ?? COR_BG.purple
+                        const isRisco = filtroCorAtivo === 'Alto Risco de Falta' && !!appt.raw.pacienteId && altoRiscoPacienteIds.has(appt.raw.pacienteId)
+                        const isConvenio = filtroCorAtivo === 'Convênio' && !!appt.raw.pacientePlano && appt.raw.pacientePlano.trim().toUpperCase() !== 'PARTICULAR'
+                        const isInadimplente = filtroCorAtivo === 'Inadimplentes' && !!appt.raw.pacienteId && inadimplenteIds.has(appt.raw.pacienteId)
+                        const isPrimeiroAtend = filtroCorAtivo === 'Primeiro Atendimento' && appt.raw.pacienteSessoes === 0
+                        const isAniversario = filtroCorAtivo === 'Aniversário' && isAniversariante(appt.raw.pacienteDataNascimento)
+                        const isSalaAtiva = filtroCorAtivo === 'Sala' && !!appt.raw.sala
+                        const isProfissional = filtroCorAtivo === 'Profissional' && !!appt.raw.usuarioNome
+                        const { bg, border } = corEvento(appt)
                         return (
                           <div
                             key={appt.id}
@@ -1700,8 +1934,72 @@ export function CalendarioView({
                             style={{ top, height, background: bg, border: `1px solid ${border}` }}
                           >
                             <div className="flex items-center gap-1.5 px-2 h-full">
-                              <div className={`w-2 h-2 rounded-full shrink-0 ${COR_DOT[appt.cor] ?? COR_DOT.purple}`} />
+                              {isRisco
+                                ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corAltoRisco }} />
+                                : isConvenio
+                                  ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corConvenio }} />
+                                  : isInadimplente
+                                    ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corInadimplente }} />
+                                    : isPrimeiroAtend
+                                      ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corPrimeiroAtendimento }} />
+                                      : isAniversario
+                                        ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corAniversariante }} />
+                                        : isSalaAtiva
+                                          ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corSala }} />
+                                          : isProfissional
+                                            ? <span className="w-2 h-2 rounded-full shrink-0" style={{ background: corProfissional }} />
+                                            : <div className={`w-2 h-2 rounded-full shrink-0 ${COR_DOT[appt.cor] ?? COR_DOT.purple}`} />
+                              }
                               <span className="text-xs font-medium text-[var(--d2b-text-primary)] truncate">{appt.pacienteNome}</span>
+                              {isRisco && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded"
+                                  style={{ background: corAltoRisco, color: '#fff' }}
+                                  title="Alto Risco de Falta"
+                                >⚠</span>
+                              )}
+                              {isConvenio && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded truncate max-w-[60px]"
+                                  style={{ background: corConvenio, color: '#fff' }}
+                                  title={`Convênio: ${appt.raw.pacientePlano}`}
+                                >{appt.raw.pacientePlano}</span>
+                              )}
+                              {isInadimplente && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded"
+                                  style={{ background: corInadimplente, color: '#fff' }}
+                                  title="Inadimplente"
+                                >$</span>
+                              )}
+                              {isPrimeiroAtend && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded"
+                                  style={{ background: corPrimeiroAtendimento, color: '#fff' }}
+                                  title="Primeiro Atendimento"
+                                >1º</span>
+                              )}
+                              {isAniversario && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded"
+                                  style={{ background: corAniversariante, color: '#fff' }}
+                                  title="Aniversário"
+                                >🎂</span>
+                              )}
+                              {isSalaAtiva && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded truncate max-w-[60px]"
+                                  style={{ background: corSala, color: '#fff' }}
+                                  title={`Sala: ${appt.raw.sala}`}
+                                >{appt.raw.sala}</span>
+                              )}
+                              {isProfissional && (
+                                <span
+                                  className="shrink-0 text-[9px] font-bold px-1 rounded truncate max-w-[60px]"
+                                  style={{ background: corProfissional, color: '#fff' }}
+                                  title={`Profissional: ${appt.raw.usuarioNome}`}
+                                >{appt.raw.usuarioNome}</span>
+                              )}
                               <span className="text-[10px] text-[var(--d2b-text-secondary)] shrink-0 ml-auto">{appt.inicio} - {appt.fim}</span>
                             </div>
                           </div>
@@ -1754,14 +2052,42 @@ export function CalendarioView({
                     </div>
                     <div className="space-y-0.5">
                       {dayAppts.slice(0, 3).map((appt) => {
-                        const { bg, border } = COR_BG[appt.cor] ?? COR_BG.purple
+                        const isRisco = filtroCorAtivo === 'Alto Risco de Falta' && !!appt.raw.pacienteId && altoRiscoPacienteIds.has(appt.raw.pacienteId)
+                        const isConvenio = filtroCorAtivo === 'Convênio' && !!appt.raw.pacientePlano && appt.raw.pacientePlano.trim().toUpperCase() !== 'PARTICULAR'
+                        const isInadimplente = filtroCorAtivo === 'Inadimplentes' && !!appt.raw.pacienteId && inadimplenteIds.has(appt.raw.pacienteId)
+                        const isPrimeiroAtend = filtroCorAtivo === 'Primeiro Atendimento' && appt.raw.pacienteSessoes === 0
+                        const isAniversario = filtroCorAtivo === 'Aniversário' && isAniversariante(appt.raw.pacienteDataNascimento)
+                        const isSalaAtiva = filtroCorAtivo === 'Sala' && !!appt.raw.sala
+                        const isProfissional = filtroCorAtivo === 'Profissional' && !!appt.raw.usuarioNome
+                        const { bg, border } = corEvento(appt)
                         return (
                           <div
                             key={appt.id}
                             onClick={(e) => { e.stopPropagation(); openEditModal(appt) }}
-                            className="w-full rounded px-1 py-0.5 text-[10px] text-[var(--d2b-text-primary)] truncate"
+                            className="w-full rounded px-1 py-0.5 text-[10px] text-[var(--d2b-text-primary)] truncate flex items-center gap-1"
                             style={{ background: bg, border: `1px solid ${border}` }}
                           >
+                            {isRisco && (
+                              <span className="shrink-0 font-bold" style={{ color: corAltoRisco }} title="Alto Risco de Falta">⚠</span>
+                            )}
+                            {isConvenio && (
+                              <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: corConvenio }} title={`Convênio: ${appt.raw.pacientePlano}`} />
+                            )}
+                            {isInadimplente && (
+                              <span className="shrink-0 font-bold" style={{ color: corInadimplente }} title="Inadimplente">$</span>
+                            )}
+                            {isPrimeiroAtend && (
+                              <span className="shrink-0 font-bold" style={{ color: corPrimeiroAtendimento }} title="Primeiro Atendimento">1º</span>
+                            )}
+                            {isAniversario && (
+                              <span className="shrink-0" title="Aniversário">🎂</span>
+                            )}
+                            {isSalaAtiva && (
+                              <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: corSala }} title={`Sala: ${appt.raw.sala}`} />
+                            )}
+                            {isProfissional && (
+                              <span className="shrink-0 font-bold text-[9px]" style={{ color: corProfissional }} title={`Profissional: ${appt.raw.usuarioNome}`}>{appt.raw.usuarioNome}</span>
+                            )}
                             {appt.inicio} {appt.pacienteNome}
                           </div>
                         )
@@ -1776,7 +2102,7 @@ export function CalendarioView({
       )}
 
       {/* ── Scroll buttons ───────────────────────────────────────────────── */}
-      <div className="flex justify-center gap-3 py-1.5 border-t shrink-0" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}>
+      <div className="relative flex justify-center gap-3 py-1.5 border-t shrink-0" style={{ background: 'var(--d2b-bg-main)', borderColor: 'var(--d2b-border)' }}>
         <button
           onClick={() => document.querySelector('.flex-1.overflow-y-auto')?.scrollBy({ top: -120, behavior: 'smooth' })}
           className="w-8 h-6 flex items-center justify-center rounded text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors text-xs"
@@ -1789,6 +2115,24 @@ export function CalendarioView({
         >
           ∨
         </button>
+
+        {/* ── Projeção financeira ──────────────────────────────── */}
+        {projecao && (
+          <div className="absolute right-4 bottom-1 flex items-end gap-3 pointer-events-none select-none">
+            <div className="text-right">
+              <p className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(124,77,255,0.5)' }}>Atendido</p>
+              <p className="font-bold leading-none tabular-nums" style={{ fontSize: '1.6rem', color: 'rgba(124,77,255,0.35)' }}>
+                {projecao.atendido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(124,77,255,0.7)' }}>Previsto</p>
+              <p className="font-bold leading-none tabular-nums" style={{ fontSize: '2.2rem', color: 'rgba(124,77,255,0.55)' }}>
+                {projecao.aguardando.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <NovoAgendamentoModal
