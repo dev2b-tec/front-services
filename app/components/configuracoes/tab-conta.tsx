@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { User, Building2, Upload, PenLine, Pencil } from 'lucide-react'
+import { User, Building2, Upload, PenLine } from 'lucide-react'
 import { FInput, FSelect, PhoneInput, CepInput, SectionFooter } from './shared'
 import { AvatarImage } from './avatar-image'
 import { SignatureDialog } from './signature-dialog'
 import { useToast } from '@/hooks/use-toast'
+import { FotoModal } from '@/components/clientes/foto-modal'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
 // ─── ContaUsuario ─────────────────────────────────────────────────────────────
@@ -18,8 +19,8 @@ function ContaUsuario({
   onChange: (field: keyof UsuarioData, value: string) => void
   onFotoUrl: (url: string) => void
 }) {
-  const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [fotoModalOpen, setFotoModalOpen] = useState(false)
   const [buscandoCep, setBuscandoCep] = useState(false)
 
   async function handleCepBlur() {
@@ -39,9 +40,8 @@ function ContaUsuario({
     }
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !data.id) return
+  async function uploadFoto(file: File) {
+    if (!data.id) return
     setUploading(true)
     try {
       const form = new FormData()
@@ -56,7 +56,6 @@ function ContaUsuario({
       }
     } finally {
       setUploading(false)
-      e.target.value = ''
     }
   }
 
@@ -65,7 +64,7 @@ function ContaUsuario({
       <div className="flex flex-col items-center gap-1.5 pb-3">
         <div
           className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
-          onClick={() => fileRef.current?.click()}
+          onClick={() => setFotoModalOpen(true)}
         >
           {data.fotoUrl
             ? <AvatarImage userId={data.id} fotoUrl={data.fotoUrl} />
@@ -75,13 +74,12 @@ function ContaUsuario({
             {uploading
               ? <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
               : <div className="w-9 h-9 rounded-full bg-[#7C4DFF] flex items-center justify-center shadow-lg">
-                  <Pencil size={14} className="text-white" strokeWidth={2.5} />
+                  <User size={14} className="text-white" strokeWidth={2.5} />
                 </div>
             }
           </div>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-        <p className="text-sm text-[var(--d2b-text-secondary)]">{data.email ?? ''}</p>
+        <FotoModal open={fotoModalOpen} onClose={() => setFotoModalOpen(false)} onConfirm={uploadFoto} />
       </div>
 
       <FInput
@@ -175,8 +173,8 @@ function ContaEmpresa({
   onChange: (field: keyof EmpresaData, value: string | number) => void
   onLogoUrl: (url: string) => void
 }) {
-  const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [logoModalOpen, setLogoModalOpen] = useState(false)
   const [buscandoCepClinica, setBuscandoCepClinica] = useState(false)
 
   async function handleCepClinicaBlur() {
@@ -196,9 +194,8 @@ function ContaEmpresa({
     }
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !data.id) return
+  async function uploadLogo(file: File) {
+    if (!data.id) return
     setUploading(true)
     try {
       const form = new FormData()
@@ -213,7 +210,6 @@ function ContaEmpresa({
       }
     } finally {
       setUploading(false)
-      e.target.value = ''
     }
   }
 
@@ -223,7 +219,7 @@ function ContaEmpresa({
         <p className="text-xs font-medium text-[var(--d2b-text-secondary)]">Logo da Clínica</p>
         <div
           className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
-          onClick={() => fileRef.current?.click()}
+          onClick={() => setLogoModalOpen(true)}
         >
           {data.logoUrl
             ? <img src={data.logoUrl} alt="Logo" className="w-full h-full object-cover" />
@@ -233,12 +229,12 @@ function ContaEmpresa({
             {uploading
               ? <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
               : <div className="w-9 h-9 rounded-full bg-[#7C4DFF] flex items-center justify-center shadow-lg">
-                  <Pencil size={14} className="text-white" strokeWidth={2.5} />
+                  <Building2 size={14} className="text-white" strokeWidth={2.5} />
                 </div>
             }
           </div>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        <FotoModal open={logoModalOpen} onClose={() => setLogoModalOpen(false)} onConfirm={uploadLogo} />
       </div>
 
       <FInput

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Send, Loader2, WifiOff, PhoneOff, MessageSquare } from 'lucide-react'
+import { X, Send, Loader2, WifiOff, PhoneOff, MessageSquare, Smile } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { htmlParaTexto } from '@/components/configuracoes/mensagem-editor'
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
+const API_URL   = process.env.NEXT_PUBLIC_API_URL ?? ''
 const WHATS_URL = ''
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -45,26 +47,46 @@ const TIPOS_MENSAGEM = [
   { id: 'personalizada', titulo: 'Personalize a Mensagem',   desc: 'Envie a mensagem que desejar ao paciente.'      },
 ]
 
-function buildMensagem(tipo: string, ctx: MensagemContext): string {
+// Mapa dos IDs do modal para os tipos do backend
+const TIPO_BACKEND_MAP: Record<string, string> = {
+  confirmar:     'CONFIRMAR_AGENDAMENTO',
+  remarcacao:    'REMARCACAO',
+  agradecimento: 'AGRADECIMENTO',
+  cobranca:      'COBRANCA',
+}
+
+// Substitui as variáveis da mensagem padrão pelos valores reais do contexto
+function substituirVariaveis(texto: string, ctx: MensagemContext): string {
+  return texto
+    .replace(/#nome_paciente#/g,            ctx.nomePaciente    ?? '')
+    .replace(/#nome_profissional#/g,        ctx.nomeProfissional ?? '')
+    .replace(/#data_e_hora_agendamento#/g,  ctx.dataHora         ?? '')
+    .replace(/#link_de_confirmacao#/g,      '')
+    .trim()
+}
+
+// Fallback hardcoded caso a API não retorne template para o tipo
+function buildMensagemFallback(tipo: string, ctx: MensagemContext): string {
   const p    = ctx.nomePaciente    ? `, ${ctx.nomePaciente}` : ''
   const prof = ctx.nomeProfissional ? ` com ${ctx.nomeProfissional}` : ''
   const hora = ctx.dataHora         ? ` para ${ctx.dataHora}` : ''
-
   switch (tipo) {
-    case 'confirmar':
-      return `Olá${p}! Confirmamos seu agendamento${prof}${hora}. Por favor, confirme sua presença respondendo esta mensagem. 😊`
-    case 'remarcacao':
-      return `Olá${p}! Notamos sua ausência em nosso atendimento. Gostaria de remarcar? Entre em contato para agendar um novo horário.`
-    case 'agradecimento':
-      return `Olá${p}! Muito obrigado pela sua visita! Esperamos ter contribuído para o seu bem-estar. Até a próxima! 😊`
-    case 'cobranca':
-      return `Olá${p}! Identificamos um valor pendente referente ao seu atendimento. Por favor, entre em contato conosco para regularizar.`
-    case 'anamnese':
-      return `Olá${p}! Para um melhor atendimento, precisamos que você preencha nosso questionário de anamnese antes da consulta. Entre em contato para mais informações.`
-    default:
-      return ''
+    case 'confirmar':     return `Olá${p}! Confirmamos seu agendamento${prof}${hora}. Por favor, confirme sua presença respondendo esta mensagem. 😊`
+    case 'remarcacao':    return `Olá${p}! Notamos sua ausência em nosso atendimento. Gostaria de remarcar? Entre em contato para agendar um novo horário.`
+    case 'agradecimento': return `Olá${p}! Muito obrigado pela sua visita! Esperamos ter contribuído para o seu bem-estar. Até a próxima! 😊`
+    case 'cobranca':      return `Olá${p}! Identificamos um valor pendente referente ao seu atendimento. Por favor, entre em contato conosco para regularizar.`
+    case 'anamnese':      return `Olá${p}! Para um melhor atendimento, precisamos que você preencha nosso questionário de anamnese antes da consulta. Entre em contato para mais informações.`
+    default:              return ''
   }
 }
+
+// Emojis disponíveis no seletor da mensagem personalizada
+const EMOJIS = [
+  '😊','😄','🤗','😎','😉','🙂','😁','🥰',
+  '👍','👏','🙏','✅','⭐','🎉','❤️','💜',
+  '📅','⏰','📞','📋','📝','🏥','💊','💰',
+  '🔔','✉️','🚀','💡','🤝','🌟','💪','😢',
+]
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function SistemaMensagensModal({
@@ -86,6 +108,14 @@ export function SistemaMensagensModal({
   const [customExpanded,   setCustomExpanded]   = useState(false)
   const [criandoChat,      setCriandoChat]      = useState(false)
 
+  // Templates carregados da API
+  const [templates, setTemplates] = useState<Record<string, string>>({})
+
+  // Emoji picker
+  const [emojiOpen, setEmojiOpen]     = useState(false)
+  const emojiRef                      = useRef<HTMLDivElement>(null)
+  const textareaRef                   = useRef<HTMLTextAreaElement>(null)
+
   const telefoneNumerico = telefone?.replace(/\D/g, '') ?? ''
   const temTelefone      = telefoneNumerico.length >= 10
 
@@ -104,16 +134,57 @@ export function SistemaMensagensModal({
     }
   }, [empresaId])
 
+  // Carrega os templates da empresa (com fallback para os defaults do sistema)
+  const carregarTemplates = useCallback(async () => {
+    if (!empresaId) return
+    try {
+      const res = await fetch(`${API_URL}/api/v1/mensagens-padrao/empresa/${empresaId}`)
+      if (res.ok) {
+        const lista: { tipo: string; texto: string }[] = await res.json()
+        const map: Record<string, string> = {}
+        lista.forEach((m) => { map[m.tipo] = htmlParaTexto(m.texto) })
+        setTemplates(map)
+      }
+    } catch { /* silencioso */ }
+  }, [empresaId])
+
   useEffect(() => {
     if (open && empresaId) {
       carregarInstancia()
+      carregarTemplates()
     }
     if (!open) {
       setCustomText('')
       setCustomExpanded(false)
+      setEmojiOpen(false)
       setEnviando(null)
     }
-  }, [open, empresaId, carregarInstancia])
+  }, [open, empresaId, carregarInstancia, carregarTemplates])
+
+  // Fecha o emoji picker ao clicar fora
+  useEffect(() => {
+    if (!emojiOpen) return
+    function onClickOutside(e: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setEmojiOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [emojiOpen])
+
+  function insertEmoji(emoji: string) {
+    const ta = textareaRef.current
+    if (!ta) { setCustomText((v) => v + emoji); return }
+    const start = ta.selectionStart ?? customText.length
+    const end   = ta.selectionEnd   ?? customText.length
+    const next  = customText.slice(0, start) + emoji + customText.slice(end)
+    setCustomText(next)
+    requestAnimationFrame(() => {
+      ta.selectionStart = ta.selectionEnd = start + emoji.length
+      ta.focus()
+    })
+  }
 
   const enviar = async (tipo: string, texto: string) => {
     if (!instancia || !temTelefone || !texto.trim()) return
@@ -151,7 +222,13 @@ export function SistemaMensagensModal({
       enviar(tipo, customText)
       return
     }
-    enviar(tipo, buildMensagem(tipo, context))
+    // Usa o template da empresa/default da API; fallback para texto hardcoded
+    const backendTipo = TIPO_BACKEND_MAP[tipo]
+    const templateRaw = backendTipo ? templates[backendTipo] : undefined
+    const texto = templateRaw
+      ? substituirVariaveis(templateRaw, context)
+      : buildMensagemFallback(tipo, context)
+    enviar(tipo, texto)
   }
 
   const abrirChat = async () => {
@@ -289,20 +366,51 @@ export function SistemaMensagensModal({
                   </button>
                 </div>
 
-                {/* Inline textarea for "Personalize" */}
+                {/* Inline textarea + emoji for "Personalize" */}
                 {showTextArea && (
                   <div className="px-4 pb-3 space-y-2 border-t border-[var(--d2b-border)]">
-                    <textarea
-                      value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
-                      rows={3}
-                      autoFocus
-                      placeholder="Digite sua mensagem personalizada..."
-                      className="w-full mt-2 bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
-                    />
+                    <div className="relative mt-2">
+                      <textarea
+                        ref={textareaRef}
+                        value={customText}
+                        onChange={(e) => setCustomText(e.target.value)}
+                        rows={3}
+                        autoFocus
+                        placeholder="Digite sua mensagem personalizada..."
+                        className="w-full bg-[var(--d2b-bg-main)] border border-[var(--d2b-border-strong)] rounded-md px-3 py-2 pr-9 text-sm text-[var(--d2b-text-primary)] placeholder:text-[var(--d2b-text-muted)] focus:outline-none focus:border-[#7C4DFF] resize-none transition-colors"
+                      />
+                      {/* Emoji trigger */}
+                      <button
+                        type="button"
+                        onClick={() => setEmojiOpen((v) => !v)}
+                        className="absolute right-2 top-2 text-[var(--d2b-text-muted)] hover:text-[#7C4DFF] transition-colors"
+                        title="Emojis"
+                      >
+                        <Smile size={16} />
+                      </button>
+                      {/* Emoji picker popover */}
+                      {emojiOpen && (
+                        <div
+                          ref={emojiRef}
+                          className="absolute right-0 bottom-full mb-1 z-50 p-2 rounded-xl shadow-2xl grid grid-cols-8 gap-0.5"
+                          style={{ background: 'var(--d2b-bg-elevated)', border: '1px solid var(--d2b-border-strong)', width: 240 }}
+                        >
+                          {EMOJIS.map((e) => (
+                            <button
+                              key={e}
+                              type="button"
+                              onClick={() => insertEmoji(e)}
+                              className="w-7 h-7 flex items-center justify-center text-base rounded hover:bg-[var(--d2b-hover)] transition-colors"
+                            >
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => { setCustomExpanded(false); setCustomText('') }}
+                        onClick={() => { setCustomExpanded(false); setCustomText(''); setEmojiOpen(false) }}
                         className="px-3 py-1.5 text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] rounded-md hover:border-[#7C4DFF] transition-colors"
                       >
                         Cancelar

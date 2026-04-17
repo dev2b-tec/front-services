@@ -10,6 +10,8 @@ import { TabAnamnese } from '@/components/clientes/tab-anamnese'
 import { TabFinanceiro } from '@/components/clientes/tab-financeiro'
 import { TabDocumentos } from '@/components/clientes/tab-documentos'
 import { SistemaMensagensModal } from '@/components/mensagens/sistema-mensagens-modal'
+import { useAbility, subject } from '@/lib/casl'
+import { FotoModal } from '@/components/clientes/foto-modal'
 import {
   Search, Plus, Pencil, Trash2,
   ChevronsUpDown, ChevronDown, ChevronUp,
@@ -17,7 +19,7 @@ import {
   ChevronsLeft, ChevronsRight, ArrowLeft,
   User, LayoutGrid, ClipboardList, Activity,
   DollarSign, FileText, X, Clock, Eye,
-  MessageCircle, Zap, Send, Lock, Printer, Settings, Loader2,
+  MessageCircle, Zap, Send, Lock, Printer, Settings, Loader2, Camera,
 } from 'lucide-react'
 import {
   Dialog,
@@ -52,6 +54,7 @@ type Cliente = {
   genero?: string
   convenio?: string
   email?: string
+  fotoUrl?: string
 }
 
 type Agendamento = {
@@ -106,6 +109,7 @@ export type PacienteApi = {
   telefoneResponsavel?: string | null
   statusPagamento: string | null
   sessoes: number
+  fotoUrl?: string | null
   usuarioId?: string | null
   usuarioNome?: string | null
 }
@@ -131,6 +135,7 @@ function pacienteParaCliente(p: PacienteApi): Cliente {
     genero: p.genero ?? undefined,
     convenio: p.plano ?? undefined,
     email: p.email ?? undefined,
+    fotoUrl: p.fotoUrl ?? undefined,
   }
 }
 
@@ -450,6 +455,9 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
   const [saving, setSaving] = useState(false)
   const [changed, setChanged] = useState(false)
   const [menorIdade, setMenorIdade] = useState(false)
+  const [fotoUrl, setFotoUrl] = useState<string | null>(paciente.fotoUrl ?? null)
+  const [uploadingFoto, setUploadingFoto] = useState(false)
+  const [fotoModalOpen, setFotoModalOpen] = useState(false)
 
   const [nome, setNome] = useState(paciente.nome ?? '')
   const [telefone, setTelefone] = useState((paciente.telefone ?? '').replace('+55 ', ''))
@@ -476,6 +484,29 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
   function mark<T>(setter: (v: T) => void): (v: T) => void {
     return (v) => { setter(v); setChanged(true) }
+  }
+
+  async function uploadFotoFile(file: File) {
+    setUploadingFoto(true)
+    try {
+      const form = new FormData()
+      form.append('arquivo', file)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${paciente.id}/foto`, {
+        method: 'POST',
+        body: form,
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setFotoUrl(data.fotoUrl ?? null)
+        toast({ title: 'Foto atualizada com sucesso!' })
+      } else {
+        toast({ title: 'Erro ao enviar foto', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Erro ao enviar foto', variant: 'destructive' })
+    } finally {
+      setUploadingFoto(false)
+    }
   }
 
   async function handleSave() {
@@ -521,8 +552,46 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="p-6 space-y-5 max-w-5xl">
-        {/* Header */}
+      <div className="p-6 max-w-5xl space-y-5">
+
+        {/* Topo: foto à esquerda + info do paciente */}
+        <div className="flex items-center gap-6">
+          {/* Avatar clicável */}
+          <div
+            className="relative group cursor-pointer flex-shrink-0"
+            onClick={() => setFotoModalOpen(true)}
+            title="Clique para alterar a foto"
+          >
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center">
+              {fotoUrl ? (
+                <img src={fotoUrl} alt={paciente.nome} className="w-full h-full object-cover" />
+              ) : (
+                <Camera size={32} className="text-[var(--d2b-text-muted)]" />
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingFoto ? (
+                <Loader2 size={20} className="text-white animate-spin" />
+              ) : (
+                <Camera size={20} className="text-white" />
+              )}
+            </div>
+          </div>
+
+          {/* Info resumida */}
+          <div>
+            <p className="text-base font-bold text-[var(--d2b-text-primary)]">{paciente.nome}</p>
+            <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Atendimentos: {paciente.sessoes ?? 0}</p>
+          </div>
+        </div>
+
+        <FotoModal
+          open={fotoModalOpen}
+          onClose={() => setFotoModalOpen(false)}
+          onConfirm={uploadFotoFile}
+        />
+
+        {/* Header do formulário */}
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Paciente</h3>
@@ -1583,6 +1652,7 @@ function CriarClienteModal({
 
 // --- Main View ----------------------------------------------------------------
 export function ClientesView({ initialPacientes, empresaId, profissionais = [], usuarioId, usuarioNome }: { initialPacientes: PacienteApi[]; empresaId: string | null; profissionais?: ProfissionalItem[]; usuarioId?: string; usuarioNome?: string }) {
+  const { ability } = useAbility()
   const searchParams = useSearchParams()
   const pacienteIdParam = searchParams.get('pacienteId')
   const tabParam = (searchParams.get('tab') as Tab | null) ?? 'dados'
@@ -1603,7 +1673,9 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
     return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} usuarioId={usuarioId} usuarioNome={usuarioNome} />
   }
 
-  const filtered = pacientes.filter((c) => {
+  const filtered = pacientes
+    .filter((c) => ability.can('read', subject('pacientes', c)))
+    .filter((c) => {
     if (!c.nome.toLowerCase().includes(search.toLowerCase())) return false
     if (filterStatus && statusLabel(c.statusPagamento) !== filterStatus) return false
     if (filterProfissional && c.usuarioId !== filterProfissional) return false
@@ -1618,10 +1690,12 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
           <h2 className="text-xl font-bold text-[var(--d2b-text-primary)]">Clientes</h2>
           <p className="text-sm text-[var(--d2b-text-secondary)] mt-0.5">Crie e gerencie os clientes da clínica.</p>
         </div>
+        {ability.can('create', 'pacientes') && (
         <button data-tour="d2b-clientes-novo" onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold transition-colors">
           <Plus size={14} /> Novo cliente
         </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -1670,8 +1744,8 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
 
       {/* Table */}
       <div className="rounded-xl border border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] overflow-hidden">
-        <div className="grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3 border-b border-[var(--d2b-border)]">
-          {[{ label: 'AÇÕES' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESSÕES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }].map((col) => (
+        <div className="grid grid-cols-[44px_1fr_160px_80px_120px_180px_88px] gap-2 px-4 py-3 border-b border-[var(--d2b-border)]">
+          {[{ label: 'FOTO' }, { label: 'NOME', sortable: true }, { label: 'TELEFONE' }, { label: 'SESSÕES' }, { label: 'GRUPO' }, { label: 'STATUS DO PAGAMENTO' }, { label: 'AÇÕES' }].map((col) => (
             <div key={col.label} className="flex items-center gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--d2b-text-secondary)]">{col.label}</span>
               {col.sortable && <ChevronsUpDown size={11} className="text-[var(--d2b-text-muted)]" />}
@@ -1684,15 +1758,16 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
         ) : (
           filtered.map((c, i) => (
             <div key={c.id}
-              className={`grid grid-cols-[84px_1fr_160px_80px_120px_180px] gap-2 px-4 py-3.5 items-center hover:bg-[var(--d2b-hover)] transition-colors ${i < filtered.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}>
-              <div className="flex items-center gap-1.5">
-                <button onClick={() => setSelectedCliente(c)}
-                  className="w-7 h-7 rounded-md bg-[var(--d2b-hover)] hover:bg-[var(--d2b-hover)] flex items-center justify-center text-[#7C4DFF] transition-colors">
-                  <Pencil size={13} />
-                </button>
-                <button className="w-7 h-7 rounded-md bg-[rgba(239,68,68,0.10)] hover:bg-[rgba(239,68,68,0.22)] flex items-center justify-center text-[#EF4444] transition-colors">
-                  <Trash2 size={13} />
-                </button>
+              className={`grid grid-cols-[44px_1fr_160px_80px_120px_180px_88px] gap-2 px-4 py-3.5 items-center hover:bg-[var(--d2b-hover)] transition-colors ${i < filtered.length - 1 ? 'border-b border-[var(--d2b-border)]' : ''}`}>
+              {/* FOTO */}
+              <div className="flex items-center justify-center">
+                {c.fotoUrl ? (
+                  <img src={c.fotoUrl} alt={c.nome} className="w-8 h-8 rounded-full object-cover border border-[var(--d2b-border)]" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[rgba(124,77,255,0.12)] border border-[rgba(124,77,255,0.2)] flex items-center justify-center">
+                    <span className="text-xs font-bold text-[#7C4DFF]">{c.nome.charAt(0).toUpperCase()}</span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setSelectedCliente(c)}
@@ -1703,6 +1778,16 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.sessoes}</span>
               <span className="text-sm text-[var(--d2b-text-secondary)]">{c.grupo ?? '—'}</span>
               <StatusBadge status={c.statusPagamento} />
+              {/* AÇÕES */}
+              <div className="flex items-center gap-1.5 justify-end">
+                <button onClick={() => setSelectedCliente(c)}
+                  className="w-7 h-7 rounded-md bg-[var(--d2b-hover)] hover:bg-[var(--d2b-hover)] flex items-center justify-center text-[#7C4DFF] transition-colors">
+                  <Pencil size={13} />
+                </button>
+                <button className="w-7 h-7 rounded-md bg-[rgba(239,68,68,0.10)] hover:bg-[rgba(239,68,68,0.22)] flex items-center justify-center text-[#EF4444] transition-colors">
+                  <Trash2 size={13} />
+                </button>
+              </div>
             </div>
           ))
         )}

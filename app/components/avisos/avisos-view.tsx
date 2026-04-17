@@ -128,12 +128,23 @@ export function AvisosView({ empresaId, usuarioId }: { empresaId: string | null;
     [agendamentos, phoneMap, agora],
   )
 
-  const remarcacaoRows = useMemo<AvisoRow[]>(() =>
-    agendamentos
-      .filter((ag) => {
-        const inicio = new Date(ag.inicio)
-        return inicio < agora && !EXCLUIDOS_REMARCACAO.includes(ag.status ?? '')
-      })
+  const remarcacaoRows = useMemo<AvisoRow[]>(() => {
+    const candidatos = agendamentos.filter((ag) => {
+      const inicio = new Date(ag.inicio)
+      return inicio < agora && !EXCLUIDOS_REMARCACAO.includes(ag.status ?? '')
+    })
+
+    // Mantém apenas o agendamento mais recente por combinação pacienteId+usuarioId
+    const mapaUltimo = new Map<string, typeof candidatos[0]>()
+    for (const ag of candidatos) {
+      const chave = `${ag.pacienteId ?? 'sem-paciente'}|${ag.usuarioId ?? 'sem-usuario'}`
+      const existente = mapaUltimo.get(chave)
+      if (!existente || new Date(ag.inicio) > new Date(existente.inicio)) {
+        mapaUltimo.set(chave, ag)
+      }
+    }
+
+    return Array.from(mapaUltimo.values())
       .sort((a, b) => new Date(b.inicio).getTime() - new Date(a.inicio).getTime())
       .map((ag) => ({
         id: ag.id,
@@ -143,9 +154,8 @@ export function AvisosView({ empresaId, usuarioId }: { empresaId: string | null;
         profissional: ag.usuarioNome ?? '♦',
         dataConsulta: formatDT(ag.inicio),
         status: (ag.status ?? 'Agendado') as AvisoRow['status'],
-      })),
-    [agendamentos, phoneMap, agora],
-  )
+      }))
+  }, [agendamentos, phoneMap, agora])
 
   // Badge count: patients with birthday in the next 7 days
   const aniversariosBadge = useMemo(() => {

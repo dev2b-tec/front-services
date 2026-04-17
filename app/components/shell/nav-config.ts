@@ -33,6 +33,7 @@ export type NavItem = {
   href: string
   icon: LucideIcon
   badge?: string        // ex: "12" para notificações
+  permission?: string   // ex: 'relatorios.read' — item oculto se usuário não tem permissão
   children?: NavItem[]  // sub-menu (nível 2)
 }
 
@@ -53,6 +54,7 @@ export const navGroups: NavGroup[] = [
         label: 'Dashboard',
         href: '/dashboard',
         icon: LayoutDashboard,
+        permission: 'relatorios.read',
       },
       {
         label: 'Calendário',

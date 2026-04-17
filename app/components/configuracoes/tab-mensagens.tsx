@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { MessageSquare, Settings, Loader2, HelpCircle } from 'lucide-react'
-import { MensagemEditor } from './mensagem-editor'
+import { MensagemEditor, textoParaHtml, htmlParaTexto } from './mensagem-editor'
 import { useToast } from '@/hooks/use-toast'
 import type { UsuarioData, EmpresaData } from '@/app/dashboard/configuracoes/page'
 
@@ -190,7 +190,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
         }
         lista.forEach((m) => { map[m.tipo] = m.texto })
         setMensagens(map)
-        setDraftText(map['CONFIRMAR_AGENDAMENTO'])
+        setDraftText(textoParaHtml(map['CONFIRMAR_AGENDAMENTO']))
       }
     } catch { /* silencioso */ } finally {
       setLoadingMsgs(false)
@@ -203,7 +203,7 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
   // -- Handlers ----------------------------------------------------------------
   const handleTipoChange = (tipo: TipoMensagem) => {
     setTipoSelecionado(tipo)
-    setDraftText(mensagens[tipo])
+    setDraftText(textoParaHtml(mensagens[tipo]))
   }
 
   const handleSalvarConfig = async () => {
@@ -245,11 +245,11 @@ export function TabMensagens({ initialUsuario, initialEmpresa }: TabMensagensPro
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texto: draftText }),
+          body: JSON.stringify({ texto: htmlParaTexto(draftText) }),
         }
       )
       if (res.ok) {
-        setMensagens((prev) => ({ ...prev, [tipoSelecionado]: draftText }))
+        setMensagens((prev) => ({ ...prev, [tipoSelecionado]: htmlParaTexto(draftText) }))
         toast({ title: 'Mensagem salva com sucesso!' })
       } else {
         toast({ title: 'Erro ao salvar mensagem', variant: 'destructive' })

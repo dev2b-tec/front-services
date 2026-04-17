@@ -6,7 +6,7 @@ import {
   ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight,
   AlertTriangle, X,
 } from 'lucide-react'
-import { MensagemEditor } from '@/components/configuracoes/mensagem-editor'
+import { MensagemEditor, textoParaHtml, htmlParaTexto } from '@/components/configuracoes/mensagem-editor'
 import {
   Dialog,
   DialogContent,
@@ -106,13 +106,13 @@ export function EditarMensagemModal({
 
   useEffect(() => {
     if (!open || !empresaId) {
-      setMsg(DEFAULT_MSGS[tabKey])
+      setMsg(textoParaHtml(DEFAULT_MSGS[tabKey]))
       return
     }
     setLoading(true)
     fetch(`${API_URL}/api/v1/mensagens-padrao/empresa/${empresaId}/tipo/${TIPO_MAP[tabKey]}`)
       .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data?.texto) setMsg(data.texto) })
+      .then((data) => { if (data?.texto) setMsg(textoParaHtml(data.texto)) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [open, empresaId, tabKey])
@@ -123,7 +123,7 @@ export function EditarMensagemModal({
     try {
       await fetch(
         `${API_URL}/api/v1/mensagens-padrao/empresa/${empresaId}/tipo/${TIPO_MAP[tabKey]}`,
-        { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: msg }) },
+        { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: htmlParaTexto(msg) }) },
       )
     } catch { /* silencioso */ } finally {
       setSaving(false)

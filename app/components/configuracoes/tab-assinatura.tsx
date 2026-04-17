@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle, Clock, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { ModalAssinatura } from '@/components/assinatura/modal-assinatura'
+import type { AssinaturaAtual } from '@/components/assinatura/modal-assinatura'
 import type { UsuarioData } from '@/app/dashboard/configuracoes/page'
 
 interface TabAssinaturaProps {
@@ -182,7 +183,7 @@ export function TabAssinatura({ initialUsuario }: TabAssinaturaProps) {
               className="px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #7C4DFF, #C084FC)' }}
             >
-              Alterar plano
+              Upgrade do plano
             </button>
             {assinatura.status !== 'CANCELADA' && (
               <button
@@ -255,6 +256,7 @@ export function TabAssinatura({ initialUsuario }: TabAssinaturaProps) {
         }}
         empresaId={empresaId}
         usuarioId={usuarioId}
+        assinaturaAtual={assinatura as AssinaturaAtual | null}
       />
     </div>
   )

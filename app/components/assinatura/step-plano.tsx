@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, Loader2 } from 'lucide-react'
-import type { PlanoInfo } from './modal-assinatura'
+import { Check, Loader2, ArrowUp, ArrowDown } from 'lucide-react'
+import type { PlanoInfo, AssinaturaAtual } from './modal-assinatura'
 
 interface StepPlanoProps {
   onNext: (plano: PlanoInfo) => void
+  assinaturaAtual?: AssinaturaAtual | null
 }
 
 const PLANOS_FALLBACK: PlanoInfo[] = [
@@ -50,7 +51,7 @@ const PLANO_FEATURES: Record<string, string[]> = {
   ],
 }
 
-export function StepPlano({ onNext }: StepPlanoProps) {
+export function StepPlano({ onNext, assinaturaAtual }: StepPlanoProps) {
   const [planos, setPlanos] = useState<PlanoInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [selecionado, setSelecionado] = useState<string | null>(null)
@@ -73,9 +74,18 @@ export function StepPlano({ onNext }: StepPlanoProps) {
 
   const desconto = periodo === 'semestral' ? 0.7 : 1
 
+  const planoAtualTipo = assinaturaAtual?.plano?.tipo ?? null
+
+  function getRelacao(plano: PlanoInfo): 'atual' | 'upgrade' | 'downgrade' | null {
+    if (!planoAtualTipo) return null
+    if (plano.tipo === planoAtualTipo) return 'atual'
+    return plano.valorMensal > (assinaturaAtual?.plano?.valorMensal ?? 0) ? 'upgrade' : 'downgrade'
+  }
+
   function handleContinuar() {
     const plano = planos.find(p => p.id === selecionado)
     if (!plano) return
+    if (assinaturaAtual && getRelacao(plano) !== 'upgrade') return
     onNext({
       ...plano,
       valorMensal: Number((plano.valorMensal * desconto).toFixed(2)),
@@ -127,26 +137,56 @@ export function StepPlano({ onNext }: StepPlanoProps) {
           const valor = (plano.valorMensal * desconto).toFixed(2).replace('.', ',')
           const features = PLANO_FEATURES[plano.tipo] ?? []
           const isSelected = selecionado === plano.id
+          const relacao = getRelacao(plano)
+          const isAtual = relacao === 'atual'
+          const isDowngrade = relacao === 'downgrade'
+          const isUpgradeOp = relacao === 'upgrade'
+          const isDisabled = !!assinaturaAtual && !isUpgradeOp
+          const diferenca = assinaturaAtual && isUpgradeOp
+            ? plano.valorMensal * desconto - assinaturaAtual.plano.valorMensal
+            : null
+
           return (
             <button
               key={plano.id}
-              onClick={() => setSelecionado(plano.id)}
-              className="w-full text-left p-4 rounded-xl border transition-all"
+              onClick={() => !isDisabled && setSelecionado(plano.id)}
+              disabled={isDisabled}
+              className="w-full text-left p-4 rounded-xl border transition-all relative"
               style={{
-                background: isSelected ? 'rgba(124,77,255,0.08)' : 'var(--d2b-bg-elevated)',
-                borderColor: isSelected ? '#7C4DFF' : 'var(--d2b-border)',
+                background: isAtual ? 'rgba(20,184,166,0.06)'
+                  : isSelected ? 'rgba(124,77,255,0.08)' : 'var(--d2b-bg-elevated)',
+                borderColor: isAtual ? 'rgba(20,184,166,0.4)'
+                  : isSelected ? '#7C4DFF' : 'var(--d2b-border)',
+                opacity: isDisabled && !isAtual ? 0.45 : 1,
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
               }}
             >
+              {/* Badge de relação */}
+              {relacao && (
+                <div
+                  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                  style={{
+                    background: isAtual ? 'rgba(20,184,166,0.15)'
+                      : isUpgradeOp ? 'rgba(124,77,255,0.15)' : 'rgba(100,116,139,0.15)',
+                    color: isAtual ? '#14B8A6' : isUpgradeOp ? '#7C4DFF' : '#64748B',
+                  }}
+                >
+                  {isAtual ? <><Check size={10} /> Plano atual</>
+                    : isUpgradeOp ? <><ArrowUp size={10} /> Upgrade</>
+                    : <><ArrowDown size={10} /> Downgrade</>}
+                </div>
+              )}
+
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
                     style={{
-                      borderColor: isSelected ? '#7C4DFF' : 'var(--d2b-border-strong)',
-                      background: isSelected ? '#7C4DFF' : 'transparent',
+                      borderColor: isSelected && !isDisabled ? '#7C4DFF' : 'var(--d2b-border-strong)',
+                      background: isSelected && !isDisabled ? '#7C4DFF' : 'transparent',
                     }}
                   >
-                    {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
+                    {isSelected && !isDisabled && <Check size={12} className="text-white" strokeWidth={3} />}
                   </div>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: 'var(--d2b-text-primary)' }}>
@@ -154,11 +194,16 @@ export function StepPlano({ onNext }: StepPlanoProps) {
                     </p>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right flex-shrink-0 pr-16">
                   <p className="text-base font-bold" style={{ color: '#7C4DFF' }}>
                     R$ {valor}
                   </p>
                   <p className="text-[10px]" style={{ color: 'var(--d2b-text-muted)' }}>/Mês</p>
+                  {diferenca !== null && diferenca > 0 && (
+                    <p className="text-[10px] font-semibold" style={{ color: '#7C4DFF' }}>
+                      + R$ {diferenca.toFixed(2).replace('.', ',')} diferença
+                    </p>
+                  )}
                   {periodo === 'semestral' && (
                     <p className="text-[10px]" style={{ color: 'var(--d2b-text-muted)' }}>
                       Total: R$ {(plano.valorMensal * desconto * 6).toFixed(2).replace('.', ',')}
@@ -203,11 +248,11 @@ export function StepPlano({ onNext }: StepPlanoProps) {
 
       <button
         onClick={handleContinuar}
-        disabled={!selecionado}
+        disabled={!selecionado || (!!assinaturaAtual && (() => { const p = planos.find(x => x.id === selecionado); return !p || getRelacao(p) !== 'upgrade' })())}
         className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
         style={{ background: 'linear-gradient(135deg, #7C4DFF, #C084FC)' }}
       >
-        Continuar
+        {assinaturaAtual ? 'Fazer Upgrade' : 'Continuar'}
       </button>
 
       <p className="text-[10px] text-center" style={{ color: 'var(--d2b-text-muted)' }}>

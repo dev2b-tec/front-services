@@ -12,46 +12,30 @@
  */
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
 import { useMenuAtivo } from '@/hooks/use-menu-ativo'
+import { useAbility } from '@/lib/casl'
+import type { AppAction, AppSubject } from '@/lib/casl'
 
 // ─── Logo DEV2B ─────────────────────────────────────────────────────────────
 
 function Logo({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex items-center gap-2.5 select-none">
-      {/* Hexágono */}
-      <div className="relative flex-shrink-0 w-8 h-8 brand-glow-sm">
-        <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-          <polygon
-            points="16,2 28,9 28,23 16,30 4,23 4,9"
-            fill="#7C4DFF"
-            opacity="0.15"
-            stroke="#7C4DFF"
-            strokeWidth="1.5"
-          />
-          <polygon
-            points="16,6 25,11 25,21 16,26 7,21 7,11"
-            fill="#7C4DFF"
-          />
-          <text
-            x="16"
-            y="20"
-            textAnchor="middle"
-            fontSize="9"
-            fontWeight="700"
-            fontFamily="Inter, sans-serif"
-            fill="#F5F0FF"
-            letterSpacing="-0.5"
-          >
-            D2B
-          </text>
-        </svg>
-      </div>
+      {/* Ícone da aplicação */}
+      <Image
+        src="/icon.png"
+        alt="DEV2B"
+        width={32}
+        height={32}
+        className="w-8 h-8 object-contain flex-shrink-0"
+        priority
+      />
 
       {/* Nome — some quando collapsed */}
       {!collapsed && (
@@ -76,13 +60,21 @@ export function Sidebar() {
   const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const pathname = usePathname()
   const { isAtivo } = useMenuAtivo()
+  const { ability } = useAbility()
 
-  // Filtra os navGroups conforme status do banco.
-  // Grupos cujos todos os itens estão desligados (ex: Logística) são ocultados inteiramente.
+  /** Checa a permissão no formato "subject.action" do nav-config */
+  function hasPermission(permission?: string): boolean {
+    if (!permission) return true
+    const dot = permission.indexOf('.')
+    if (dot === -1) return true
+    return ability.can(permission.slice(dot + 1) as AppAction, permission.slice(0, dot) as AppSubject)
+  }
+
+  // Filtra os navGroups conforme status do banco E permissões CASL.
   const visibleGroups = navGroups
     .map(group => ({
       ...group,
-      items: group.items.filter(item => isAtivo(getChave(item.href))),
+      items: group.items.filter(item => isAtivo(getChave(item.href)) && hasPermission(item.permission)),
     }))
     .filter(group => group.items.length > 0)
 

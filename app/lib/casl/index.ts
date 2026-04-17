@@ -1,0 +1,5 @@
+// Barrel — importar tudo de '@/lib/casl'
+export { AbilityProvider, AbilityCtx, AbilityMetaCtx, useAbility } from './context'
+export { buildAbility, subject } from './ability'
+export { Can } from './can'
+export type { AppAbility, AppAction, AppSubject } from './types'

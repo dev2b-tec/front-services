@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useAbility } from '@/lib/casl'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
@@ -1152,11 +1153,21 @@ export function CalendarioView({
   empresaId,
   profissionais,
   agendaConfig,
+  currentNome,
 }: {
   empresaId: string | null
   profissionais: Profissional[]
   agendaConfig?: AgendaConfig | null
+  currentNome?: string
+  currentUsuarioId?: string
+  currentTipoAcesso?: string
 }) {
+  const { perfilNome } = useAbility()
+  const isSimples = perfilNome === 'PROFISSIONAL_SIMPLES'
+  const ADMIN_PERFIS_MODAL = new Set(['PROFISSIONAL_ADM', 'GERENTE', 'GERENTE_GERAL'])
+  const profissionaisParaModal = ADMIN_PERFIS_MODAL.has(perfilNome ?? '')
+    ? profissionais
+    : profissionais.filter((p) => p.nome === currentNome)
   const [weekBase, setWeekBase]     = useState(new Date())
   const [viewMode, setViewMode]     = useState<ViewMode>('Semana')
   const [novoOpen, setNovoOpen]     = useState(false)
@@ -1183,7 +1194,7 @@ export function CalendarioView({
   const [historicoRisco, setHistoricoRisco]             = useState<ApiAgendamento[]>([])
   const [inadimplenteIds, setInadimplenteIds]           = useState<Set<string>>(new Set())
   const [selectedAgendamento, setSelectedAgendamento] = useState<ApiAgendamento | undefined>()
-  const [selectedProfissional, setSelectedProfissional] = useState('')
+  const [selectedProfissional, setSelectedProfissional] = useState(() => isSimples && currentNome ? currentNome : '')
   const [profDropdownOpen, setProfDropdownOpen]         = useState(false)
   const [bloqueioOpen, setBloqueioOpen]                 = useState(false)
   const [selectedBloqueio, setSelectedBloqueio]         = useState<ApiAgendamento | undefined>()
@@ -1356,9 +1367,12 @@ export function CalendarioView({
   const nowMinutes   = now.getHours() * 60 + now.getMinutes()
   const timeLineTop  = ((nowMinutes - gridStartMin) / 60) * CELL_H
 
-  const visibleAppointments = selectedProfissional
-    ? appointments.filter((a) => a.usuarioNome === selectedProfissional)
-    : appointments
+  // PROFISSIONAL_SIMPLES always sees only their own appointments (security hard-filter)
+  const visibleAppointments = (isSimples && currentNome)
+    ? appointments.filter((a) => a.usuarioNome === currentNome)
+    : selectedProfissional
+      ? appointments.filter((a) => a.usuarioNome === selectedProfissional)
+      : appointments
 
   // ── Projeção financeira ───────────────────────────────────────────────────
   const exibirProjecao = agendaConfig?.exibirProjecao === true
@@ -1515,16 +1529,19 @@ export function CalendarioView({
           {/* Profissional dropdown */}
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => { setProfDropdownOpen((p) => !p); setFiltrosOpen(false); setSettingsOpen(false) }}
+              disabled={isSimples}
+              onClick={() => { if (!isSimples) { setProfDropdownOpen((p) => !p); setFiltrosOpen(false); setSettingsOpen(false) } }}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-[var(--d2b-bg-elevated)] border transition-colors min-w-[160px] justify-between ${
-                profDropdownOpen ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)] hover:border-[#7C4DFF]'
+                isSimples
+                  ? 'border-[var(--d2b-border)] opacity-70 cursor-not-allowed'
+                  : profDropdownOpen ? 'border-[#7C4DFF]' : 'border-[var(--d2b-border-strong)] hover:border-[#7C4DFF]'
               }`}
             >
               <span className={selectedProfissional ? 'text-[var(--d2b-text-primary)]' : 'text-[var(--d2b-text-secondary)]'}>
                 {selectedProfissional || 'Todos profissionais'}
               </span>
               <div className="flex items-center gap-1">
-                {selectedProfissional && (
+                {selectedProfissional && !isSimples && (
                   <span
                     role="button"
                     onClick={(e) => { e.stopPropagation(); setSelectedProfissional('') }}
@@ -1533,10 +1550,13 @@ export function CalendarioView({
                     <X size={12} />
                   </span>
                 )}
-                <ChevronDown size={13} className="text-[var(--d2b-text-muted)] shrink-0" />
+                {isSimples
+                  ? <Lock size={12} className="text-[var(--d2b-text-muted)] shrink-0" />
+                  : <ChevronDown size={13} className="text-[var(--d2b-text-muted)] shrink-0" />
+                }
               </div>
             </button>
-            {profDropdownOpen && (
+            {profDropdownOpen && !isSimples && (
               <div className="absolute left-0 top-11 z-50 w-52 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl shadow-2xl overflow-hidden">
                 <button
                   onClick={() => { setSelectedProfissional(''); setProfDropdownOpen(false) }}
@@ -2141,7 +2161,7 @@ export function CalendarioView({
         defaultInicio={clickDT?.inicio}
         defaultFim={clickDT?.fim}
         empresaId={empresaId}
-        profissionaisApi={profissionais}
+        profissionaisApi={profissionaisParaModal}
         agendamento={selectedAgendamento}
         onSaved={fetchAppointments}
       />
