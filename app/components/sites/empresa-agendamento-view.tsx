@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { MapPin, Clock, ChevronRight } from 'lucide-react'
 
 interface ProfissionalData {
   id: string
@@ -30,65 +31,74 @@ export default function EmpresaAgendamentoView({
   profissionais: unknown[]
 }) {
   const profs = profissionais as ProfissionalData[]
+  const address = [empresa.logradouro, empresa.numero, empresa.cidade].filter(Boolean).join(', ')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-purple-500 to-purple-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          {empresa.logoUrl && (
+    <div className="min-h-screen bg-[#F8F7FF]">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-100 px-4 py-4 sm:px-6">
+        <div className="max-w-lg mx-auto flex items-center gap-4">
+          {empresa.logoUrl ? (
             <Image
               src={empresa.logoUrl}
               alt={empresa.nome}
               width={100}
-              height={50}
-              className="object-contain shrink-0"
+              height={44}
+              className="object-contain shrink-0 h-11 w-auto"
             />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-[#7C4DFF]/10 flex items-center justify-center text-[#7C4DFF] font-bold text-base shrink-0">
+              {empresa.nome?.charAt(0) ?? '?'}
+            </div>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{empresa.nome}</h1>
-            {(empresa.logradouro || empresa.cidade) && (
-              <p className="text-sm text-gray-400 mt-0.5">
-                {[empresa.logradouro, empresa.numero, empresa.bairro, empresa.cidade]
-                  .filter(Boolean)
-                  .join(', ')}
+          <div className="min-w-0">
+            {empresa.nome && (
+              <h1 className="font-bold text-gray-900 text-base leading-tight truncate">{empresa.nome}</h1>
+            )}
+            {address && (
+              <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+                <MapPin size={11} className="shrink-0 text-[#7C4DFF]" />
+                {address}
               </p>
             )}
           </div>
         </div>
+      </header>
 
-        <p className="text-sm text-purple-600 font-semibold mb-5">
-          Selecione um profissional e horário
+      {/* Content */}
+      <main className="max-w-lg mx-auto px-4 py-6 sm:px-6">
+        <p className="text-xs font-bold text-[#7C4DFF] uppercase tracking-widest mb-5">
+          Selecione um profissional
         </p>
 
         {profs.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-12">
-            Nenhum profissional disponível no momento.
-          </p>
+          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+            <p className="text-gray-400 text-sm">Nenhum profissional disponível no momento.</p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {profs.map((prof) => (
               <Link
                 key={prof.id}
                 href={`/sites/profissional/agendamento/${prof.id}`}
-                className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-purple-300 hover:bg-purple-50 transition-colors group"
+                className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4 shadow-sm hover:border-[#7C4DFF]/40 hover:shadow-md active:scale-[0.99] transition-all group"
               >
                 {prof.fotoUrl ? (
                   <Image
                     src={prof.fotoUrl}
                     alt={prof.nome}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover w-12 h-12 border-2 border-purple-100 shrink-0"
+                    width={56}
+                    height={56}
+                    className="rounded-full object-cover w-14 h-14 shrink-0 border-2 border-[#7C4DFF]/10"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-bold shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-[#7C4DFF]/10 flex items-center justify-center text-[#7C4DFF] text-xl font-bold shrink-0">
                     {prof.nome.charAt(0)}
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm group-hover:text-purple-700 transition-colors">
+                  <p className="font-semibold text-gray-900 text-sm group-hover:text-[#7C4DFF] transition-colors leading-snug">
                     {prof.nome}
                   </p>
                   {(prof.tipo || prof.especialidade) && (
@@ -96,21 +106,25 @@ export default function EmpresaAgendamentoView({
                       {[prof.tipo, prof.especialidade].filter(Boolean).join(' · ')}
                     </p>
                   )}
+                  {prof.duracaoSessao && (
+                    <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-1.5">
+                      <Clock size={10} className="shrink-0" />
+                      {prof.duracaoSessao} min de atendimento
+                    </p>
+                  )}
                 </div>
 
-                <div className="text-right shrink-0">
-                  {prof.duracaoSessao && (
-                    <p className="text-xs text-gray-400">{prof.duracaoSessao} min</p>
-                  )}
-                  <p className="text-xs text-purple-500 font-medium mt-0.5 group-hover:text-purple-700">
-                    Agendar →
-                  </p>
+                <div className="shrink-0">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#7C4DFF] bg-[#7C4DFF]/10 px-3 py-2 rounded-xl group-hover:bg-[#7C4DFF] group-hover:text-white transition-colors whitespace-nowrap">
+                    Agendar
+                    <ChevronRight size={13} />
+                  </span>
                 </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }
