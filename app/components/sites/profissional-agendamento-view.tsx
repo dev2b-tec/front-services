@@ -263,28 +263,42 @@ export default function ProfissionalAgendamentoView({
   const servicoNome = servicos.find(s => s.id === servicoId)?.nome ?? ''
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-300 via-purple-500 to-purple-700 flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl flex flex-col md:flex-row gap-5 items-start">
+    <div className="min-h-screen bg-gradient-to-br from-purple-300 via-purple-500 to-purple-700 flex items-start sm:items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-5xl flex flex-col md:flex-row gap-4 md:gap-5 items-start">
 
         {/* ── Left card ─────────────────────────────────── */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 w-full md:w-72 shrink-0">
+        <div className="bg-white rounded-2xl shadow-2xl p-4 md:p-6 w-full md:w-72 shrink-0">
           {/* Logo */}
           {empresa?.logoUrl ? (
-            <div className="mb-4">
+            <div className="mb-3 md:mb-4">
               <Image src={empresa.logoUrl} alt={empresa.nome} width={120} height={56} className="object-contain" />
             </div>
           ) : empresa ? (
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">{empresa.nome}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 md:mb-4">{empresa.nome}</p>
           ) : null}
 
-          <h1 className="text-xl font-bold text-gray-900">Auto Agendamento</h1>
-          <p className="text-sm text-gray-500 mt-1 mb-4">
-            Faça um novo agendamento para o profissional abaixo:
-          </p>
-          <p className="text-xs font-semibold text-purple-600 mb-3">Detalhes do profissional:</p>
+          {/* On mobile: horizontal row with title + avatar */}
+          <div className="flex items-center gap-3 md:block">
+            <div className="md:hidden w-[44px] h-[44px] rounded-full overflow-hidden border-2 border-purple-100 shrink-0 bg-purple-100 flex items-center justify-center">
+              <AvatarImage
+                userId={usuario.id}
+                fotoUrl={usuario.fotoUrl}
+                size={44}
+                fallbackIcon={
+                  <span className="text-purple-600 text-lg font-bold">{usuario.nome.charAt(0)}</span>
+                }
+              />
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold text-gray-900">Auto Agendamento</h1>
+              <p className="hidden md:block text-sm text-gray-500 mt-1 mb-4">Faça um novo agendamento para o profissional abaixo:</p>
+            </div>
+          </div>
 
-          {/* Prof info */}
-          <div className="flex items-center gap-3 mb-4">
+          <p className="hidden md:block text-xs font-semibold text-purple-600 mt-4 mb-3">Detalhes do profissional:</p>
+
+          {/* Prof info — full version on desktop */}
+          <div className="hidden md:flex items-center gap-3 mb-4">
             <div className="w-[52px] h-[52px] rounded-full overflow-hidden border-2 border-purple-100 shrink-0 bg-purple-100 flex items-center justify-center">
               <AvatarImage
                 userId={usuario.id}
@@ -297,16 +311,20 @@ export default function ProfissionalAgendamentoView({
             </div>
             <span className="font-bold text-gray-900 text-sm leading-tight uppercase">{usuario.nome}</span>
           </div>
+          {/* Name only on mobile (avatar shown above) */}
+          <p className="md:hidden font-bold text-gray-900 text-sm uppercase mt-2 mb-1">{usuario.nome}</p>
 
-          <div className="space-y-1.5 text-xs text-gray-700">
+          <div className="hidden md:block space-y-1.5 text-xs text-gray-700">
             <p><span className="font-semibold">Tempo de atendimento:</span> {usuario.duracaoSessao??40} minutos</p>
             {addr     && <p><span className="font-semibold">Endereço:</span> {addr}</p>}
             {usuario.cep      && <p><span className="font-semibold">CEP:</span> {usuario.cep}</p>}
             {usuario.email    && <p><span className="font-semibold">Email:</span> {usuario.email}</p>}
             {usuario.telefone && <p><span className="font-semibold">Telefone:</span> {usuario.telefone}</p>}
           </div>
+          {/* Compact info on mobile */}
+          <p className="md:hidden text-[11px] text-gray-500 mb-3">{usuario.duracaoSessao??40} min de atendimento{addr ? ` · ${usuario.cidade ?? addr}` : ''}</p>
 
-          <div className="mt-5 space-y-2">
+          <div className="mt-3 md:mt-5 space-y-2">
             <button onClick={reset}
               className="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
               Novo Agendamento
@@ -362,84 +380,80 @@ export default function ProfissionalAgendamentoView({
                     {/* Week table */}
                     <div className="flex items-start gap-1">
                       <button onClick={() => setWeekStart(w => addDays(w,-7))}
-                        className="text-purple-600 hover:text-purple-800 transition-colors mt-6 px-1 text-lg font-bold leading-none select-none">
+                        className="text-purple-600 hover:text-purple-800 transition-colors mt-6 px-1 text-lg font-bold leading-none select-none shrink-0">
                         «
                       </button>
 
-                      <div className="flex-1 overflow-x-auto">
-                        <table className="w-full text-center text-xs border-collapse">
-                          <thead>
+                      <div className="flex-1 min-w-0 overflow-auto" style={{maxHeight: 320}}>
+                        <table className="w-full min-w-[392px] text-center text-xs border-collapse">
+                          <thead className="sticky top-0 z-10">
                             <tr>
                               {week.map((d,i) => (
-                                <th key={i} className="pb-3 min-w-[60px] border border-gray-200 bg-gray-50 px-1 py-2">
+                                <th key={i} className="min-w-[56px] border border-gray-200 bg-gray-50 px-1 py-2">
                                   <div className="font-semibold text-[11px] text-gray-700">{WEEK_DAYS[d.getDay()]}</div>
                                   <div className="text-[11px] text-gray-400 font-normal">{d.getDate()} {MONTH_ABBR[d.getMonth()]}</div>
                                 </th>
                               ))}
                             </tr>
                           </thead>
-                        </table>
-                        <div className="max-h-[260px] overflow-y-auto">
-                          <table className="w-full text-center text-xs border-collapse">
-                            <tbody>
-                              {loading ? (
-                                <tr>
-                                  <td colSpan={7} className="py-10 text-gray-400 text-xs border border-gray-200">Carregando horários...</td>
-                                </tr>
-                              ) : (
-                                Array.from({length: maxRows}, (_, row) => (
-                                  <tr key={row}>
-                                    {week.map((d, col) => {
-                                      const ds       = fmt(d)
-                                      const daySlots = slots[ds] ?? []
-                                      const slot     = daySlots[row]
-                                      const isSel    = selected?.date === ds && selected?.time === slot?.time
+                          <tbody>
+                            {loading ? (
+                              <tr>
+                                <td colSpan={7} className="py-10 text-gray-400 text-xs border border-gray-200 bg-white">Carregando horários...</td>
+                              </tr>
+                            ) : (
+                              Array.from({length: maxRows}, (_, row) => (
+                                <tr key={row}>
+                                  {week.map((d, col) => {
+                                    const ds       = fmt(d)
+                                    const daySlots = slots[ds] ?? []
+                                    const slot     = daySlots[row]
+                                    const isSel    = selected?.date === ds && selected?.time === slot?.time
 
-                                      if (!slot) {
-                                        return (
-                                          <td key={col} className="border border-gray-200 py-1 px-1 min-w-[60px]">
-                                            {row === 0 && daySlots.length === 0 && (
-                                              <span className="text-gray-400 font-medium text-[11px]">N / A</span>
-                                            )}
-                                          </td>
-                                        )
-                                      }
-
-                                      if (slot.blocked) {
-                                        return (
-                                          <td key={col} className="border border-gray-200 py-1 px-1 min-w-[60px]">
-                                            <div className="w-full py-[7px] rounded text-[12px] font-semibold bg-gray-100 text-gray-300 cursor-not-allowed select-none line-through">
-                                              {slot.time}
-                                            </div>
-                                          </td>
-                                        )
-                                      }
-
+                                    if (!slot) {
                                       return (
-                                        <td key={col} className="border border-gray-200 py-1 px-1 min-w-[60px]">
-                                          <button
-                                            onClick={() => setSelected({date:ds, time:slot.time})}
-                                            className={`w-full py-[7px] rounded text-[12px] font-semibold transition-all ${
-                                              isSel
-                                                ? 'bg-purple-600 text-white shadow-sm'
-                                                : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-                                            }`}
-                                          >
-                                            {slot.time}
-                                          </button>
+                                        <td key={col} className="border border-gray-200 py-1 px-1 min-w-[56px]">
+                                          {row === 0 && daySlots.length === 0 && (
+                                            <span className="text-gray-400 font-medium text-[11px]">N / A</span>
+                                          )}
                                         </td>
                                       )
-                                    })}
-                                  </tr>
-                                ))
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
+                                    }
+
+                                    if (slot.blocked) {
+                                      return (
+                                        <td key={col} className="border border-gray-200 py-1 px-1 min-w-[56px]">
+                                          <div className="w-full py-[7px] rounded text-[12px] font-semibold bg-gray-100 text-gray-300 cursor-not-allowed select-none line-through">
+                                            {slot.time}
+                                          </div>
+                                        </td>
+                                      )
+                                    }
+
+                                    return (
+                                      <td key={col} className="border border-gray-200 py-1 px-1 min-w-[56px]">
+                                        <button
+                                          onClick={() => setSelected({date:ds, time:slot.time})}
+                                          className={`w-full py-[7px] rounded text-[12px] font-semibold transition-all ${
+                                            isSel
+                                              ? 'bg-purple-600 text-white shadow-sm'
+                                              : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
+                                          }`}
+                                        >
+                                          {slot.time}
+                                        </button>
+                                      </td>
+                                    )
+                                  })}
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
                       </div>
 
                       <button onClick={() => setWeekStart(w => addDays(w,7))}
-                        className="text-purple-600 hover:text-purple-800 transition-colors mt-6 px-1 text-lg font-bold leading-none select-none">
+                        className="text-purple-600 hover:text-purple-800 transition-colors mt-6 px-1 text-lg font-bold leading-none select-none shrink-0">
                         »
                       </button>
                     </div>

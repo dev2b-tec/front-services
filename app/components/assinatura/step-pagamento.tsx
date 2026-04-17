@@ -19,11 +19,12 @@ interface StepPagamentoProps {
   loading: boolean
   onCartao: (cardTokenId: string, deviceId?: string) => void
   onPix: () => void
+  valorDiferenca?: number | null
 }
 
 type Metodo = 'cartao' | 'pix'
 
-export function StepPagamento({ plano, cliente, loading, onCartao, onPix }: StepPagamentoProps) {
+export function StepPagamento({ plano, cliente, loading, onCartao, onPix, valorDiferenca }: StepPagamentoProps) {
   const [metodo, setMetodo] = useState<Metodo>('cartao')
   const [cardForm, setCardForm] = useState({
     numero: '',
@@ -142,16 +143,31 @@ export function StepPagamento({ plano, cliente, loading, onCartao, onPix }: Step
       {/* Detalhes do plano */}
       <div className="rounded-xl p-4" style={{ background: 'var(--d2b-bg-elevated)' }}>
         <p className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: 'var(--d2b-text-muted)' }}>
-          Detalhes do Plano
+          {valorDiferenca != null ? 'Detalhes do Upgrade' : 'Detalhes do Plano'}
         </p>
         <div className="flex justify-between items-center text-sm mb-2">
           <span style={{ color: 'var(--d2b-text-secondary)' }}>{plano.nome}</span>
-          <span style={{ color: 'var(--d2b-text-primary)' }}>R$ {valorFormatado}</span>
+          <span style={{ color: 'var(--d2b-text-primary)' }}>R$ {valorFormatado}/mês</span>
         </div>
+        {valorDiferenca != null && (
+          <div className="flex justify-between items-center text-sm mb-2">
+            <span style={{ color: 'var(--d2b-text-secondary)' }}>Plano atual (desconto)</span>
+            <span style={{ color: '#94A3B8' }}>- R$ {(plano.valorMensal - valorDiferenca).toFixed(2).replace('.', ',')}</span>
+          </div>
+        )}
         <div className="flex justify-between items-center border-t pt-2" style={{ borderColor: 'var(--d2b-border)' }}>
-          <span className="text-sm font-semibold" style={{ color: 'var(--d2b-text-primary)' }}>Valor (Mensal)</span>
-          <span className="text-sm font-bold" style={{ color: '#7C4DFF' }}>R$ {valorFormatado}</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--d2b-text-primary)' }}>
+            {valorDiferenca != null ? 'Valor a pagar (diferença)' : 'Valor (Mensal)'}
+          </span>
+          <span className="text-sm font-bold" style={{ color: '#7C4DFF' }}>
+            R$ {valorDiferenca != null ? valorDiferenca.toFixed(2).replace('.', ',') : valorFormatado}
+          </span>
         </div>
+        {valorDiferenca != null && (
+          <p className="text-[10px] mt-2" style={{ color: 'var(--d2b-text-muted)' }}>
+            Você paga apenas a diferença agora. Nas próximas cobranças será cobrado o valor integral do novo plano.
+          </p>
+        )}
       </div>
 
       {/* Método de pagamento */}

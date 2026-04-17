@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo, type ReactNode } from 'react'
+import { useAbility } from '@/lib/casl'
 import {
   Plus, MoreHorizontal, Printer, ChevronDown, Filter,
-  CheckCircle2, TrendingUp, CheckSquare, X, Ban, CalendarDays, User2,
+  CheckCircle2, TrendingUp, CheckSquare, X, Ban, CalendarDays, User2, Lock,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -159,6 +160,24 @@ function PieCard({ title, data, legend }: { title: string; data: PieSlice[]; leg
 
 // ─── Main component ────────────────────────────────────────────
 export function DashboardView({ data, empresaId }: { data: DashboardData; empresaId?: string | null }) {
+  const { ability, loading: abilityLoading } = useAbility()
+
+  // Bloqueia acesso ao dashboard para perfis sem permissão de relatórios
+  if (!abilityLoading && !ability.can('read', 'relatorios')) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4 text-center px-6">
+        <div className="w-16 h-16 rounded-2xl bg-[var(--d2b-hover)] flex items-center justify-center">
+          <Lock size={28} className="text-[var(--d2b-text-muted)]" />
+        </div>
+        <div>
+          <p className="text-base font-bold text-[var(--d2b-text-primary)]">Acesso Restrito</p>
+          <p className="text-sm text-[var(--d2b-text-muted)] mt-1">
+            Você não tem permissão para acessar o Dashboard.
+          </p>
+        </div>
+      </div>
+    )
+  }
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [mostraInput, setMostraInput] = useState(false)
   const [novaTarefa, setNovaTarefa] = useState('')

@@ -11,7 +11,35 @@ const VARIAVEIS = [
   { label: '#nome_paciente#', title: 'Nome do paciente' },
   { label: '#nome_profissional#', title: 'Nome do profissional' },
   { label: '#data_e_hora_agendamento#', title: 'Data e hora do agendamento' },
+  { label: '#link_de_confirmacao#', title: 'Link de confirmação do agendamento' },
 ]
+
+/** Converte texto plano (com \n) para HTML compatível com TipTap */
+export function textoParaHtml(texto: string): string {
+  if (!texto || texto.trim() === '') return '<p></p>'
+  if (/<[a-z]/.test(texto)) return texto // já é HTML
+  return texto
+    .split('\n')
+    .map((linha) => `<p>${linha === '' ? '<br>' : linha.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
+    .join('')
+}
+
+/** Converte HTML do TipTap para texto plano com quebras de linha (\n) */
+export function htmlParaTexto(html: string): string {
+  if (!html || html.trim() === '') return ''
+  if (!/<[a-z]/.test(html)) return html // já é texto plano
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p>/gi, '\n')
+    .replace(/<p>/gi, '')
+    .replace(/<\/p>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+}
 
 // ─── Toolbar button ───────────────────────────────────────────────────────────
 
@@ -70,7 +98,7 @@ export function MensagemEditor({ value, onChange, minHeight = 180 }: MensagemEdi
   useEffect(() => {
     if (!editor) return
     if (editor.getHTML() !== value) {
-      editor.commands.setContent(value || '', false, { preserveWhitespace: 'full' })
+      editor.commands.setContent(value || '')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -142,7 +170,10 @@ export function MensagemEditor({ value, onChange, minHeight = 180 }: MensagemEdi
       </div>
 
       {/* Editor area */}
-      <div style={{ background: 'var(--d2b-bg-main)' }}>
+      <div
+        style={{ background: 'var(--d2b-bg-main)' }}
+        className="[&_.tiptap]:outline-none [&_.tiptap_p]:min-h-[1.4em] [&_.tiptap_p]:my-0.5"
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

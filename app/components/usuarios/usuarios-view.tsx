@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Search, Plus, Trash2, ChevronDown, X, Eye, EyeOff,
   ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight,
+  Camera, Loader2,
 } from 'lucide-react'
 import {
   Dialog,
@@ -11,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { FotoModal } from '@/components/clientes/foto-modal'
+import { useAbility, subject } from '@/lib/casl'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type NivelPermissao = 'Profissional / ADM' | 'Assistente' | 'Profissional Simples' | 'Gerente' | 'Gerente Geral'
@@ -35,6 +38,7 @@ interface Usuario {
   agendaId?: string
   genero?: string
   duracaoSessao?: number
+  fotoUrl?: string
 }
 
 const ESPECIALIDADES = ['Dentista', 'Médico', 'Psicólogo', 'Fisioterapeuta', 'Nutricionista', 'Enfermeiro']
@@ -109,7 +113,7 @@ function FloatingSelect({
 }
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
-function Avatar({ nome }: { nome: string }) {
+function Avatar({ nome, fotoUrl }: { nome: string; fotoUrl?: string }) {
   const initials = nome
     .split(' ')
     .filter(Boolean)
@@ -117,6 +121,14 @@ function Avatar({ nome }: { nome: string }) {
     .map((w) => w[0])
     .join('')
     .toUpperCase()
+
+  if (fotoUrl && fotoUrl.startsWith('http')) {
+    return (
+      <div className="w-9 h-9 rounded-lg overflow-hidden border border-[var(--d2b-border-strong)] shrink-0">
+        <img src={fotoUrl} alt={nome} className="w-full h-full object-cover" />
+      </div>
+    )
+  }
 
   return (
     <div className="w-9 h-9 rounded-lg bg-[var(--d2b-hover)] border border-[var(--d2b-border-strong)] flex items-center justify-center shrink-0">
@@ -217,13 +229,45 @@ function EditarUsuarioModal({
   usuario,
   onClose,
   onSaved,
+  readonlyNivel,
 }: {
   usuario: Usuario
   onClose: () => void
   onSaved?: (updated: Usuario) => void
+  readonlyNivel?: boolean
 }) {
   const [saving, setSaving] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
+  const [fotoSrc, setFotoSrc] = useState<string | null>(null)
+  const [uploadingFoto, setUploadingFoto] = useState(false)
+  const [fotoModalOpen, setFotoModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (!usuario.fotoUrl) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${usuario.id}/foto-url`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => d && setFotoSrc(d.fotoUrl ?? null))
+      .catch(() => {})
+  }, [usuario.id, usuario.fotoUrl])
+
+  async function uploadFoto(file: File) {
+    setUploadingFoto(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${usuario.id}/foto`, {
+        method: 'POST',
+        body: form,
+      })
+      if (res.ok) {
+        const d = await res.json()
+        setFotoSrc(d.fotoUrl ?? null)
+        onSaved?.({ ...usuario, fotoUrl: d.fotoUrl ?? usuario.fotoUrl })
+      }
+    } finally {
+      setUploadingFoto(false)
+    }
+  }
   const [email, setEmail] = useState(usuario.email)
   const [senha, setSenha] = useState('')
   const [nome, setNome] = useState(usuario.nome)
@@ -274,13 +318,38 @@ function EditarUsuarioModal({
 
         <div className="overflow-y-auto max-h-[78vh] px-7 py-6 space-y-7">
 
-          {/* Informações da conta */}
+          {/* Foto do profissional */}
+          <div className="flex items-center gap-5">
+            <div
+              className="relative group cursor-pointer flex-shrink-0"
+              onClick={() => setFotoModalOpen(true)}
+              title="Clique para alterar a foto"
+            >
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center">
+                {fotoSrc
+                  ? <img src={fotoSrc} alt={usuario.nome} className="w-full h-full object-cover" />
+                  : <Camera size={28} className="text-[var(--d2b-text-muted)]" />
+                }
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                {uploadingFoto
+                  ? <Loader2 size={18} className="text-white animate-spin" />
+                  : <Camera size={18} className="text-white" />
+                }
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[var(--d2b-text-primary)]">{usuario.nome}</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">Clique na foto para alterar</p>
+            </div>
+          </div>
+          <FotoModal open={fotoModalOpen} onClose={() => setFotoModalOpen(false)} onConfirm={uploadFoto} />
           <div>
             <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
             <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do DEV2B.</p>
             <div className="grid grid-cols-2 gap-4">
               <FloatingField label="Email" required>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
+                <input type="email" value={email} readOnly className={INPUT + ' opacity-60 cursor-not-allowed bg-[var(--d2b-hover)]'} />
               </FloatingField>
               <div className="relative">
                 <label className={LBL}>Senha<span className="text-[#7C4DFF] ml-0.5">*</span></label>
@@ -319,7 +388,13 @@ function EditarUsuarioModal({
                 </div>
               </div>
               <FloatingSelect label="Nível de Permissão" required
-                options={NIVEIS_PERMISSAO} value={nivelPermissao} onChange={setNivelPermissao} />
+                options={NIVEIS_PERMISSAO} value={nivelPermissao}
+                onChange={readonlyNivel ? () => {} : setNivelPermissao} />
+            {readonlyNivel && (
+              <p className="text-xs text-[var(--d2b-text-muted)] col-span-2 -mt-2">
+                Seu nível de permissão não pode ser alterado por você mesmo.
+              </p>
+            )}
             </div>
           </div>
 
@@ -442,7 +517,13 @@ function EditarUsuarioModal({
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${usuario.id}`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ nome, telefone, cep, logradouro, numero, complemento, bairro, cidade, tipo, especialidade, conselho, numeroConselho }),
+                  body: JSON.stringify({
+                  nome, telefone, cep, logradouro, numero, complemento, bairro, cidade,
+                  tipo, especialidade, conselho, numeroConselho,
+                  genero,
+                  tipoAcesso: nivelPermissao,
+                  duracaoSessao: parseInt(duracao),
+                }),
                 })
                 if (res.ok) {
                   const updated = await res.json()
@@ -518,6 +599,9 @@ function CadastrarUsuarioModal({
   const [numeroConselho, setNumConselhoCad] = useState('')
   const [erros,          setErros]          = useState<Record<string, string>>({})
   const [saving,         setSaving]         = useState(false)
+  const [fotoFile,       setFotoFile]       = useState<File | null>(null)
+  const [fotoPreview,    setFotoPreview]    = useState<string | null>(null)
+  const [fotoModalOpen,  setFotoModalOpen]  = useState(false)
 
   function handleNivel(v: string) {
     setNivelPermissao(v)
@@ -576,7 +660,36 @@ function CadastrarUsuarioModal({
 
         <div className="overflow-y-auto max-h-[80vh] px-7 py-6 space-y-6">
 
-          {/* ── Informações da conta ── */}
+          {/* ── Foto ── */}
+          <div className="flex items-center gap-5">
+            <div
+              className="relative group cursor-pointer flex-shrink-0"
+              onClick={() => setFotoModalOpen(true)}
+              title="Adicionar foto"
+            >
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-dashed border-[var(--d2b-border-strong)] bg-[var(--d2b-bg-elevated)] flex items-center justify-center">
+                {fotoPreview
+                  ? <img src={fotoPreview} alt="preview" className="w-full h-full object-cover" />
+                  : <Camera size={28} className="text-[var(--d2b-text-muted)]" />
+                }
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Camera size={18} className="text-white" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--d2b-text-primary)]">Foto do profissional</p>
+              <p className="text-xs text-[var(--d2b-text-muted)] mt-0.5">{fotoFile ? fotoFile.name : 'Clique para adicionar (opcional)'}</p>
+            </div>
+          </div>
+          <FotoModal
+            open={fotoModalOpen}
+            onClose={() => setFotoModalOpen(false)}
+            onConfirm={(file) => {
+              setFotoFile(file)
+              setFotoPreview(URL.createObjectURL(file))
+            }}
+          />
           <div>
             <p className="text-sm font-bold text-[var(--d2b-text-primary)] mb-0.5">Informações da conta</p>
             <p className="text-xs text-[var(--d2b-text-muted)] mb-4">Defina um e-mail e senha para um novo usuário do DEV2B.</p>
@@ -695,7 +808,7 @@ function CadastrarUsuarioModal({
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                   nome, email, senha, telefone, tipo, especialidade,
-                  conselho, numeroConselho, nivelPermissao,
+                  conselho, numeroConselho, nivelPermissao, genero,
                   permissoes: toggles,
                 }),
                 })
@@ -703,6 +816,22 @@ function CadastrarUsuarioModal({
                 if (!res.ok) {
                   setErros({ Email: data.error ?? 'Erro ao cadastrar' })
                   return
+                }
+                // upload foto se selecionada
+                let fotoUrlSalva: string | undefined
+                if (fotoFile && data.id) {
+                  try {
+                    const form = new FormData()
+                    form.append('file', fotoFile)
+                    const fRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${data.id}/foto`, {
+                      method: 'POST',
+                      body: form,
+                    })
+                    if (fRes.ok) {
+                      const fd = await fRes.json()
+                      fotoUrlSalva = fd.fotoUrl
+                    }
+                  } catch { /* non-critical */ }
                 }
                 onCadastrado?.({
                   id: data.id,
@@ -714,6 +843,7 @@ function CadastrarUsuarioModal({
                   tipo: data.tipo,
                   conselho: data.conselho,
                   numeroConselho: data.numeroConselho,
+                  fotoUrl: fotoUrlSalva,
                 })
                 onClose()
               } catch {
@@ -733,6 +863,7 @@ function CadastrarUsuarioModal({
 
 // ─── UsuariosView ─────────────────────────────────────────────────────────────
 export function UsuariosView({ empresaId }: { empresaId: string | null }) {
+  const { ability } = useAbility()
   const [search, setSearch] = useState('')
   const [especialidade, setEspecialidade] = useState('')
   const [niveisSelected, setNiveisSelected] = useState<string[]>([])
@@ -751,7 +882,8 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
         tipo?: string; especialidade?: string; conselho?: string
         numeroConselho?: string; cep?: string; logradouro?: string
         numero?: string; complemento?: string; bairro?: string
-        cidade?: string; agendaId?: string; genero?: string; duracaoSessao?: number
+        cidade?: string; agendaId?: string; genero?: string; duracaoSessao?: number; fotoUrl?: string
+        tipoAcesso?: string
       }>) =>
         setUsuarios(data.map((u) => ({
           id: u.id,
@@ -759,7 +891,7 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
           especialidade: u.especialidade ?? u.tipo ?? '',
           email: u.email,
           telefone: u.telefone ?? '',
-          tipoAcesso: u.tipo ?? '',
+          tipoAcesso: u.tipoAcesso ?? '',
           tipo: u.tipo,
           conselho: u.conselho,
           numeroConselho: u.numeroConselho,
@@ -772,13 +904,16 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
           agendaId: u.agendaId,
           genero: u.genero,
           duracaoSessao: u.duracaoSessao,
+          fotoUrl: u.fotoUrl,
         })))
       )
       .catch(() => {})
   }, [empresaId])
 
-  // Filtering
-  const filtered = usuarios.filter((u) => {
+  // Filtering — respects CASL row-level conditions (e.g. Profissional Simples só vê a si mesmo)
+  const filtered = usuarios
+    .filter((u) => ability.can('read', subject('usuarios', u)))
+    .filter((u) => {
     const q = search.toLowerCase()
     const matchSearch =
       !q || u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
@@ -809,6 +944,7 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
             Crie e gerencie os perfis dos profissionais cadastrados dentro da clínica.
           </p>
         </div>
+        {ability.can('create', 'usuarios') && (
         <button
           onClick={() => setModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors"
@@ -816,6 +952,7 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
           <Plus size={15} />
           Novo Usuário
         </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -909,7 +1046,7 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
               >
                 {/* Nome */}
                 <div className="px-4 py-3.5 flex items-center gap-3">
-                  <Avatar nome={u.nome} />
+                  <Avatar nome={u.nome} fotoUrl={u.fotoUrl} />
                   <div>
                     <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">{u.nome}</p>
                     <p className="text-xs text-[#7C4DFF]">{u.especialidade}</p>
@@ -939,13 +1076,13 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
                     <span className="text-xs text-[#7C4DFF] font-medium whitespace-nowrap">
                       * Proprietário da Clínica
                     </span>
-                  ) : (
+                  ) : ability.can('delete', 'usuarios') ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); /* delete */ }}
                       className="w-8 h-8 rounded-md flex items-center justify-center text-[#EF4444] hover:bg-[rgba(239,68,68,0.12)] transition-colors">
                       <Trash2 size={15} />
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             ))
@@ -1009,6 +1146,7 @@ export function UsuariosView({ empresaId }: { empresaId: string | null }) {
         <EditarUsuarioModal
           usuario={editarUsuario}
           onClose={() => setEditarUsuario(null)}
+          readonlyNivel={!ability.can('update', subject('usuarios', editarUsuario), 'tipoAcesso')}
           onSaved={(updated) => {
             setUsuarios((prev) => prev.map((u) => u.id === updated.id ? updated : u))
           }}

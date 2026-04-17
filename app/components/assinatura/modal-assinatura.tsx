@@ -17,6 +17,12 @@ export interface PlanoInfo {
   limiteIaAudios: number
 }
 
+export interface AssinaturaAtual {
+  id: string
+  plano: PlanoInfo
+  status: string
+}
+
 export interface ClienteInfo {
   nome: string
   email: string
@@ -46,21 +52,36 @@ interface ModalAssinaturaProps {
   onClose: () => void
   empresaId?: string
   usuarioId?: string
+  assinaturaAtual?: AssinaturaAtual | null
 }
 
 const STEP_LABELS: Record<Step, string> = {
+  plano: 'Escolha o novo plano',
+  cliente: 'Informações do Cliente',
+  pagamento: 'Informações de Pagamento',
+}
+
+const STEP_LABELS_NOVO: Record<Step, string> = {
   plano: 'Monte seu plano',
   cliente: 'Informações do Cliente',
   pagamento: 'Informações de Pagamento',
 }
 
-export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAssinaturaProps) {
+export function ModalAssinatura({ open, onClose, empresaId, usuarioId, assinaturaAtual }: ModalAssinaturaProps) {
+  const isUpgrade = !!assinaturaAtual
   const [step, setStep] = useState<Step>('plano')
   const [planoSelecionado, setPlanoSelecionado] = useState<PlanoInfo | null>(null)
   const [clienteInfo, setClienteInfo] = useState<ClienteInfo | null>(null)
   const [pixData, setPixData] = useState<PixData | null>(null)
   const [loading, setLoading] = useState(false)
   const [sucesso, setSucesso] = useState(false)
+
+  const labels = isUpgrade ? STEP_LABELS : STEP_LABELS_NOVO
+
+  // Diferença de valor para upgrade
+  const valorDiferenca = planoSelecionado && assinaturaAtual
+    ? Math.max(0, planoSelecionado.valorMensal - assinaturaAtual.plano.valorMensal)
+    : null
 
   // Fechar com ESC
   useEffect(() => {
@@ -96,21 +117,40 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
     if (!planoSelecionado || !clienteInfo || !empresaId || !usuarioId) return
     setLoading(true)
     try {
-      const res = await fetch('/api/v1/assinaturas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          empresaId,
-          usuarioId,
-          payerEmail: clienteInfo.email,
-          planoTipo: planoSelecionado.tipo,
-          cardTokenId,
-          payerDocumento: clienteInfo.documento.replace(/\D/g, ''),
-          payerTipoDocumento: clienteInfo.tipoDocumento,
-          deviceId: deviceId ?? null,
-        }),
-      })
-      if (!res.ok) throw new Error('Erro ao criar assinatura')
+      if (isUpgrade && assinaturaAtual) {
+        // Upgrade: migrar plano pagando apenas a diferença
+        const res = await fetch(`/api/v1/assinaturas/${assinaturaAtual.id}/upgrade`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            empresaId,
+            usuarioId,
+            novoPlanoTipo: planoSelecionado.tipo,
+            cardTokenId,
+            payerEmail: clienteInfo.email,
+            payerDocumento: clienteInfo.documento.replace(/\D/g, ''),
+            payerTipoDocumento: clienteInfo.tipoDocumento,
+            deviceId: deviceId ?? null,
+          }),
+        })
+        if (!res.ok) throw new Error('Erro ao fazer upgrade')
+      } else {
+        const res = await fetch('/api/v1/assinaturas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            empresaId,
+            usuarioId,
+            payerEmail: clienteInfo.email,
+            planoTipo: planoSelecionado.tipo,
+            cardTokenId,
+            payerDocumento: clienteInfo.documento.replace(/\D/g, ''),
+            payerTipoDocumento: clienteInfo.tipoDocumento,
+            deviceId: deviceId ?? null,
+          }),
+        })
+        if (!res.ok) throw new Error('Erro ao criar assinatura')
+      }
       setSucesso(true)
     } catch (err) {
       console.error(err)
@@ -118,33 +158,51 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
     } finally {
       setLoading(false)
     }
-  }, [planoSelecionado, clienteInfo, empresaId, usuarioId])
+  }, [planoSelecionado, clienteInfo, empresaId, usuarioId, isUpgrade, assinaturaAtual])
 
   const handlePix = useCallback(async () => {
     if (!planoSelecionado || !clienteInfo || !empresaId || !usuarioId) return
     setLoading(true)
     try {
-      const res = await fetch('/api/v1/assinaturas/pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          empresaId,
-          usuarioId,
-          planoTipo: planoSelecionado.tipo,
-          payerEmail: clienteInfo.email,
-          payerNome: clienteInfo.nome,
-        }),
-      })
-      if (!res.ok) throw new Error('Erro ao gerar PIX')
-      const data = await res.json()
-      setPixData(data)
+      if (isUpgrade && assinaturaAtual) {
+        const res = await fetch(`/api/v1/assinaturas/${assinaturaAtual.id}/upgrade`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            empresaId,
+            usuarioId,
+            novoPlanoTipo: planoSelecionado.tipo,
+            metodoPagamento: 'PIX',
+            payerEmail: clienteInfo.email,
+            payerNome: clienteInfo.nome,
+          }),
+        })
+        if (!res.ok) throw new Error('Erro ao gerar PIX para upgrade')
+        const data = await res.json()
+        setPixData(data)
+      } else {
+        const res = await fetch('/api/v1/assinaturas/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            empresaId,
+            usuarioId,
+            planoTipo: planoSelecionado.tipo,
+            payerEmail: clienteInfo.email,
+            payerNome: clienteInfo.nome,
+          }),
+        })
+        if (!res.ok) throw new Error('Erro ao gerar PIX')
+        const data = await res.json()
+        setPixData(data)
+      }
     } catch (err) {
       console.error(err)
       alert('Erro ao gerar PIX. Tente novamente.')
     } finally {
       setLoading(false)
     }
-  }, [planoSelecionado, clienteInfo, empresaId, usuarioId])
+  }, [planoSelecionado, clienteInfo, empresaId, usuarioId, isUpgrade, assinaturaAtual])
 
   if (!open) return null
 
@@ -175,7 +233,7 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
             )}
             <div>
               <h2 className="text-base font-semibold" style={{ color: 'var(--d2b-text-primary)' }}>
-                {sucesso ? 'Assinatura realizada!' : STEP_LABELS[step]}
+                {sucesso ? (isUpgrade ? 'Upgrade realizado!' : 'Assinatura realizada!') : labels[step]}
               </h2>
               {!sucesso && step !== 'plano' && (
                 <button
@@ -234,9 +292,9 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
         {/* Body */}
         <div className="p-6">
           {sucesso ? (
-            <SucessoView plano={planoSelecionado} onClose={onClose} />
+            <SucessoView plano={planoSelecionado} onClose={onClose} isUpgrade={isUpgrade} />
           ) : step === 'plano' ? (
-            <StepPlano onNext={handlePlanoNext} />
+            <StepPlano onNext={handlePlanoNext} assinaturaAtual={assinaturaAtual ?? null} />
           ) : step === 'cliente' ? (
             <StepCliente
               plano={planoSelecionado!}
@@ -249,6 +307,7 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
               loading={loading}
               onCartao={handleAssinaturaCartao}
               onPix={handlePix}
+              valorDiferenca={valorDiferenca}
             />
           )}
         </div>
@@ -267,7 +326,7 @@ export function ModalAssinatura({ open, onClose, empresaId, usuarioId }: ModalAs
   return typeof window !== 'undefined' ? createPortal(content, document.body) : null
 }
 
-function SucessoView({ plano, onClose }: { plano: PlanoInfo | null; onClose: () => void }) {
+function SucessoView({ plano, onClose, isUpgrade }: { plano: PlanoInfo | null; onClose: () => void; isUpgrade: boolean }) {
   return (
     <div className="flex flex-col items-center text-center py-4 gap-4">
       <div
@@ -278,11 +337,13 @@ function SucessoView({ plano, onClose }: { plano: PlanoInfo | null; onClose: () 
       </div>
       <div>
         <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--d2b-text-primary)' }}>
-          Assinatura ativada!
+          {isUpgrade ? 'Upgrade realizado!' : 'Assinatura ativada!'}
         </h3>
         <p className="text-sm" style={{ color: 'var(--d2b-text-secondary)' }}>
-          Seu plano <strong>{plano?.nome}</strong> está sendo processado.
-          Em breve você terá acesso a todas as funcionalidades.
+          {isUpgrade
+            ? <>Seu plano foi migrado para o <strong>{plano?.nome}</strong>. A diferença está sendo processada e as novas funcionalidades estarão disponíveis em breve.</>
+            : <>Seu plano <strong>{plano?.nome}</strong> está sendo processado. Em breve você terá acesso a todas as funcionalidades.</>
+          }
         </p>
       </div>
       <p className="text-xs" style={{ color: 'var(--d2b-text-muted)' }}>

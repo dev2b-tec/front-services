@@ -9,6 +9,9 @@ export default async function CalendarioPage() {
   let agendaId: string | null = null
   let profissionais: { id: string; nome: string }[] = []
   let agendaConfig: AgendaConfig | null = null
+  let currentUsuarioId: string | undefined
+  let currentNome: string | undefined
+  let currentTipoAcesso: string | undefined
 
   if (keycloakId) {
     try {
@@ -24,6 +27,9 @@ export default async function CalendarioPage() {
       if (res.ok) {
         const usuario = await res.json()
         empresaId = usuario.empresaId ?? null
+        currentUsuarioId = usuario.id ?? undefined
+        currentNome = usuario.nome ?? undefined
+        currentTipoAcesso = usuario.tipoAcesso ?? undefined
       }
     } catch {
       // backend offline
@@ -63,6 +69,6 @@ export default async function CalendarioPage() {
     }
   }
 
-  return <CalendarioView empresaId={empresaId} profissionais={profissionais} agendaConfig={agendaConfig} />
+  return <CalendarioView empresaId={empresaId} profissionais={profissionais} agendaConfig={agendaConfig} currentUsuarioId={currentUsuarioId} currentNome={currentNome} currentTipoAcesso={currentTipoAcesso} />
 }
 

@@ -17,6 +17,7 @@ interface CriarUsuarioPayload {
   bairro?: string
   cidade?: string
   nivelPermissao?: string
+  genero?: string
   permissoes?: {
     financeiro?: boolean
     calendario?: boolean
@@ -88,14 +89,12 @@ export async function POST(request: NextRequest) {
 
     const adminToken = await getKeycloakAdminToken()
 
-    const roleMapping: Record<string, string> = {
-      'Profissional / ADM': 'profissional_adm',
-      'Assistente': 'assistente',
-      'Profissional Simples': 'profissional_simples',
-      'Gerente': 'gerente',
-      'Gerente Geral': 'gerente_geral',
-    }
-    const grupo = roleMapping[payload.nivelPermissao ?? ''] ?? 'assistente'
+    // Macro roles only — fine-grained profile is stored in our own DB (perfis table).
+    // GERENTE_GERAL and GERENTE get tenant_admin; everyone else gets system_user.
+    const macroRole =
+      payload.nivelPermissao === 'Gerente Geral' || payload.nivelPermissao === 'Gerente'
+        ? 'tenant_admin'
+        : 'system_user'
 
     const kcRes = await fetch(
       `${baseUrl}/admin/realms/${realm}/users`,
@@ -112,9 +111,6 @@ export async function POST(request: NextRequest) {
           lastName: payload.nome.split(' ').slice(1).join(' ') || undefined,
           enabled: true,
           emailVerified: true,
-          attributes: {
-            grupo: [grupo],
-          },
           credentials: [
             {
               type: 'password',
@@ -142,10 +138,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Keycloak não retornou o ID do usuário' }, { status: 500 })
     }
 
-    // 4 — Assign realm role if it exists
+    // 4 — Assign macro realm role (best-effort — role must exist in Keycloak)
     try {
       const rolesRes = await fetch(
-        `${baseUrl}/admin/realms/${realm}/roles/${grupo}`,
+        `${baseUrl}/admin/realms/${realm}/roles/${macroRole}`,
         { headers: { Authorization: `Bearer ${adminToken}` } },
       )
       if (rolesRes.ok) {
@@ -186,6 +182,8 @@ export async function POST(request: NextRequest) {
         bairro: payload.bairro,
         cidade: payload.cidade,
         empresaId,
+        genero: payload.genero,
+        tipoAcesso: payload.nivelPermissao,
         permissoes: payload.permissoes,
       }),
     })

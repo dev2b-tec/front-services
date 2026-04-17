@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Menu, Bell, LogOut, User, Sun, Moon, Clock, Video, HelpCircle, Info, Plus, Copy, ExternalLink, Settings, Sparkles, CalendarDays } from 'lucide-react'
+import { Menu, Bell, LogOut, User, Sun, Moon, Clock, Video, HelpCircle, Info, Plus, Copy, ExternalLink, Settings, Sparkles, CalendarDays, ArrowUpCircle } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useSidebar } from './sidebar-context'
 import { navGroups } from './nav-config'
 import { ModalAssinatura } from '@/components/assinatura/modal-assinatura'
+import type { AssinaturaAtual } from '@/components/assinatura/modal-assinatura'
 import { useTour } from '@/hooks/use-tour'
 import { trackCliqueAssinarPlano } from '@/lib/analytics'
 
@@ -87,6 +88,7 @@ export function Topbar() {
   const [userId, setUserId] = useState<string | null>(null)
   const [empresaId, setEmpresaId] = useState<string | null>(null)
   const [assinaturaOpen, setAssinaturaOpen] = useState(false)
+  const [assinaturaAtual, setAssinaturaAtual] = useState<AssinaturaAtual | null>(null)
 
   const initials = session?.user?.name
     ? session.user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
@@ -109,7 +111,22 @@ export function Topbar() {
         if (!res.ok) return
         const u = await res.json()
         setUserId(u.id)
-        if (u.empresaId) setEmpresaId(u.empresaId)
+        if (u.empresaId) {
+          setEmpresaId(u.empresaId)
+          // Busca assinatura ativa da empresa
+          try {
+            const aRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/assinaturas/empresa/${u.empresaId}`)
+            if (aRes.ok) {
+              const list = await aRes.json()
+              if (Array.isArray(list)) {
+                const ativa = list.find((a: { status: string }) => a.status === 'ATIVA')
+                  ?? list.find((a: { status: string }) => a.status === 'PENDENTE')
+                  ?? null
+                setAssinaturaAtual(ativa ?? null)
+              }
+            }
+          } catch { /* offline */ }
+        }
         if (u.fotoUrl) {
           const fRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/usuarios/${u.id}/foto-url`)
           if (fRes.ok) {
@@ -220,15 +237,20 @@ export function Topbar() {
 
       {/* HelpCircle removido a pedido */}
 
-      {/* Botão Assine um plano */}
+      {/* Botão Assine / Upgrade do plano */}
       <button
         data-tour="d2b-btn-assinar"
         onClick={() => { setAssinaturaOpen(true); trackCliqueAssinarPlano() }}
-        className="flex-shrink-0 hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-bold text-white bg-[#7C4DFF] hover:bg-[#5B21B6] transition-colors"
-        aria-label="Assinar plano"
+        className="flex-shrink-0 hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-bold text-white transition-colors"
+        style={{
+          background: assinaturaAtual
+            ? 'linear-gradient(135deg, #7C4DFF, #C084FC)'
+            : '#7C4DFF',
+        }}
+        aria-label={assinaturaAtual ? 'Upgrade do plano' : 'Assinar plano'}
       >
-        <CalendarDays size={13} />
-        Assine um plano
+        {assinaturaAtual ? <ArrowUpCircle size={14} /> : <CalendarDays size={13} />}
+        {assinaturaAtual ? 'Upgrade do plano' : 'Assine um plano'}
       </button>
 
       {/* Relógio / Links de Auto Agendamento */}
@@ -361,9 +383,6 @@ export function Topbar() {
         document.body
       )}
 
-      {/* Tour button */}
-      <TourButton />
-
       <button
         onClick={toggleTheme}
         className="flex-shrink-0 p-2 rounded-lg transition-colors"
@@ -372,6 +391,9 @@ export function Topbar() {
       >
         {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </button>
+
+      {/* Tour button */}
+      <TourButton />
 
       {/* Bell removido a pedido */}
 
@@ -453,6 +475,7 @@ export function Topbar() {
       onClose={() => setAssinaturaOpen(false)}
       empresaId={empresaId ?? undefined}
       usuarioId={userId ?? undefined}
+      assinaturaAtual={assinaturaAtual}
     />
     </>
   )
