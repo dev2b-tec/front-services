@@ -63,7 +63,7 @@ function ContaUsuario({
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-1.5 pb-3">
         <div
-          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
+          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
           onClick={() => setFotoModalOpen(true)}
         >
           {data.fotoUrl
@@ -218,7 +218,7 @@ function ContaEmpresa({
       <div className="flex flex-col items-center gap-1.5 pb-3">
         <p className="text-xs font-medium text-[var(--d2b-text-secondary)]">Logo da Clínica</p>
         <div
-          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border-2 border-dashed border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
+          className="relative w-28 h-28 rounded-xl bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] flex items-center justify-center cursor-pointer hover:border-[#7C4DFF] transition-colors overflow-hidden group"
           onClick={() => setLogoModalOpen(true)}
         >
           {data.logoUrl
