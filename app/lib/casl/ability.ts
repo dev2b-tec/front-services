@@ -6,10 +6,14 @@ export { subject }
 /**
  * Subjects cujo acesso para PROFISSIONAL_SIMPLES usa condição de linha.
  * Chave = subject, Valor = nome do campo no objeto que deve bater com ownId.
+ *
+ * pacientes foi removido intencionalmente: a filtragem é feita no backend
+ * (GET /pacientes/empresa/{id}?usuarioId=) que retorna apenas os pacientes
+ * do próprio profissional ou compartilhados. O CASL não precisa replicar
+ * essa lógica e acabaria bloqueando pacientes compartilhados (pois o campo
+ * usuarioId deles pertence a quem os criou, não ao profissional com acesso).
  */
-const ROW_CONDITION_FIELDS: Partial<Record<AppSubject, string>> = {
-  pacientes: 'usuarioId',
-}
+const ROW_CONDITION_FIELDS: Partial<Record<AppSubject, string>> = {}
 
 /**
  * Perfis que têm controle total sobre usuários, incluindo alterar o

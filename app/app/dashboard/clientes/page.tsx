@@ -28,9 +28,13 @@ export default async function ClientesPage() {
         empresaId = usuario.empresaId ?? null
         usuarioId = usuario.id ?? undefined
         usuarioNome = usuario.nome ?? undefined
+        const isSimples = usuario.perfilNome === 'PROFISSIONAL_SIMPLES'
         if (empresaId) {
+          const pacientesUrl = isSimples && usuarioId
+            ? `${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}?usuarioId=${usuarioId}`
+            : `${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}`
           const [pRes, uRes] = await Promise.all([
-            fetch(`${process.env.API_URL}/api/v1/pacientes/empresa/${empresaId}`, { cache: 'no-store' }),
+            fetch(pacientesUrl, { cache: 'no-store' }),
             fetch(`${process.env.API_URL}/api/v1/usuarios/empresa/${empresaId}`, { cache: 'no-store' }),
           ])
           if (pRes.ok) pacientes = await pRes.json()
