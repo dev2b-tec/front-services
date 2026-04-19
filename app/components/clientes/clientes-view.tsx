@@ -110,8 +110,6 @@ export type PacienteApi = {
   statusPagamento: string | null
   sessoes: number
   fotoUrl?: string | null
-  usuarioId?: string | null
-  usuarioNome?: string | null
 }
 
 function statusLabel(s: string | null | undefined): string {
@@ -325,7 +323,7 @@ function AgendamentoModal({ open, onClose, ag, empresaId, clienteId, clienteNome
 
             {/* Informacoes do Paciente */}
             <div>
-              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMAÇÕES DO PACIENTE</p>
+              <p className="text-xs font-bold tracking-widest text-[#7C4DFF] mb-3">INFORMAÇÕES DO CLIENTE</p>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-base font-bold text-[var(--d2b-text-primary)]">Paciente Exemplo</span>
                 <button onClick={() => setMensagensOpen(true)}
@@ -542,7 +540,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
       })
       if (!res.ok) throw new Error('Erro ao salvar')
       setChanged(false)
-      toast({ title: 'Paciente atualizado com sucesso!' })
+      toast({ title: 'Cliente atualizado com sucesso!' })
     } catch {
       toast({ title: 'Erro ao salvar alterações', variant: 'destructive' })
     } finally {
@@ -551,7 +549,7 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto scroll-hide">
       <div className="p-6 max-w-5xl space-y-5">
 
         {/* Topo: foto à esquerda + info do paciente */}
@@ -594,8 +592,8 @@ function TabDados({ paciente }: { paciente: PacienteApi }) {
         {/* Header do formulário */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Paciente</h3>
-            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Edite as informações associadas a este paciente.</p>
+            <h3 className="text-base font-bold text-[var(--d2b-text-primary)]">Editar Cliente</h3>
+            <p className="text-xs text-[var(--d2b-text-secondary)] mt-0.5">Edite as informações associadas a este cliente.</p>
           </div>
           <button className="text-xs text-[var(--d2b-text-secondary)] border border-[var(--d2b-border)] px-3 py-1.5 rounded-md hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors">
             Voltar
@@ -826,7 +824,7 @@ function NotasCompartilhadasPanel({ onClose, pacienteId, usuarioId, usuarioNome 
       </div>
 
       {/* Notas list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto scroll-hide px-4 py-4">
         {loading ? (
           <p className="text-xs text-[var(--d2b-text-muted)] text-center mt-8">Carregando...</p>
         ) : notas.length === 0 ? (
@@ -936,7 +934,7 @@ const TABS: { id: Tab; label: string; icon: ReactNode; badge?: ReactNode }[] = [
   { id: 'documentos',  label: 'Documentos',     icon: <FileText size={18} /> },
 ]
 
-function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId, usuarioNome }: { cliente: PacienteApi; onBack: () => void; empresaId: string | null; initialTab?: Tab; usuarioId?: string; usuarioNome?: string }) {
+function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId, usuarioNome, profissionais = [] }: { cliente: PacienteApi; onBack: () => void; empresaId: string | null; initialTab?: Tab; usuarioId?: string; usuarioNome?: string; profissionais?: ProfissionalItem[] }) {
   const [tab, setTab] = useState<Tab>(initialTab ?? 'dados')
   const [notasOpen, setNotasOpen] = useState(false)
   const [compartilharOpen, setCompartilharOpen] = useState(false)
@@ -1046,17 +1044,17 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId,
       <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] flex-shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="flex items-center gap-1.5 text-xs text-[var(--d2b-text-secondary)] hover:text-[var(--d2b-text-primary)] transition-colors">
-            <ArrowLeft size={14} /> Pacientes
+            <ArrowLeft size={14} /> Clientes
           </button>
           <span className="text-[#2D1B4E]">|</span>
           <div className="flex items-center gap-1.5 text-sm font-medium text-[var(--d2b-text-primary)]">
             <User size={13} className="text-[#7C4DFF]" />
-            Detalhes do Paciente
+            Detalhes do Cliente
             <span className="text-[var(--d2b-text-secondary)]">-</span>
             <span className="text-[#C084FC]">{cliente.nome}</span>
           </div>
           <button onClick={abrirResumir} className="flex items-center gap-1.5 text-xs font-bold text-[#7C4DFF] border border-[var(--d2b-border-strong)] px-3 py-1 rounded-md hover:bg-[var(--d2b-hover)] transition-colors">
-            ✦ Resumir Paciente
+            ✦ Resumir Cliente
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -1115,7 +1113,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId,
             {tab === 'documentos' && <TabDocumentos pacienteId={cliente.id} pacienteNome={cliente.nome} empresaId={empresaId ?? ''} onVoltar={() => setTab('dados')} />}
           </div>
           {notasOpen && <NotasCompartilhadasPanel onClose={() => setNotasOpen(false)} pacienteId={cliente.id} usuarioId={usuarioId ?? ''} usuarioNome={usuarioNome ?? ''} />}
-          {compartilharOpen && <CompartilharAcessoPanel onClose={() => setCompartilharOpen(false)} />}
+          {compartilharOpen && <CompartilharAcessoPanel onClose={() => setCompartilharOpen(false)} profissionais={profissionais} pacienteId={cliente.id} />}
         </div>
       </div>
 
@@ -1160,7 +1158,7 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId,
                 Sumarização do prontuário
                 <span className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[10px] flex items-center justify-center cursor-help" title="Resumo clínico gerado por IA">?</span>
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">Paciente: <span className="text-gray-600 font-medium">{cliente.nome}</span></p>
+              <p className="text-xs text-gray-400 mt-0.5">Cliente: <span className="text-gray-600 font-medium">{cliente.nome}</span></p>
             </div>
             <button onClick={() => setResumirOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors mt-0.5">
               <X size={18} />
@@ -1272,28 +1270,37 @@ function ClienteDetalheView({ cliente, onBack, empresaId, initialTab, usuarioId,
 }
 
 // --- Compartilhar Acesso (painel lateral direito) ----------------------------
-type ProfAcesso = { id: number; label: string; descricao: string }
 
-const PROFS_ACESSO_PADRAO: ProfAcesso[] = [
-  {
-    id: 1,
-    label: 'Todos',
-    descricao: '"Profissionais Administradores", "Gestores", "Assistentes" e "Profissionais Simples com chave de acesso total ativa".',
-  },
-]
-
-function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function AdicionarProfissionalModal({ open, onClose, profissionais, pacienteId, onAdded }: {
+  open: boolean
+  onClose: () => void
+  profissionais: ProfissionalItem[]
+  pacienteId: string
+  onAdded: () => void
+}) {
   const [selecionado, setSelecionado] = useState('')
-  const opcoes = [
-    'Dr. Carlos Oliveira',
-    'Dra. Ana Lima',
-    'Dr. Felipe Souza',
-    'Dra. Mariana Torres',
-  ]
+  const [salvando, setSalvando] = useState(false)
+  const { toast } = useToast()
 
-  function conceder() {
-    onClose()
-    setSelecionado('')
+  async function conceder() {
+    if (!selecionado) return
+    setSalvando(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${pacienteId}/acessos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: selecionado }),
+      })
+      if (!res.ok) throw new Error()
+      onAdded()
+      setSelecionado('')
+      onClose()
+      toast({ title: 'Acesso concedido com sucesso!' })
+    } catch {
+      toast({ title: 'Erro ao conceder acesso', variant: 'destructive' })
+    } finally {
+      setSalvando(false)
+    }
   }
 
   if (!open) return null
@@ -1315,7 +1322,7 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
         {/* Body */}
         <div className="px-5 py-5 space-y-4">
           <p className="text-sm text-[var(--d2b-text-secondary)]">
-            Selecione o(s) profissional(is) para conceder acesso ao paciente:
+            Selecione o(s) profissional(is) para conceder acesso ao cliente:
           </p>
 
           {/* Dropdown */}
@@ -1326,8 +1333,8 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
               className="w-full appearance-none bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border-strong)] rounded-xl px-4 py-2.5 text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] cursor-pointer"
             >
               <option value="" disabled>Adicionar pessoas</option>
-              {opcoes.map((o) => (
-                <option key={o} value={o}>{o}</option>
+              {profissionais.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
               ))}
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--d2b-text-muted)] pointer-events-none" />
@@ -1336,10 +1343,11 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
           {/* Conceder Acesso button */}
           <button
             onClick={conceder}
-            className="w-full flex items-center justify-center gap-2 bg-[#7C4DFF] hover:bg-[#5B21B6] text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
+            disabled={!selecionado || salvando}
+            className="w-full flex items-center justify-center gap-2 bg-[#7C4DFF] hover:bg-[#5B21B6] disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
           >
             <Lock size={13} />
-            Conceder Acesso
+            {salvando ? 'Concedendo...' : 'Conceder Acesso'}
           </button>
         </div>
       </div>
@@ -1347,22 +1355,33 @@ function AdicionarProfissionalModal({ open, onClose }: { open: boolean; onClose:
   )
 }
 
-function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
-  const [profs, setProfs] = useState<ProfAcesso[]>(PROFS_ACESSO_PADRAO)
+function CompartilharAcessoPanel({ onClose, profissionais, pacienteId }: { onClose: () => void; profissionais: ProfissionalItem[]; pacienteId: string }) {
+  const [acessos, setAcessos] = useState<{ usuarioId: string; usuarioNome: string }[]>([])
   const [adicionarOpen, setAdicionarOpen] = useState(false)
 
-  function remover(id: number) {
-    setProfs((prev) => prev.filter((p) => p.id !== id))
+  async function carregarAcessos() {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${pacienteId}/acessos`)
+      if (res.ok) setAcessos(await res.json())
+    } catch { /* silently */ }
   }
+
+  useEffect(() => { carregarAcessos() }, [pacienteId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
-    <AdicionarProfissionalModal open={adicionarOpen} onClose={() => setAdicionarOpen(false)} />
+    <AdicionarProfissionalModal
+      open={adicionarOpen}
+      onClose={() => setAdicionarOpen(false)}
+      profissionais={profissionais}
+      pacienteId={pacienteId}
+      onAdded={carregarAcessos}
+    />
     <div className="w-[340px] flex-shrink-0 flex flex-col border-l border-[var(--d2b-border)] bg-[var(--d2b-bg-surface)] h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--d2b-border)] flex-shrink-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Compartilhar Paciente</span>
+          <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Compartilhar Cliente</span>
           <button className="text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-secondary)] transition-colors" title="Ajuda">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
@@ -1380,7 +1399,7 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto scroll-hide px-4 py-4 space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-[var(--d2b-text-primary)]">Profissionais com acesso</p>
           <button
@@ -1392,39 +1411,23 @@ function CompartilharAcessoPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="space-y-2">
-          {profs.length === 0 ? (
+          {acessos.length === 0 ? (
             <p className="text-xs text-[var(--d2b-text-muted)] text-center py-6">Nenhum profissional com acesso.</p>
           ) : (
-            profs.map((p) => (
+            acessos.map((a) => (
               <div
-                key={p.id}
-                className="flex items-start gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-xl px-3 py-3 group"
+                key={a.usuarioId}
+                className="flex items-center gap-3 bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] rounded-xl px-3 py-3"
               >
                 {/* Checkmark icon */}
-                <div className="w-7 h-7 rounded-full bg-[rgba(16,185,129,0.15)] border border-[rgba(16,185,129,0.3)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-full bg-[rgba(16,185,129,0.15)] border border-[rgba(16,185,129,0.3)] flex items-center justify-center flex-shrink-0">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-[var(--d2b-text-primary)]">
-                    {p.label !== 'Todos' && <span className="font-semibold">{p.label} </span>}
-                    {p.label === 'Todos' ? (
-                      <span>
-                        Todos{' '}
-                        <span className="text-[var(--d2b-text-secondary)]">{p.descricao}</span>
-                      </span>
-                    ) : (
-                      <span className="text-[var(--d2b-text-secondary)]">{p.descricao}</span>
-                    )}
-                  </span>
+                  <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">{a.usuarioNome}</span>
                 </div>
-                <button
-                  onClick={() => remover(p.id)}
-                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[#EF4444] transition-all flex-shrink-0 mt-0.5"
-                >
-                  <X size={12} />
-                </button>
               </div>
             ))
           )}
@@ -1551,9 +1554,9 @@ function CriarClienteModal({
       resetForm()
       onClose()
       trackClienteCadastrado(empresaId)
-      toast({ title: 'Paciente cadastrado com sucesso!' })
+      toast({ title: 'Cliente cadastrado com sucesso!' })
     } catch {
-      toast({ title: 'Erro ao cadastrar paciente. Verifique os dados e tente novamente.', variant: 'destructive' })
+      toast({ title: 'Erro ao cadastrar cliente. Verifique os dados e tente novamente.', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -1653,15 +1656,17 @@ function CriarClienteModal({
 // --- Main View ----------------------------------------------------------------
 export function ClientesView({ initialPacientes, empresaId, profissionais = [], usuarioId, usuarioNome }: { initialPacientes: PacienteApi[]; empresaId: string | null; profissionais?: ProfissionalItem[]; usuarioId?: string; usuarioNome?: string }) {
   const { ability } = useAbility()
+  const { toast } = useToast()
   const searchParams = useSearchParams()
   const pacienteIdParam = searchParams.get('pacienteId')
   const tabParam = (searchParams.get('tab') as Tab | null) ?? 'dados'
 
   const [pacientes, setPacientes] = useState<PacienteApi[]>(initialPacientes)
   const [modalOpen, setModalOpen] = useState(false)
+  const [confirmarExclusao, setConfirmarExclusao] = useState<{ id: string; nome: string } | null>(null)
+  const [excluindo, setExcluindo] = useState(false)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
-  const [filterProfissional, setFilterProfissional] = useState('')
   const [mostrarArquivados, setMostrarArquivados] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [page, setPage] = useState(1)
@@ -1669,8 +1674,24 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
     () => pacienteIdParam ? (initialPacientes.find((p) => p.id === pacienteIdParam) ?? null) : null
   )
 
+  async function deletarCliente() {
+    if (!confirmarExclusao) return
+    setExcluindo(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/pacientes/${confirmarExclusao.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      setPacientes((prev) => prev.filter((p) => p.id !== confirmarExclusao.id))
+      toast({ title: 'Cliente excluído com sucesso.' })
+      setConfirmarExclusao(null)
+    } catch {
+      toast({ title: 'Erro ao excluir cliente.', variant: 'destructive' })
+    } finally {
+      setExcluindo(false)
+    }
+  }
+
   if (selectedCliente) {
-    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} usuarioId={usuarioId} usuarioNome={usuarioNome} />
+    return <ClienteDetalheView cliente={selectedCliente} onBack={() => setSelectedCliente(null)} empresaId={empresaId} initialTab={tabParam} usuarioId={usuarioId} usuarioNome={usuarioNome} profissionais={profissionais} />
   }
 
   const filtered = pacientes
@@ -1678,7 +1699,6 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
     .filter((c) => {
     if (!c.nome.toLowerCase().includes(search.toLowerCase())) return false
     if (filterStatus && statusLabel(c.statusPagamento) !== filterStatus) return false
-    if (filterProfissional && c.usuarioId !== filterProfissional) return false
     return true
   })
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage))
@@ -1714,18 +1734,6 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
             <option>Em Aberto</option>
             <option>Quitado</option>
             <option>Pendente</option>
-          </select>
-          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
-        </div>
-        <div className="relative">
-          <select
-            value={filterProfissional}
-            onChange={(e) => { setFilterProfissional(e.target.value); setPage(1) }}
-            className="appearance-none h-9 pl-3 pr-8 rounded-lg bg-[var(--d2b-bg-elevated)] border border-[var(--d2b-border)] text-sm text-[var(--d2b-text-secondary)] focus:outline-none focus:border-[#7C4DFF] transition-colors cursor-pointer">
-            <option value="">Todos profissionais</option>
-            {profissionais.map((p) => (
-              <option key={p.id} value={p.id}>{p.nome}</option>
-            ))}
           </select>
           <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--d2b-text-secondary)] pointer-events-none" />
         </div>
@@ -1784,7 +1792,9 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
                   className="w-7 h-7 rounded-md bg-[var(--d2b-hover)] hover:bg-[var(--d2b-hover)] flex items-center justify-center text-[#7C4DFF] transition-colors">
                   <Pencil size={13} />
                 </button>
-                <button className="w-7 h-7 rounded-md bg-[rgba(239,68,68,0.10)] hover:bg-[rgba(239,68,68,0.22)] flex items-center justify-center text-[#EF4444] transition-colors">
+                <button className="w-7 h-7 rounded-md bg-[rgba(239,68,68,0.10)] hover:bg-[rgba(239,68,68,0.22)] flex items-center justify-center text-[#EF4444] transition-colors"
+                  onClick={() => setConfirmarExclusao({ id: c.id, nome: c.nome })}
+                >
                   <Trash2 size={13} />
                 </button>
               </div>
@@ -1814,6 +1824,56 @@ export function ClientesView({ initialPacientes, empresaId, profissionais = [], 
         empresaId={empresaId}
         onCreated={(p) => setPacientes((prev) => [p, ...prev])}
       />
+
+      {/* Modal de confirmação de exclusão */}
+      {confirmarExclusao && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => !excluindo && setConfirmarExclusao(null)} />
+          <div className="relative z-10 w-[340px] rounded-xl bg-[var(--d2b-bg-surface)] border border-[var(--d2b-border)] shadow-xl flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--d2b-border)] flex-shrink-0">
+              <span className="text-sm font-semibold text-[var(--d2b-text-primary)]">Excluir Cliente</span>
+              <button
+                onClick={() => setConfirmarExclusao(null)}
+                disabled={excluindo}
+                className="w-6 h-6 flex items-center justify-center rounded text-[var(--d2b-text-muted)] hover:text-[var(--d2b-text-primary)] hover:bg-[var(--d2b-hover)] transition-colors disabled:opacity-50"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            {/* Body */}
+            <div className="px-4 py-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[rgba(239,68,68,0.12)] border border-[rgba(239,68,68,0.25)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Trash2 size={15} className="text-[#EF4444]" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--d2b-text-primary)] leading-snug">Tem certeza que deseja excluir?</p>
+                  <p className="text-xs text-[var(--d2b-text-secondary)] mt-1 leading-relaxed">
+                    O cliente <span className="font-semibold text-[var(--d2b-text-primary)]">{confirmarExclusao.nome}</span> será removido permanentemente. Esta ação não pode ser desfeita.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  onClick={() => setConfirmarExclusao(null)}
+                  disabled={excluindo}
+                  className="px-4 py-1.5 rounded-md text-xs font-medium text-[var(--d2b-text-secondary)] border border-[var(--d2b-border-strong)] hover:border-[#7C4DFF] hover:text-[var(--d2b-text-primary)] transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={deletarCliente}
+                  disabled={excluindo}
+                  className="px-4 py-1.5 rounded-md text-xs font-bold text-white bg-[#EF4444] hover:bg-[#DC2626] transition-colors disabled:opacity-50"
+                >
+                  {excluindo ? 'Excluindo...' : 'Excluir'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
